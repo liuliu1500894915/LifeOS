@@ -1,5 +1,7 @@
 import 'package:workmanager/workmanager.dart';
 
+import '../database/app_database.dart';
+import 'midnight_settlement_service.dart';
 import 'worker_types.dart';
 
 /// Top-level callback dispatcher for workmanager.
@@ -30,17 +32,20 @@ Future<bool> _executeMidnightSettlement(Map<String, dynamic>? inputData) async {
 
   if (targetDate == null) return false;
 
-  // TODO: 8-step settlement logic (operate on database directly)
-  //   1. Todo Rollover (delay_count++, target_date = tomorrow)
-  //   2. Pet Status Settlement (MA7 → body_shape ±10)
-  //   3. ADC Update (recalculate daily amortized cost)
-  //   4. Net Worth Snapshot → asset_value_snapshots
-  //   5. Relationship Decay (warmth_score -N)
-  //   6. Subscription Check → auto-write financial_transaction
-  //   7. Correlation Engine (Pearson |r| ≥ 0.65 → insights)
-  //   8. Daily Aggregation Cache → daily_aggregation_cache
+  final db = AppDatabase();
+  final service = MidnightSettlementService(db);
 
-  return true;
+  try {
+    if (await service.hasRunForDate(targetDate)) {
+      return true;
+    }
+    await service.run(targetDate);
+    return true;
+  } catch (_) {
+    return false;
+  } finally {
+    await db.close();
+  }
 }
 
 Future<bool> _executeHealthCheck() async {
