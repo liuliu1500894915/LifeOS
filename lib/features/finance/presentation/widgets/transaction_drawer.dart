@@ -1,25 +1,24 @@
-import 'package:flutter/services.dart';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/widgets/number_keyboard.dart';
+import '../providers/finance_providers.dart';
 import 'category_grid.dart';
 
-class TransactionDrawer extends StatefulWidget {
+class TransactionDrawer extends ConsumerStatefulWidget {
   const TransactionDrawer({super.key});
 
   @override
-  State<TransactionDrawer> createState() => _TransactionDrawerState();
+  ConsumerState<TransactionDrawer> createState() => _TransactionDrawerState();
 }
 
-class _TransactionDrawerState extends State<TransactionDrawer> {
+class _TransactionDrawerState extends ConsumerState<TransactionDrawer> {
   String _amount = '';
   String? _categoryId;
-  String _accountName = '微信支付';
+  String? _selectedAccountId;
   final _remarkController = TextEditingController();
   DateTime _date = DateTime.now();
-
-  static const _accounts = ['微信支付', '支付宝', '花呗(负债)', '招商银行卡'];
 
   void _onKey(String key) {
     setState(() {
@@ -33,9 +32,21 @@ class _TransactionDrawerState extends State<TransactionDrawer> {
     });
   }
 
-  void _save() {
-    if (_amount.isEmpty || _categoryId == null) return;
-    Navigator.of(context).pop();
+  Future<void> _save() async {
+    if (_amount.isEmpty || _categoryId == null || _selectedAccountId == null) return;
+    final amount = double.tryParse(_amount);
+    if (amount == null || amount <= 0) return;
+
+    await ref.read(transactionProvider.notifier).addTransaction(
+          flowType: 'EXPENSE',
+          amount: amount,
+          categoryId: _categoryId!,
+          accountId: _selectedAccountId!,
+          remark: _remarkController.text.isEmpty ? null : _remarkController.text,
+          loggedAt: _date,
+        );
+
+    if (mounted) Navigator.of(context).pop();
   }
 
   @override
@@ -46,6 +57,15 @@ class _TransactionDrawerState extends State<TransactionDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    final accountsAsync = ref.watch(accountProvider);
+    final accounts = accountsAsync.valueOrNull ?? [];
+    final selectedId = _selectedAccountId ?? (accounts.isNotEmpty ? accounts.first.accountId : null);
+    if (_selectedAccountId == null && selectedId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() => _selectedAccountId = selectedId);
+      });
+    }
+
     final bottom = MediaQuery.of(context).viewInsets.bottom;
 
     return SafeArea(
@@ -54,7 +74,6 @@ class _TransactionDrawerState extends State<TransactionDrawer> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Drag handle
             Padding(
               padding: const EdgeInsets.only(top: 8, bottom: 8),
               child: Container(
@@ -65,7 +84,6 @@ class _TransactionDrawerState extends State<TransactionDrawer> {
                 ),
               ),
             ),
-            // Amount display
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Row(
@@ -82,33 +100,32 @@ class _TransactionDrawerState extends State<TransactionDrawer> {
               ),
             ),
             const SizedBox(height: 8),
-            // Account selector
             SizedBox(
               height: 40,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: _accounts.length,
+                itemCount: accounts.length,
                 separatorBuilder: (_, __) => const SizedBox(width: 8),
                 itemBuilder: (context, index) {
-                  final acc = _accounts[index];
-                  final selected = _accountName == acc;
+                  final acc = accounts[index];
+                  final isSelected = selectedId == acc.accountId;
                   return GestureDetector(
-                    onTap: () => setState(() => _accountName = acc),
+                    onTap: () => setState(() => _selectedAccountId = acc.accountId),
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       decoration: BoxDecoration(
-                        color: selected
+                        color: isSelected
                             ? Theme.of(context).colorScheme.primary
                             : Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Center(
                         child: Text(
-                          acc,
+                          acc.accountName,
                           style: TextStyle(
                             fontSize: 13,
-                            color: selected ? Colors.white : const Color(0xFF616161),
+                            color: isSelected ? Colors.white : const Color(0xFF616161),
                           ),
                         ),
                       ),
@@ -118,7 +135,6 @@ class _TransactionDrawerState extends State<TransactionDrawer> {
               ),
             ),
             const SizedBox(height: 12),
-            // Category grid
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: CategoryGrid(
@@ -130,7 +146,6 @@ class _TransactionDrawerState extends State<TransactionDrawer> {
               ),
             ),
             const SizedBox(height: 8),
-            // Date + remark row
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
@@ -183,7 +198,6 @@ class _TransactionDrawerState extends State<TransactionDrawer> {
               ),
             ),
             const SizedBox(height: 8),
-            // Number keyboard
             NumberKeyboard(
               onKeyPressed: _onKey,
               onConfirm: _save,

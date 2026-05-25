@@ -22,11 +22,14 @@ import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/profile/presentation/pages/relationships_page.dart';
 import '../../features/profile/presentation/widgets/biometric_gate.dart';
 import '../theme/app_theme.dart';
+import '../../features/finance/presentation/pages/accounts_page.dart';
+import '../../features/finance/presentation/pages/monthly_spending_page.dart';
 import '../../features/finance/presentation/pages/today_expenses_page.dart';
 import '../../features/finance/presentation/pages/asset_list_page.dart';
 import '../../features/finance/presentation/pages/add_asset_page.dart';
 import '../../features/finance/presentation/pages/subscription_page.dart';
 import '../../features/finance/presentation/pages/add_subscription_page.dart';
+import '../../features/finance/presentation/providers/finance_providers.dart';
 import '../../features/finance/presentation/widgets/transaction_drawer.dart';
 import '../../features/daily/presentation/pages/quadrant_todo_page.dart';
 import '../../features/daily/presentation/providers/daily_providers.dart';
@@ -68,6 +71,8 @@ class AppRoutes {
 
   // Finance
   static const todayExpenses = '/finance/today-expenses';
+  static const monthlySpending = '/finance/monthly-spending';
+  static const accounts = '/finance/accounts';
   static const assets = '/finance/assets';
   static const subscriptions = '/finance/subscriptions';
   static const addTransaction = '/finance/add-transaction';
@@ -183,11 +188,29 @@ GoRouter createAppRouter() {
           ]),
           _buildBranch(AppRoutes.finance, [
             _buildRealRoute('today-expenses', () => const TodayExpensesPage()),
+            _buildRealRoute('monthly-spending', () => const MonthlySpendingPage()),
+            _buildRealRoute('accounts', () => const AccountsPage()),
             _buildRealRoute('assets', () => const AssetListPage()),
             _buildRealRoute('subscriptions', () => const SubscriptionPage()),
             _buildTransactionDrawer('add-transaction'),
-            _buildRealRoute('add-asset', () => const AddAssetPage()),
-            _buildRealRoute('add-subscription', () => const AddSubscriptionPage()),
+            GoRoute(
+              path: 'add-asset',
+              pageBuilder: (context, state) => CustomTransitionPage(
+                key: state.pageKey,
+                child: AddAssetPage(editAsset: state.extra as AssetItem?),
+                transitionsBuilder: _slideFromRight,
+                transitionDuration: const Duration(milliseconds: 300),
+              ),
+            ),
+            GoRoute(
+              path: 'add-subscription',
+              pageBuilder: (context, state) => CustomTransitionPage(
+                key: state.pageKey,
+                child: AddSubscriptionPage(editSub: state.extra as SubscriptionItem?),
+                transitionsBuilder: _slideFromRight,
+                transitionDuration: const Duration(milliseconds: 300),
+              ),
+            ),
             _buildRoute('budget-settings', '预算设置'),
           ]),
           _buildBranch(AppRoutes.analytics, [
@@ -271,7 +294,9 @@ GoRoute _buildQuadrantTodoRoute() {
     path: 'quadrant-todo',
     pageBuilder: (context, state) => CustomTransitionPage(
       key: state.pageKey,
-      child: QuadrantTodoPage(initialQuadrant: state.extra as QuadrantType?),
+      child: QuadrantTodoPage(
+        initialQuadrant: state.extra is QuadrantType ? state.extra as QuadrantType : null,
+      ),
       transitionsBuilder: _slideFromRight,
       transitionDuration: const Duration(milliseconds: 300),
     ),

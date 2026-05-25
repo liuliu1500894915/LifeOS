@@ -16,11 +16,15 @@ class SecureVaultCipher {
       return encryptedText.substring(4);
     }
 
-    final decoded = utf8.decode(base64Decode(encryptedText));
-    final prefix = '${EncryptionConfig.defaultKey}::';
-    if (decoded.startsWith(prefix)) {
-      return decoded.substring(prefix.length);
+    try {
+      final decoded = utf8.decode(base64Decode(encryptedText));
+      final prefix = '${EncryptionConfig.defaultKey}::';
+      if (decoded.startsWith(prefix)) {
+        return decoded.substring(prefix.length);
+      }
+      return decoded;
+    } catch (_) {
+      return encryptedText;
     }
-    return decoded;
   }
 }

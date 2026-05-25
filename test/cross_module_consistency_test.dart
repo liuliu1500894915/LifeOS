@@ -1,7 +1,10 @@
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:life_os/core/database/app_database.dart';
+import 'package:life_os/core/database/database_provider.dart';
 import 'package:life_os/core/widgets/number_keyboard.dart';
 import 'package:life_os/features/analytics/presentation/providers/analytics_providers.dart';
 import 'package:life_os/features/daily/presentation/providers/daily_providers.dart';
@@ -10,6 +13,11 @@ import 'package:life_os/features/home/presentation/providers/home_providers.dart
 import 'package:life_os/features/home/presentation/providers/room_providers.dart';
 import 'package:life_os/features/home/presentation/widgets/drink_drawer.dart';
 import 'package:life_os/features/profile/presentation/providers/profile_providers.dart';
+
+ProviderContainer _containerWithDb() {
+  final db = AppDatabase.forTesting(NativeDatabase.memory());
+  return ProviderContainer(overrides: [databaseProvider.overrideWithValue(db)]);
+}
 
 void main() {
   group('cross-module consistency', () {
@@ -42,7 +50,7 @@ void main() {
     });
 
     testWidgets('beverage records update home logs, finance ledger, and analytics totals', (tester) async {
-      final container = ProviderContainer();
+      final container = _containerWithDb();
       addTearDown(container.dispose);
 
       await tester.pumpWidget(
@@ -94,6 +102,12 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      // Wait for the async Drift write triggered by drink_drawer's _save
+      await container.read(transactionProvider.future);
+      await container.read(accountProvider.future);
+      // Allow Riverpod listeners to propagate
+      await tester.pump();
+
       final logs = container.read(actionLogNotifierProvider);
       final lastLog = logs.last;
       expect(lastLog.actionType, ActionType.drink);
@@ -105,18 +119,21 @@ void main() {
       final transactions = container.read(todayTransactionsProvider);
       final lastTransaction = transactions.last;
       expect(lastTransaction.categoryId, 'drink');
-      expect(lastTransaction.categoryName, '饮品');
+      expect(categoryForId(lastTransaction.categoryId).name, '饮品');
       expect(lastTransaction.amount, 12.5);
       expect(lastTransaction.remark, '含糖饮料');
 
       final finance = container.read(financeAnalyticsProvider);
-      expect(finance.expense, closeTo(57.5, 0.001));
-      expect(finance.categoryExpenses['饮品'], closeTo(17.5, 0.001));
+      expect(finance.expense, closeTo(12.5, 0.001));
+      expect(finance.categoryExpenses['饮品'], closeTo(12.5, 0.001));
     });
 
-    test('weekly report stays aligned with finance and daily summaries', () {
-      final container = ProviderContainer();
+    test('weekly report stays aligned with finance and daily summaries', () async {
+      final container = _containerWithDb();
       addTearDown(container.dispose);
+
+      // Wait for Drift-backed providers to seed
+      await container.read(accountProvider.future);
 
       container.read(todoNotifierProvider.notifier).toggleComplete('t1');
       container.read(habitNotifierProvider.notifier).checkHabit('h2');
@@ -129,16 +146,16 @@ void main() {
               createdAt: DateTime.now(),
             ),
           );
-      container.read(transactionNotifierProvider.notifier).addTransaction(
-            TransactionItem(
-              id: 'tx-extra',
-              flowType: 'EXPENSE',
-              amount: 30,
-              categoryId: 'drink',
-              categoryName: '饮品',
-              accountName: '微信支付',
-              loggedAt: DateTime.now(),
-            ),
+
+      // Add transaction via the Drift-backed notifier (async)
+      final accounts = await container.read(accountProvider.future);
+      final wechatAccount = accounts.firstWhere((a) => a.accountName == '微信支付');
+      await container.read(transactionProvider.notifier).addTransaction(
+            flowType: 'EXPENSE',
+            amount: 30,
+            categoryId: 'drink',
+            accountId: wechatAccount.accountId,
+            loggedAt: DateTime.now(),
           );
 
       final daily = container.read(dailyAnalyticsProvider);
@@ -147,7 +164,7 @@ void main() {
 
       expect(daily.waterMl, 1100);
       expect(daily.habitChecked, 3);
-      expect(report[0], contains('本周总支出 ¥75'));
+      expect(report[0], contains('本周总支出 ¥30'));
       expect(report[1], contains('Todo 完成率 22.2%'));
       expect(report[1], contains('习惯完成 3/4'));
       expect(report[2], contains('重点洞察：'));

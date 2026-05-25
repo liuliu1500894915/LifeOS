@@ -1,15 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../providers/finance_providers.dart';
 import '../widgets/transaction_drawer.dart';
 
-class FinancePage extends StatelessWidget {
+class FinancePage extends ConsumerWidget {
   const FinancePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final netWorth = ref.watch(netWorthProvider);
+    final totalLiability = ref.watch(totalLiabilityProvider);
+    final todayExpense = ref.watch(todayExpenseProvider);
+    final monthExpense = ref.watch(monthExpenseProvider);
+    final monthBudget = ref.watch(monthBudgetProvider);
+    final todayTxCount = ref.watch(todayTransactionsProvider).where((t) => t.flowType == 'EXPENSE').length;
+    final assets = ref.watch(assetListProvider);
+    final subs = ref.watch(subscriptionListProvider);
+
+    final budgetPercent = monthBudget > 0 ? ((monthBudget - monthExpense) / monthBudget * 100).clamp(0.0, 100.0) : 0.0;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: SafeArea(
@@ -20,9 +33,9 @@ class FinancePage extends StatelessWidget {
             children: [
               _buildHeader(context),
               const SizedBox(height: 16),
-              _buildNetWorthCard(context),
+              _buildNetWorthCard(context, netWorth, totalLiability),
               const SizedBox(height: 12),
-              _buildSpendingRow(context),
+              _buildSpendingRow(context, todayExpense, todayTxCount, monthExpense, budgetPercent),
               _buildQuickRecordButton(context),
               const SizedBox(height: 16),
               _buildSectionLabel('资产与固定账单管理'),
@@ -31,7 +44,7 @@ class FinancePage extends StatelessWidget {
                 context,
                 icon: Icons.chair_outlined,
                 title: '固定资产库',
-                subtitle: '5件设备 | 估值: ¥45,600',
+                subtitle: '${assets.length}件设备 | 估值: ¥${assets.fold<double>(0, (s, a) => s + a.purchasePrice).toStringAsFixed(0)}',
                 onTap: () => context.push(AppRoutes.assets),
               ),
               const SizedBox(height: 8),
@@ -39,8 +52,7 @@ class FinancePage extends StatelessWidget {
                 context,
                 icon: Icons.autorenew,
                 title: '自动化订阅管理',
-                subtitle: '3项服务 | 下次扣费: T-3',
-                trailing: _buildWarningChip('T-3'),
+                subtitle: '${subs.length}项服务 | 月均: ¥${subs.fold<double>(0, (s, sub) => s + sub.amount).toStringAsFixed(0)}',
                 onTap: () => context.push(AppRoutes.subscriptions),
               ),
               const SizedBox(height: 24),
@@ -86,44 +98,47 @@ class FinancePage extends StatelessWidget {
     );
   }
 
-  Widget _buildNetWorthCard(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [ModuleColors.finance, Color(0xFF1B8C5E)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+  Widget _buildNetWorthCard(BuildContext context, double netWorth, double totalLiability) {
+    return GestureDetector(
+      onTap: () => context.push(AppRoutes.accounts),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [ModuleColors.finance, Color(0xFF1B8C5E)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
         ),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            '当前总净资产',
-            style: TextStyle(fontSize: 13, color: Colors.white70),
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            '¥245,890.00',
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-              height: 1.2,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              '当前总净资产',
+              style: TextStyle(fontSize: 13, color: Colors.white70),
             ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              _buildMiniStat('较上月', '+¥3,420', Colors.greenAccent),
-              const SizedBox(width: 16),
-              _buildMiniStat('总负债', '¥12,500', Colors.white70),
-            ],
-          ),
-        ],
+            const SizedBox(height: 4),
+            Text(
+              '¥${netWorth.toStringAsFixed(2)}',
+              style: const TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+                height: 1.2,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                _buildMiniStat('总负债', '¥${totalLiability.toStringAsFixed(0)}', Colors.white70),
+                const SizedBox(width: 16),
+                const Icon(Icons.chevron_right, color: Colors.white54, size: 16),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -138,15 +153,15 @@ class FinancePage extends StatelessWidget {
     );
   }
 
-  Widget _buildSpendingRow(BuildContext context) {
+  Widget _buildSpendingRow(BuildContext context, double todayExpense, int todayCount, double monthExpense, double budgetPercent) {
     return Row(
       children: [
         Expanded(
           child: _buildSummaryCard(
             icon: Icons.receipt_long,
             title: '今日花费',
-            amount: '¥45.00',
-            detail: '3笔支出',
+            amount: '¥${todayExpense.toStringAsFixed(2)}',
+            detail: '$todayCount笔支出',
             color: ModuleColors.expense,
             onTap: () => context.push(AppRoutes.todayExpenses),
           ),
@@ -156,10 +171,10 @@ class FinancePage extends StatelessWidget {
           child: _buildSummaryCard(
             icon: Icons.calendar_month,
             title: '本月花费',
-            amount: '¥3,420',
-            detail: '预算剩余: 45.3%',
+            amount: '¥${monthExpense.toStringAsFixed(0)}',
+            detail: budgetPercent > 0 ? '预算剩余: ${budgetPercent.toStringAsFixed(1)}%' : '未设预算',
             color: ModuleColors.daily,
-            onTap: () => context.push(AppRoutes.financeDeep),
+            onTap: () => context.push(AppRoutes.monthlySpending),
           ),
         ),
       ],
@@ -280,20 +295,6 @@ class FinancePage extends StatelessWidget {
             Text('记一笔', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white)),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildWarningChip(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: ModuleColors.warning.withAlpha(25),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: ModuleColors.warning),
       ),
     );
   }

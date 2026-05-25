@@ -45,7 +45,7 @@ final financeAnalyticsProvider = Provider<FinanceAnalyticsSummary>((ref) {
   final expense = txs.where((t) => t.flowType == 'EXPENSE').fold<double>(0, (s, t) => s + t.amount);
   final byCategory = <String, double>{};
   for (final tx in txs.where((t) => t.flowType == 'EXPENSE')) {
-    byCategory.update(tx.categoryName, (v) => v + tx.amount, ifAbsent: () => tx.amount);
+    byCategory.update(categoryForId(tx.categoryId).name, (v) => v + tx.amount, ifAbsent: () => tx.amount);
   }
   return FinanceAnalyticsSummary(
     income: income,

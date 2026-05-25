@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AddAssetPage extends StatefulWidget {
-  const AddAssetPage({super.key});
+import '../providers/finance_providers.dart';
+
+class AddAssetPage extends ConsumerStatefulWidget {
+  const AddAssetPage({super.key, this.editAsset});
+  final AssetItem? editAsset;
 
   @override
-  State<AddAssetPage> createState() => _AddAssetPageState();
+  ConsumerState<AddAssetPage> createState() => _AddAssetPageState();
 }
 
-class _AddAssetPageState extends State<AddAssetPage> {
-  final _nameController = TextEditingController();
-  final _priceController = TextEditingController();
-  DateTime _purchaseDate = DateTime.now();
-  String _selectedIcon = 'laptop';
-  bool _projectToRoom = true;
+class _AddAssetPageState extends ConsumerState<AddAssetPage> {
+  late final _nameController = TextEditingController(text: widget.editAsset?.name ?? '');
+  late final _priceController = TextEditingController(text: widget.editAsset?.purchasePrice.toStringAsFixed(0) ?? '');
+  late DateTime _purchaseDate = widget.editAsset?.purchaseDate ?? DateTime.now();
+  late String _selectedIcon = widget.editAsset?.iconId ?? 'laptop';
+  late bool _projectToRoom = widget.editAsset?.projectToRoom ?? true;
 
   static const _iconOptions = [
     ('laptop', '💻'),
@@ -23,6 +27,8 @@ class _AddAssetPageState extends State<AddAssetPage> {
     ('car', '🚗'),
   ];
 
+  bool get _isEdit => widget.editAsset != null;
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -30,16 +36,43 @@ class _AddAssetPageState extends State<AddAssetPage> {
     super.dispose();
   }
 
+  Future<void> _save() async {
+    final name = _nameController.text.trim();
+    final price = double.tryParse(_priceController.text);
+    if (name.isEmpty || price == null || price <= 0) return;
+
+    if (_isEdit) {
+      await ref.read(assetProvider.notifier).updateAsset(
+            widget.editAsset!.id,
+            name: name,
+            price: price,
+            purchaseDate: _purchaseDate,
+            iconId: _selectedIcon,
+            projectToRoom: _projectToRoom,
+          );
+    } else {
+      await ref.read(assetProvider.notifier).addAsset(
+            name: name,
+            price: price,
+            purchaseDate: _purchaseDate,
+            iconId: _selectedIcon,
+            projectToRoom: _projectToRoom,
+          );
+    }
+
+    if (mounted) Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        title: const Text('新增资产'),
+        title: Text(_isEdit ? '编辑资产' : '新增资产'),
         backgroundColor: const Color(0xFFF8F9FA),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: _save,
             child: const Text('保存', style: TextStyle(fontWeight: FontWeight.w600)),
           ),
         ],
@@ -114,6 +147,33 @@ class _AddAssetPageState extends State<AddAssetPage> {
               onChanged: (v) => setState(() => _projectToRoom = v),
               contentPadding: const EdgeInsets.symmetric(horizontal: 4),
             ),
+            if (_isEdit) ...[
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () async {
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('删除资产'),
+                        content: Text('确定删除「${widget.editAsset!.name}」吗？'),
+                        actions: [
+                          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('取消')),
+                          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('删除')),
+                        ],
+                      ),
+                    );
+                    if (confirmed == true) {
+                      await ref.read(assetProvider.notifier).deleteAsset(widget.editAsset!.id);
+                      if (mounted) Navigator.of(context).pop();
+                    }
+                  },
+                  style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
+                  child: const Text('删除此资产'),
+                ),
+              ),
+            ],
           ],
         ),
       ),
