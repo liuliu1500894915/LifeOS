@@ -21,6 +21,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
   Widget build(BuildContext context) {
     final finance = ref.watch(financeAnalyticsProvider);
     final daily = ref.watch(dailyAnalyticsProvider);
+    final insight = ref.watch(insightCardProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -34,7 +35,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
               const SizedBox(height: 16),
               _buildPeriodFilter(),
               const SizedBox(height: 16),
-              _buildInsightCard(context),
+              _buildInsightCard(context, insight),
               const SizedBox(height: 12),
               _buildSectionLabel('财务多维收支简报'),
               const SizedBox(height: 8),
@@ -43,6 +44,23 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
               _buildSectionLabel('日常习惯与执行力统计'),
               const SizedBox(height: 8),
               _buildDailySummary(context, daily),
+              const SizedBox(height: 12),
+              GestureDetector(
+                onTap: () => context.push(AppRoutes.report),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                  child: Row(
+                    children: const [
+                      Icon(Icons.description_outlined, color: ModuleColors.analytics),
+                      SizedBox(width: 8),
+                      Expanded(child: Text('查看周/月综合报告', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500))),
+                      Icon(Icons.chevron_right, color: Color(0xFFBDBDBD)),
+                    ],
+                  ),
+                ),
+              ),
               const SizedBox(height: 24),
             ],
           ),
@@ -113,9 +131,9 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
     );
   }
 
-  Widget _buildInsightCard(BuildContext context) {
+  Widget _buildInsightCard(BuildContext context, dynamic insight) {
     return GestureDetector(
-      onTap: () => context.push(AppRoutes.calendar),
+      onTap: () => context.push(AppRoutes.insights),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(16),
@@ -131,19 +149,19 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
                 Text('🎯', style: TextStyle(fontSize: 16)),
                 SizedBox(width: 8),
                 Expanded(
-                  child: Text('冲动消费与睡眠关联', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                  child: Text(insight.title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
                 ),
               ],
             ),
             const SizedBox(height: 8),
-            const Text(
-              '系统注意到，当睡眠少于 6 小时后，第二天的饮品与外卖消费更容易上升。',
-              style: TextStyle(fontSize: 13, color: Color(0xFF616161), height: 1.5),
+            Text(
+              '${insight.summary}（r=${insight.coefficient.toStringAsFixed(2)}）',
+              style: const TextStyle(fontSize: 13, color: Color(0xFF616161), height: 1.5),
             ),
             const SizedBox(height: 8),
             Row(

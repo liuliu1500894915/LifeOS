@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../features/daily/presentation/providers/daily_providers.dart';
 import '../../../../features/finance/presentation/providers/finance_providers.dart';
 import '../../../../features/home/presentation/providers/home_providers.dart';
+import '../../domain/correlation_engine.dart';
 
 class FinanceAnalyticsSummary {
   final double income;
@@ -69,6 +70,21 @@ final dailyAnalyticsProvider = Provider<DailyAnalyticsSummary>((ref) {
     habitChecked: checkedHabits,
     habitTotal: habits.length,
   );
+});
+
+final insightCardProvider = Provider<CorrelationResult>((ref) {
+  return CorrelationEngine.buildSleepVsImpulse();
+});
+
+final weeklyReportProvider = Provider<List<String>>((ref) {
+  final finance = ref.watch(financeAnalyticsProvider);
+  final daily = ref.watch(dailyAnalyticsProvider);
+  final insight = ref.watch(insightCardProvider);
+  return [
+    '本周总支出 ¥${finance.expense.toStringAsFixed(0)}，结余 ¥${finance.balance.toStringAsFixed(0)}。',
+    'Todo 完成率 ${(daily.completionRate * 100).toStringAsFixed(1)}%，习惯完成 ${daily.habitChecked}/${daily.habitTotal}。',
+    '重点洞察：${insight.summary} (r=${insight.coefficient.toStringAsFixed(2)})',
+  ];
 });
 
 final yearlyHeatmapProvider = Provider<List<double>>((ref) {

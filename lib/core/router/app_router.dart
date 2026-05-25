@@ -6,6 +6,8 @@ import '../../features/analytics/presentation/pages/calendar_matrix_page.dart';
 import '../../features/analytics/presentation/pages/daily_efficiency_page.dart';
 import '../../features/analytics/presentation/pages/finance_deep_page.dart';
 import '../../features/analytics/presentation/pages/habit_heatmap_page.dart';
+import '../../features/analytics/presentation/pages/insight_detail_page.dart';
+import '../../features/analytics/presentation/pages/report_page.dart';
 import '../../features/daily/presentation/pages/daily_page.dart';
 import '../../features/finance/presentation/pages/finance_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
@@ -73,6 +75,7 @@ class AppRoutes {
   static const dailyDeep = '/analytics/daily-deep';
   static const categoryLedger = '/analytics/category-ledger';
   static const habitHeatmap = '/analytics/habit-heatmap';
+  static const report = '/analytics/report';
 
   // Daily
   static const quadrantTodo = '/daily/quadrant-todo';
@@ -181,12 +184,13 @@ GoRouter createAppRouter() {
             _buildRoute('budget-settings', '预算设置'),
           ]),
           _buildBranch(AppRoutes.analytics, [
-            _buildRoute('insights', '洞察因果'),
+            _buildRealRoute('insights', () => const InsightDetailPage()),
             _buildRealRoute('calendar', () => const CalendarMatrixPage()),
             _buildRealRoute('finance-deep', () => const FinanceDeepPage()),
             _buildRealRoute('daily-deep', () => const DailyEfficiencyPage()),
             _buildRoute('category-ledger', '分类流水'),
             _buildRealRoute('habit-heatmap', () => const HabitHeatmapPage()),
+            _buildRealRoute('report', () => const ReportPage()),
           ]),
           _buildBranch(AppRoutes.daily, [
             _buildQuadrantTodoRoute(),
