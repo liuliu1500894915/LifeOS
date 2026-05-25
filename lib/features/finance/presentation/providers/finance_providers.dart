@@ -53,6 +53,7 @@ class AccountNotifier extends AsyncNotifier<List<PaymentAccount>> {
   }
 
   Future<void> _seedDefaults(AppDatabase db) async {
+    await _ensureSystemUser(db);
     const defaults = [
       ('微信支付', 'CASH', false, 0.0),
       ('支付宝', 'CASH', false, 0.0),
@@ -73,15 +74,15 @@ class AccountNotifier extends AsyncNotifier<List<PaymentAccount>> {
             ),
           );
     }
-    await _ensureSystemUser(db);
   }
 
   Future<void> _ensureSystemUser(AppDatabase db) async {
-    await db.into(db.userAccounts).insertOnConflictUpdate(
+    await db.into(db.userAccounts).insert(
           UserAccountsCompanion.insert(
             userId: _systemUserId,
             displayName: '默认用户',
           ),
+          mode: InsertMode.insertOrIgnore,
         );
   }
 
@@ -202,11 +203,12 @@ class TransactionNotifier extends AsyncNotifier<List<FinancialTransactionData>> 
   }
 
   Future<void> _ensureSystemUser(AppDatabase db) async {
-    await db.into(db.userAccounts).insertOnConflictUpdate(
+    await db.into(db.userAccounts).insert(
           UserAccountsCompanion.insert(
             userId: _systemUserId,
             displayName: '默认用户',
           ),
+          mode: InsertMode.insertOrIgnore,
         );
   }
 
@@ -264,11 +266,12 @@ class AssetNotifier extends AsyncNotifier<List<AssetInventoryData>> {
   }
 
   Future<void> _ensureSystemUser(AppDatabase db) async {
-    await db.into(db.userAccounts).insertOnConflictUpdate(
+    await db.into(db.userAccounts).insert(
           UserAccountsCompanion.insert(
             userId: _systemUserId,
             displayName: '默认用户',
           ),
+          mode: InsertMode.insertOrIgnore,
         );
   }
 }
@@ -332,11 +335,12 @@ class SubscriptionNotifier extends AsyncNotifier<List<SubscriptionService>> {
   }
 
   Future<void> _ensureSystemUser(AppDatabase db) async {
-    await db.into(db.userAccounts).insertOnConflictUpdate(
+    await db.into(db.userAccounts).insert(
           UserAccountsCompanion.insert(
             userId: _systemUserId,
             displayName: '默认用户',
           ),
+          mode: InsertMode.insertOrIgnore,
         );
   }
 }
@@ -373,11 +377,12 @@ class BudgetNotifier extends AsyncNotifier<List<BudgetSetting>> {
   }
 
   Future<void> _ensureSystemUser(AppDatabase db) async {
-    await db.into(db.userAccounts).insertOnConflictUpdate(
+    await db.into(db.userAccounts).insert(
           UserAccountsCompanion.insert(
             userId: _systemUserId,
             displayName: '默认用户',
           ),
+          mode: InsertMode.insertOrIgnore,
         );
   }
 }
