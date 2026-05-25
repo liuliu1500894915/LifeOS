@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
-import 'package:sqlcipher_flutter_libs/sqlcipher_flutter_libs.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
+import '../crypto/encryption_config.dart';
+import 'tables/app_defaults.dart';
 import 'tables/pet_tables.dart';
 import 'tables/finance_tables.dart';
 import 'tables/daily_tables.dart';
@@ -14,32 +17,27 @@ part 'app_database.g.dart';
 
 @DriftDatabase(
   tables: [
-    // Pet & Home
     PetStatusCore,
     PetActionQuickLog,
     RoomFurniturePlacement,
     UserProfile,
     WeightHistory,
-    // Finance
     FinancialTransaction,
     AssetInventory,
     PaymentAccounts,
     SubscriptionServices,
     BudgetSettings,
     AssetValueSnapshots,
-    // Daily
     TodoExecutionList,
     HabitDefinitions,
     HabitCheckLog,
     FlagGoals,
     FlagMilestones,
     DailyReviewLog,
-    // Profile
     SecureDocumentsVault,
     MemorialDays,
     RelationshipNetwork,
     RelationshipInteractionLog,
-    // System
     UserAccounts,
     AnalyticalInsights,
     DailyAggregationCache,
@@ -47,7 +45,8 @@ part 'app_database.g.dart';
   ],
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
+  AppDatabase({EncryptionConfig? encryptionConfig})
+      : super(_openConnection(encryptionConfig));
 
   @override
   int get schemaVersion => 1;
@@ -60,21 +59,24 @@ class AppDatabase extends _$AppDatabase {
       );
 }
 
-LazyDatabase _openConnection() {
+LazyDatabase _openConnection(EncryptionConfig? encryptionConfig) {
+  final config = encryptionConfig ?? EncryptionConfig.withDefaultKey();
+
   return LazyDatabase(() async {
     final dbFolder = await getApplicationDocumentsDirectory();
     final file = p.join(dbFolder.path, 'life_os.db');
 
     return NativeDatabase.createInBackground(
-      file,
+      File(file),
       setup: (rawDb) {
-        // Enable SQLCipher encryption with a default key
-        // Key will be derived from biometric auth + device ID in production
-        rawDb.execute("PRAGMA key = 'life_os_v1_encryption_key'");
-        rawDb.execute("PRAGMA cipher_page_size = 4096");
-        rawDb.execute("PRAGMA kdf_iter = 256000");
-        rawDb.execute("PRAGMA cipher_hmac_algorithm = HMAC_SHA512");
-        rawDb.execute("PRAGMA cipher_kdf_algorithm = PBKDF2_HMAC_SHA512");
+        rawDb.execute("PRAGMA key = '${config.key}'");
+        rawDb.execute('PRAGMA cipher_page_size = ${EncryptionConfig.pageSize}');
+        rawDb.execute('PRAGMA kdf_iter = ${EncryptionConfig.kdfIter}');
+        rawDb.execute('PRAGMA cipher_hmac_algorithm = HMAC_SHA512');
+        rawDb.execute('PRAGMA cipher_kdf_algorithm = PBKDF2_HMAC_SHA512');
+        rawDb.execute('PRAGMA foreign_keys = ON');
+        rawDb.execute('PRAGMA journal_mode = WAL');
+        rawDb.execute('PRAGMA busy_timeout = 5000');
       },
     );
   });

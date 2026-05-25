@@ -1,9 +1,13 @@
 import 'package:drift/drift.dart';
 
-/// 待办清单执行表
+import 'system_tables.dart';
+
 class TodoExecutionList extends Table {
   TextColumn get todoId => text().withLength(min: 1, max: 36)();
-  TextColumn get userId => text().withLength(min: 1, max: 36)();
+  TextColumn get userId =>
+      text()
+          .withLength(min: 1, max: 36)
+          .references(UserAccounts, #userId)();
   TextColumn get title => text().withLength(max: 150)();
   TextColumn get priorityQuadrant => text().check(
         priorityQuadrant.equals('A') |
@@ -15,17 +19,22 @@ class TodoExecutionList extends Table {
   DateTimeColumn get reminderClock => dateTime().nullable()();
   BoolColumn get isCompleted => boolean().withDefault(const Constant(false))();
   IntColumn get delayCount => integer().withDefault(const Constant(0))();
-  TextColumn get associatedFlagId => text().withLength(min: 1, max: 36).nullable()();
+  TextColumn get associatedFlagId =>
+      text()
+          .withLength(min: 1, max: 36)
+          .references(FlagGoals, #flagId)();
   DateTimeColumn get completedAt => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {todoId};
 }
 
-/// 习惯定义表
 class HabitDefinitions extends Table {
   TextColumn get habitId => text().withLength(min: 1, max: 36)();
-  TextColumn get userId => text().withLength(min: 1, max: 36)();
+  TextColumn get userId =>
+      text()
+          .withLength(min: 1, max: 36)
+          .references(UserAccounts, #userId)();
   TextColumn get habitName => text().withLength(max: 100)();
   TextColumn get habitIcon => text().withLength(max: 10).nullable()();
   TextColumn get targetType => text().check(
@@ -40,11 +49,16 @@ class HabitDefinitions extends Table {
   Set<Column> get primaryKey => {habitId};
 }
 
-/// 习惯打卡记录表
 class HabitCheckLog extends Table {
   TextColumn get logId => text().withLength(min: 1, max: 36)();
-  TextColumn get userId => text().withLength(min: 1, max: 36)();
-  TextColumn get habitId => text().withLength(min: 1, max: 36)();
+  TextColumn get userId =>
+      text()
+          .withLength(min: 1, max: 36)
+          .references(UserAccounts, #userId)();
+  TextColumn get habitId =>
+      text()
+          .withLength(min: 1, max: 36)
+          .references(HabitDefinitions, #habitId)();
   DateTimeColumn get checkDate => dateTime()();
   RealColumn get achievedValue => real().nullable()();
   BoolColumn get isFrozen => boolean().withDefault(const Constant(false))();
@@ -56,10 +70,12 @@ class HabitCheckLog extends Table {
   List<String> get customConstraints => ['UNIQUE(habit_id, check_date)'];
 }
 
-/// 长期 Flag 目标表
 class FlagGoals extends Table {
   TextColumn get flagId => text().withLength(min: 1, max: 36)();
-  TextColumn get userId => text().withLength(min: 1, max: 36)();
+  TextColumn get userId =>
+      text()
+          .withLength(min: 1, max: 36)
+          .references(UserAccounts, #userId)();
   TextColumn get title => text().withLength(max: 150)();
   TextColumn get description => text().nullable()();
   RealColumn get targetValue => real().nullable()();
@@ -73,11 +89,16 @@ class FlagGoals extends Table {
   Set<Column> get primaryKey => {flagId};
 }
 
-/// Flag 里程碑表
 class FlagMilestones extends Table {
   TextColumn get milestoneId => text().withLength(min: 1, max: 36)();
-  TextColumn get userId => text().withLength(min: 1, max: 36)();
-  TextColumn get flagId => text().withLength(min: 1, max: 36)();
+  TextColumn get userId =>
+      text()
+          .withLength(min: 1, max: 36)
+          .references(UserAccounts, #userId)();
+  TextColumn get flagId =>
+      text()
+          .withLength(min: 1, max: 36)
+          .references(FlagGoals, #flagId)();
   TextColumn get title => text().withLength(max: 150)();
   RealColumn get targetValue => real().nullable()();
   BoolColumn get isReached => boolean().withDefault(const Constant(false))();
@@ -87,10 +108,12 @@ class FlagMilestones extends Table {
   Set<Column> get primaryKey => {milestoneId};
 }
 
-/// 每日复盘日志表
 class DailyReviewLog extends Table {
   DateTimeColumn get reviewDate => dateTime()();
-  TextColumn get userId => text().withLength(min: 1, max: 36)();
+  TextColumn get userId =>
+      text()
+          .withLength(min: 1, max: 36)
+          .references(UserAccounts, #userId)();
   TextColumn get moodTag => text()();
   TextColumn get insightsContent => text().nullable()();
   TextColumn get summarySnapshotJson => text()();

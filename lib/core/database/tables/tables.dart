@@ -1,3 +1,4 @@
+export 'app_defaults.dart';
 export 'pet_tables.dart';
 export 'finance_tables.dart';
 export 'daily_tables.dart';
