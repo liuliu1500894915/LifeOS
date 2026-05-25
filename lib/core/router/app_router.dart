@@ -13,7 +13,14 @@ import '../../features/finance/presentation/pages/finance_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/home/presentation/pages/pet_panel_page.dart';
 import '../../features/home/presentation/pages/room_edit_page.dart';
+import '../../features/profile/presentation/pages/add_document_page.dart';
+import '../../features/profile/presentation/pages/add_interaction_page.dart';
+import '../../features/profile/presentation/pages/add_memorial_page.dart';
+import '../../features/profile/presentation/pages/documents_page.dart';
+import '../../features/profile/presentation/pages/memorials_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/profile/presentation/pages/relationships_page.dart';
+import '../../features/profile/presentation/widgets/biometric_gate.dart';
 import '../theme/app_theme.dart';
 import '../../features/finance/presentation/pages/today_expenses_page.dart';
 import '../../features/finance/presentation/pages/asset_list_page.dart';
@@ -201,15 +208,42 @@ GoRouter createAppRouter() {
           ]),
           _buildBranch(AppRoutes.profile, [
             _buildRoute('edit', '编辑档案'),
-            _buildNestedRoute('documents', '证件资产库', [
-              _buildRoute('add', '添加证件'),
-            ]),
-            _buildNestedRoute('memorials', '纪念日', [
-              _buildRoute('add', '新增纪念日'),
-            ]),
-            _buildNestedRoute('relationships', '人际关系', [
-              _buildRoute('add-interaction', '新增交往日志'),
-            ]),
+            GoRoute(
+              path: 'documents',
+              pageBuilder: (context, state) => CustomTransitionPage(
+                key: state.pageKey,
+                child: const BiometricGate(child: DocumentsPage()),
+                transitionsBuilder: _slideFromRight,
+                transitionDuration: const Duration(milliseconds: 300),
+              ),
+              routes: [
+                _buildRealRoute('add', () => const AddDocumentPage()),
+              ],
+            ),
+            GoRoute(
+              path: 'memorials',
+              pageBuilder: (context, state) => CustomTransitionPage(
+                key: state.pageKey,
+                child: const MemorialsPage(),
+                transitionsBuilder: _slideFromRight,
+                transitionDuration: const Duration(milliseconds: 300),
+              ),
+              routes: [
+                _buildRealRoute('add', () => const AddMemorialPage()),
+              ],
+            ),
+            GoRoute(
+              path: 'relationships',
+              pageBuilder: (context, state) => CustomTransitionPage(
+                key: state.pageKey,
+                child: const RelationshipsPage(),
+                transitionsBuilder: _slideFromRight,
+                transitionDuration: const Duration(milliseconds: 300),
+              ),
+              routes: [
+                _buildRealRoute('add-interaction', () => const AddInteractionPage()),
+              ],
+            ),
           ]),
         ],
       ),
@@ -281,19 +315,6 @@ GoRoute _buildRoute(String path, String title) {
   );
 }
 
-
-GoRoute _buildNestedRoute(String path, String title, List<GoRoute> children) {
-  return GoRoute(
-    path: path,
-    pageBuilder: (context, state) => CustomTransitionPage(
-      key: state.pageKey,
-      child: PlaceholderPage(title: title),
-      transitionsBuilder: _slideFromRight,
-      transitionDuration: const Duration(milliseconds: 300),
-    ),
-    routes: children,
-  );
-}
 
 Widget _slideFromRight(BuildContext context, Animation<double> animation,
     Animation<double> secondaryAnimation, Widget child) {

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/event_bus/bus.dart';
+import '../../../../../core/event_bus/events.dart';
 import '../../../../../core/theme/app_theme.dart';
 
 // ── Enums ──
@@ -237,3 +239,18 @@ final todayHabitsProvider = Provider<List<HabitItem>>((ref) => ref.watch(habitNo
 final flagNotifierProvider = StateNotifierProvider<FlagNotifier, List<FlagItem>>((ref) => FlagNotifier());
 
 final flagListProvider = Provider<List<FlagItem>>((ref) => ref.watch(flagNotifierProvider));
+
+final memorialTodoBridgeProvider = Provider<void>((ref) {
+  final notifier = ref.read(todoNotifierProvider.notifier);
+  final sub = globalEventBus.on<MemorialTodoEvent>().listen((event) {
+    notifier.addTodo(
+      TodoItem(
+        todoId: 'memorial-${event.memorialId}-${event.targetDate.millisecondsSinceEpoch}',
+        title: event.title,
+        quadrant: QuadrantType.B,
+        targetDate: event.targetDate,
+      ),
+    );
+  });
+  ref.onDispose(sub.cancel);
+});
