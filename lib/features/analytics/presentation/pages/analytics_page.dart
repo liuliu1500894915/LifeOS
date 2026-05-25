@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../providers/analytics_providers.dart';
 
-class AnalyticsPage extends StatefulWidget {
+class AnalyticsPage extends ConsumerStatefulWidget {
   const AnalyticsPage({super.key});
 
   @override
-  State<AnalyticsPage> createState() => _AnalyticsPageState();
+  ConsumerState<AnalyticsPage> createState() => _AnalyticsPageState();
 }
 
-class _AnalyticsPageState extends State<AnalyticsPage> {
+class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
   String _selectedPeriod = '本月';
   static const _periods = ['本周', '本月', '近90天', '自定义'];
 
   @override
   Widget build(BuildContext context) {
+    final finance = ref.watch(financeAnalyticsProvider);
+    final daily = ref.watch(dailyAnalyticsProvider);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: SafeArea(
@@ -29,15 +34,15 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
               const SizedBox(height: 16),
               _buildPeriodFilter(),
               const SizedBox(height: 16),
-              _buildInsightCard(),
+              _buildInsightCard(context),
               const SizedBox(height: 12),
               _buildSectionLabel('财务多维收支简报'),
               const SizedBox(height: 8),
-              _buildFinanceSummary(context),
+              _buildFinanceSummary(context, finance),
               const SizedBox(height: 12),
               _buildSectionLabel('日常习惯与执行力统计'),
               const SizedBox(height: 8),
-              _buildDailySummary(context),
+              _buildDailySummary(context, daily),
               const SizedBox(height: 24),
             ],
           ),
@@ -108,9 +113,9 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     );
   }
 
-  Widget _buildInsightCard() {
+  Widget _buildInsightCard(BuildContext context) {
     return GestureDetector(
-      onTap: () {},
+      onTap: () => context.push(AppRoutes.calendar),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(16),
@@ -131,27 +136,20 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                 Text('🎯', style: TextStyle(fontSize: 16)),
                 SizedBox(width: 8),
                 Expanded(
-                  child: Text(
-                    '冲动消费与睡眠关联',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                  ),
+                  child: Text('冲动消费与睡眠关联', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
                 ),
               ],
             ),
             const SizedBox(height: 8),
             const Text(
-              '系统注意到，当你深夜睡眠少于 5.5 小时后的第二天，'
-              '你的冲动购物消费（如咖啡、外卖）平均会上升 42%。',
+              '系统注意到，当睡眠少于 6 小时后，第二天的饮品与外卖消费更容易上升。',
               style: TextStyle(fontSize: 13, color: Color(0xFF616161), height: 1.5),
             ),
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text(
-                  '查看关联数据流水',
-                  style: TextStyle(fontSize: 13, color: ModuleColors.analytics, fontWeight: FontWeight.w500),
-                ),
+                Text('查看关联矩阵', style: TextStyle(fontSize: 13, color: ModuleColors.analytics, fontWeight: FontWeight.w500)),
                 const SizedBox(width: 4),
                 Icon(Icons.arrow_forward, size: 14, color: ModuleColors.analytics),
               ],
@@ -162,37 +160,32 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     );
   }
 
-  Widget _buildFinanceSummary(BuildContext context) {
+  Widget _buildFinanceSummary(BuildContext context, FinanceAnalyticsSummary finance) {
+    final topCategories = finance.categoryExpenses.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
     return GestureDetector(
       onTap: () => context.push(AppRoutes.financeDeep),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-        ),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildStat('总收入', '¥15,000', ModuleColors.income),
-                _buildStat('总支出', '¥4,520', ModuleColors.expense),
-                _buildStat('结余', '¥10,480', ModuleColors.analytics),
+                _buildStat('总收入', '¥${finance.income.toStringAsFixed(0)}', ModuleColors.income),
+                _buildStat('总支出', '¥${finance.expense.toStringAsFixed(0)}', ModuleColors.expense),
+                _buildStat('结余', '¥${finance.balance.toStringAsFixed(0)}', ModuleColors.analytics),
               ],
             ),
             const SizedBox(height: 12),
-            const Row(
-              children: [
-                Text('消费大头: ', style: TextStyle(fontSize: 13, color: Color(0xFF9E9E9E))),
-                Text('🍱 餐饮 (40%)', style: TextStyle(fontSize: 13, color: Color(0xFF616161))),
-                SizedBox(width: 8),
-                Text('🛒 购物 (25%)', style: TextStyle(fontSize: 13, color: Color(0xFF616161))),
-                SizedBox(width: 8),
-                Text('🚗 交通 (15%)', style: TextStyle(fontSize: 13, color: Color(0xFF616161))),
-              ],
+            Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              children: topCategories.take(3).map((entry) => Text('${entry.key} ¥${entry.value.toStringAsFixed(0)}', style: const TextStyle(fontSize: 13, color: Color(0xFF616161)))).toList(),
             ),
           ],
         ),
@@ -211,29 +204,20 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     );
   }
 
-  Widget _buildDailySummary(BuildContext context) {
+  Widget _buildDailySummary(BuildContext context, DailyAnalyticsSummary daily) {
     return GestureDetector(
       onTap: () => context.push(AppRoutes.dailyDeep),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-        ),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
         child: Row(
           children: [
-            Expanded(
-              child: _buildProgressItem('Todo 清空率', '84.5%', 0.845, ModuleColors.daily),
-            ),
+            Expanded(child: _buildProgressItem('Todo 清空率', '${(daily.completionRate * 100).toStringAsFixed(1)}%', daily.completionRate, ModuleColors.daily)),
             const SizedBox(width: 12),
-            Expanded(
-              child: _buildProgressItem('饮水达标', '78.2%', 0.782, const Color(0xFF42A5F5)),
-            ),
+            Expanded(child: _buildProgressItem('饮水达标', '${daily.waterMl.toInt()}ml', (daily.waterMl / 2000).clamp(0.0, 1.0), const Color(0xFF42A5F5))),
             const SizedBox(width: 12),
-            Expanded(
-              child: _buildProgressItem('睡眠', '7.2h', 0.72, const Color(0xFF7E57C2)),
-            ),
+            Expanded(child: _buildProgressItem('睡眠', '${daily.sleepHours.toStringAsFixed(1)}h', (daily.sleepHours / 10).clamp(0.0, 1.0), const Color(0xFF7E57C2))),
           ],
         ),
       ),

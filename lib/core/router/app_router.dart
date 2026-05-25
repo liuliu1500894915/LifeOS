@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/analytics/presentation/pages/analytics_page.dart';
+import '../../features/analytics/presentation/pages/calendar_matrix_page.dart';
+import '../../features/analytics/presentation/pages/daily_efficiency_page.dart';
+import '../../features/analytics/presentation/pages/finance_deep_page.dart';
+import '../../features/analytics/presentation/pages/habit_heatmap_page.dart';
 import '../../features/daily/presentation/pages/daily_page.dart';
 import '../../features/finance/presentation/pages/finance_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
@@ -178,11 +182,11 @@ GoRouter createAppRouter() {
           ]),
           _buildBranch(AppRoutes.analytics, [
             _buildRoute('insights', '洞察因果'),
-            _buildRoute('calendar', '日历账单'),
-            _buildRoute('finance-deep', '财务深度分析'),
-            _buildRoute('daily-deep', '日常效率分析'),
+            _buildRealRoute('calendar', () => const CalendarMatrixPage()),
+            _buildRealRoute('finance-deep', () => const FinanceDeepPage()),
+            _buildRealRoute('daily-deep', () => const DailyEfficiencyPage()),
             _buildRoute('category-ledger', '分类流水'),
-            _buildRoute('habit-heatmap', '习惯热力图'),
+            _buildRealRoute('habit-heatmap', () => const HabitHeatmapPage()),
           ]),
           _buildBranch(AppRoutes.daily, [
             _buildQuadrantTodoRoute(),
