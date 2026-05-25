@@ -7,6 +7,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/status_capsule.dart';
 import '../../domain/pet_animation_state.dart';
 import '../providers/home_providers.dart';
+import '../providers/room_providers.dart';
 import '../widgets/drink_drawer.dart';
 import '../widgets/exercise_drawer.dart';
 import '../widgets/feed_drawer.dart';
@@ -73,6 +74,7 @@ class HomePage extends ConsumerWidget {
 
   Widget _buildPetRoom(BuildContext context, WidgetRef ref) {
     final petStatus = ref.watch(petStatusProvider);
+    final furniture = ref.watch(roomFurnitureProvider);
     return Container(
       height: MediaQuery.of(context).size.height * 0.38,
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -83,6 +85,51 @@ class HomePage extends ConsumerWidget {
       ),
       child: Stack(
         children: [
+          if (petStatus.overallStatusLevel == 'EXCELLENT')
+            Positioned.fill(
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [ModuleColors.statusExcellent.withAlpha(12), Colors.transparent],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          if (petStatus.overallStatusLevel == 'CRITICAL')
+            Positioned.fill(
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [ModuleColors.statusCritical.withAlpha(12), Colors.transparent],
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          for (final item in furniture)
+            Positioned(
+              left: item.posX,
+              top: item.posY,
+              child: Transform.scale(
+                scale: item.scale,
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: item.color.withAlpha(20),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(item.icon, size: 24, color: item.color),
+                ),
+              ),
+            ),
           Center(child: PetCharacter(
             animationState: PetAnimationMapper.fromVitals(petStatus.vitals),
             hydrationLevel: petStatus.hydrationPoints,
@@ -90,22 +137,6 @@ class HomePage extends ConsumerWidget {
             moodLevel: petStatus.moodPoints,
             bodyShapeLevel: petStatus.bodyShapePoints,
           )),
-          Positioned(
-            right: 20, bottom: 30,
-            child: Container(
-              width: 48, height: 48,
-              decoration: BoxDecoration(color: ModuleColors.daily.withAlpha(20), borderRadius: BorderRadius.circular(12)),
-              child: const Icon(Icons.chair, size: 24, color: ModuleColors.daily),
-            ),
-          ),
-          Positioned(
-            left: 24, top: 20,
-            child: Container(
-              width: 40, height: 40,
-              decoration: BoxDecoration(color: ModuleColors.analytics.withAlpha(20), borderRadius: BorderRadius.circular(10)),
-              child: const Icon(Icons.music_note, size: 22, color: ModuleColors.analytics),
-            ),
-          ),
         ],
       ),
     );
