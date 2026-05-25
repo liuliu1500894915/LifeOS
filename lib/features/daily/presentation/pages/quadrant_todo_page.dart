@@ -87,15 +87,18 @@ class _QuadrantTodoPageState extends ConsumerState<QuadrantTodoPage> {
   Widget _buildQuadrantTabs() {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      child: Row(
-        children: [
-          _buildTabChip(null, '全部'),
-          const SizedBox(width: 6),
-          ...QuadrantType.values.map((q) => Padding(
-            padding: const EdgeInsets.only(right: 6),
-            child: _buildTabChip(q, '${q.shortLabel}. ${q.label}'),
-          )),
-        ],
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            _buildTabChip(null, '全部'),
+            const SizedBox(width: 6),
+            ...QuadrantType.values.map((q) => Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: _buildTabChip(q, '${q.shortLabel}. ${q.label}'),
+            )),
+          ],
+        ),
       ),
     );
   }

@@ -4,10 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/widgets/number_keyboard.dart';
 import '../../../../../features/finance/presentation/providers/finance_providers.dart';
-
 import '../providers/home_providers.dart';
 
 const _drinkColor = Color(0xFF42A5F5);
+
+enum _DrinkInputField { amount, calories, cost }
 
 class DrinkDrawer extends ConsumerStatefulWidget {
   const DrinkDrawer({super.key});
@@ -18,6 +19,7 @@ class DrinkDrawer extends ConsumerStatefulWidget {
 
 class _DrinkDrawerState extends ConsumerState<DrinkDrawer> {
   DrinkType _drinkType = DrinkType.water;
+  _DrinkInputField _activeField = _DrinkInputField.amount;
   String _amount = '';
   String _calories = '';
   String _cost = '';
@@ -37,47 +39,52 @@ class _DrinkDrawerState extends ConsumerState<DrinkDrawer> {
       child: Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
             _buildDragHandle(),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                children: [
-                  _buildHeader(summary.waterMl, progress),
-                  const SizedBox(height: 12),
-                  _buildTypeSwitch(),
-                  const SizedBox(height: 12),
-                  if (_drinkType == DrinkType.water) ...[
-                    _buildQuickCups(),
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    _buildHeader(summary.waterMl, progress),
                     const SizedBox(height: 12),
+                    _buildTypeSwitch(),
+                    const SizedBox(height: 12),
+                    if (_drinkType == DrinkType.water) ...[
+                      _buildQuickCups(),
+                      const SizedBox(height: 12),
+                    ],
+                    _buildInputTile(
+                      label: '饮水量',
+                      value: _amount,
+                      unit: 'ml',
+                      field: _DrinkInputField.amount,
+                    ),
+                    if (_drinkType == DrinkType.beverage) ...[
+                      const SizedBox(height: 8),
+                      _buildInputTile(
+                        label: '卡路里',
+                        value: _calories,
+                        unit: 'kcal',
+                        field: _DrinkInputField.calories,
+                      ),
+                      const SizedBox(height: 8),
+                      _buildInputTile(
+                        label: '金额',
+                        value: _cost,
+                        unit: '元',
+                        field: _DrinkInputField.cost,
+                      ),
+                    ],
+                    const SizedBox(height: 10),
                   ],
-                  _buildAmountDisplay(),
-                  if (_drinkType == DrinkType.beverage) ...[
-                    const SizedBox(height: 8),
-                    _buildExtraRow('卡路里', _calories, 'kcal'),
-                    const SizedBox(height: 6),
-                    _buildExtraRow('金额', _cost, '元'),
-                  ],
-                  const SizedBox(height: 8),
-                ],
+                ),
               ),
             ),
             NumberKeyboard(
               showDecimal: true,
-              onKeyPressed: (key) {
-                setState(() {
-                  if (_amount.length >= 6) return;
-                  if (key == '.' && _amount.contains('.')) return;
-                  if (_amount == '0' && key != '.') _amount = '';
-                  _amount += key;
-                });
-              },
-              onBackspace: () {
-                setState(() {
-                  if (_amount.isNotEmpty) _amount = _amount.substring(0, _amount.length - 1);
-                });
-              },
+              onKeyPressed: _onKeyPressed,
+              onBackspace: _onBackspace,
               onConfirm: _save,
             ),
           ],
@@ -89,7 +96,16 @@ class _DrinkDrawerState extends ConsumerState<DrinkDrawer> {
   Widget _buildDragHandle() {
     return Padding(
       padding: const EdgeInsets.only(top: 10, bottom: 8),
-      child: Center(child: Container(width: 36, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)))),
+      child: Center(
+        child: Container(
+          width: 36,
+          height: 4,
+          decoration: BoxDecoration(
+            color: Colors.grey.shade300,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+      ),
     );
   }
 
@@ -99,8 +115,15 @@ class _DrinkDrawerState extends ConsumerState<DrinkDrawer> {
       children: [
         Row(
           children: [
-            Container(width: 32, height: 32, decoration: BoxDecoration(color: _drinkColor.withAlpha(25), borderRadius: BorderRadius.circular(8)),
-                child: const Icon(Icons.water_drop, size: 18, color: _drinkColor)),
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: _drinkColor.withAlpha(25),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.water_drop, size: 18, color: _drinkColor),
+            ),
             const SizedBox(width: 10),
             const Text('喝水记录', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
             const Spacer(),
@@ -132,6 +155,7 @@ class _DrinkDrawerState extends ConsumerState<DrinkDrawer> {
               HapticFeedback.lightImpact();
               setState(() {
                 _drinkType = t;
+                _activeField = _DrinkInputField.amount;
                 _amount = '';
                 _calories = '';
                 _cost = '';
@@ -145,8 +169,14 @@ class _DrinkDrawerState extends ConsumerState<DrinkDrawer> {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Center(
-                child: Text(label,
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: selected ? Colors.white : const Color(0xFF9E9E9E))),
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: selected ? Colors.white : const Color(0xFF9E9E9E),
+                  ),
+                ),
               ),
             ),
           ),
@@ -162,7 +192,10 @@ class _DrinkDrawerState extends ConsumerState<DrinkDrawer> {
           child: GestureDetector(
             onTap: () {
               HapticFeedback.lightImpact();
-              setState(() => _amount = cup.$2.toString());
+              setState(() {
+                _activeField = _DrinkInputField.amount;
+                _amount = cup.$2.toString();
+              });
             },
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 3),
@@ -173,7 +206,10 @@ class _DrinkDrawerState extends ConsumerState<DrinkDrawer> {
                 border: Border.all(color: _drinkColor.withAlpha(40)),
               ),
               child: Center(
-                child: Text(cup.$1, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: _drinkColor)),
+                child: Text(
+                  cup.$1,
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: _drinkColor),
+                ),
               ),
             ),
           ),
@@ -182,39 +218,82 @@ class _DrinkDrawerState extends ConsumerState<DrinkDrawer> {
     );
   }
 
-  Widget _buildAmountDisplay() {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(12)),
-      child: Row(
-        children: [
-          const Text('饮水量', style: TextStyle(fontSize: 14, color: Color(0xFF616161))),
-          const Spacer(),
-          Text(
-            _amount.isEmpty ? '0' : _amount,
-            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w600, color: _drinkColor, letterSpacing: 1),
+  Widget _buildInputTile({
+    required String label,
+    required String value,
+    required String unit,
+    required _DrinkInputField field,
+  }) {
+    final selected = _activeField == field;
+    final displayValue = value.isEmpty ? '0' : value;
+    return GestureDetector(
+      onTap: () => setState(() => _activeField = field),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: selected ? _drinkColor.withAlpha(8) : Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: selected ? _drinkColor : Colors.transparent,
+            width: selected ? 1.2 : 1,
           ),
-          const SizedBox(width: 4),
-          const Text('ml', style: TextStyle(fontSize: 14, color: Color(0xFF9E9E9E))),
-        ],
+        ),
+        child: Row(
+          children: [
+            Text(label, style: const TextStyle(fontSize: 14, color: Color(0xFF616161))),
+            const Spacer(),
+            Text(
+              displayValue,
+              style: TextStyle(
+                fontSize: field == _DrinkInputField.amount ? 28 : 18,
+                fontWeight: FontWeight.w600,
+                color: _drinkColor,
+                letterSpacing: 0.6,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Text(unit, style: const TextStyle(fontSize: 12, color: Color(0xFF9E9E9E))),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildExtraRow(String label, String value, String unit) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(10)),
-      child: Row(
-        children: [
-          Text(label, style: const TextStyle(fontSize: 13, color: Color(0xFF9E9E9E))),
-          const Spacer(),
-          Text(value.isEmpty ? '0' : value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: _drinkColor)),
-          const SizedBox(width: 4),
-          Text(unit, style: const TextStyle(fontSize: 12, color: Color(0xFF9E9E9E))),
-        ],
-      ),
-    );
+  void _onKeyPressed(String key) {
+    setState(() {
+      if (_activeField == _DrinkInputField.amount) {
+        _amount = _appendValue(_amount, key, 6);
+      } else if (_activeField == _DrinkInputField.calories) {
+        _calories = _appendValue(_calories, key, 5);
+      } else {
+        _cost = _appendValue(_cost, key, 6);
+      }
+    });
+  }
+
+  void _onBackspace() {
+    setState(() {
+      if (_activeField == _DrinkInputField.amount) {
+        _amount = _removeLast(_amount);
+      } else if (_activeField == _DrinkInputField.calories) {
+        _calories = _removeLast(_calories);
+      } else {
+        _cost = _removeLast(_cost);
+      }
+    });
+  }
+
+  String _appendValue(String current, String key, int maxLength) {
+    if (current.length >= maxLength) return current;
+    if (key == '.' && current.contains('.')) return current;
+    if (current == '0' && key != '.') return key;
+    return current + key;
+  }
+
+  String _removeLast(String current) {
+    if (current.isEmpty) return current;
+    return current.substring(0, current.length - 1);
   }
 
   void _save() {
@@ -228,6 +307,8 @@ class _DrinkDrawerState extends ConsumerState<DrinkDrawer> {
         valueNumeric: ml,
         subCategory: _drinkType == DrinkType.water ? 'water' : 'beverage',
         createdAt: DateTime.now(),
+        associatedCost: _drinkType == DrinkType.beverage ? (double.tryParse(_cost) ?? 0) : 0,
+        remark: _drinkType == DrinkType.beverage && _calories.isNotEmpty ? '${_calories}kcal' : null,
       ),
     );
 

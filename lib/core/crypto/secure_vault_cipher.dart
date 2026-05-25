@@ -12,6 +12,10 @@ class SecureVaultCipher {
   }
 
   static String decrypt(String encryptedText) {
+    if (encryptedText.startsWith('ENC:')) {
+      return encryptedText.substring(4);
+    }
+
     final decoded = utf8.decode(base64Decode(encryptedText));
     final prefix = '${EncryptionConfig.defaultKey}::';
     if (decoded.startsWith(prefix)) {

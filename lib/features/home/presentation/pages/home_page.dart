@@ -20,21 +20,30 @@ class HomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final roomHeight = (screenHeight * 0.38).clamp(240.0, 360.0);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(context, ref),
-            const SizedBox(height: 12),
-            _buildPetRoom(context, ref),
-            const SizedBox(height: 16),
-            _buildQuickActions(context),
-            const SizedBox(height: 12),
-            _buildRoomActions(context),
-            const SizedBox(height: 12),
-            const Expanded(child: Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: TodaySnapshot())),
-          ],
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Column(
+            children: [
+              _buildHeader(context, ref),
+              const SizedBox(height: 12),
+              _buildPetRoom(context, ref, roomHeight),
+              const SizedBox(height: 16),
+              _buildQuickActions(context),
+              const SizedBox(height: 12),
+              _buildRoomActions(context),
+              const SizedBox(height: 12),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: TodaySnapshot(),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -72,11 +81,11 @@ class HomePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildPetRoom(BuildContext context, WidgetRef ref) {
+  Widget _buildPetRoom(BuildContext context, WidgetRef ref, double roomHeight) {
     final petStatus = ref.watch(petStatusProvider);
     final furniture = ref.watch(roomFurnitureProvider);
     return Container(
-      height: MediaQuery.of(context).size.height * 0.38,
+      height: roomHeight,
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: Colors.white,
