@@ -18,7 +18,26 @@
 library;
 
 /// 性别。对应 `UserProfile.gender` 字符串：`MALE` / `FEMALE` / `OTHER`。
-enum Gender { male, female, other }
+enum Gender {
+  male,
+  female,
+  other;
+
+  /// 对应 `UserProfile.gender` 列存的字符串（与表 CHECK 约束一致）。
+  String get code => switch (this) {
+        Gender.male => 'MALE',
+        Gender.female => 'FEMALE',
+        Gender.other => 'OTHER',
+      };
+
+  /// 由档案字符串还原；null / 未知值返回 null（调用方据此判定档案是否完整）。
+  static Gender? fromCode(String? code) => switch (code) {
+        'MALE' => Gender.male,
+        'FEMALE' => Gender.female,
+        'OTHER' => Gender.other,
+        _ => null,
+      };
+}
 
 /// 活动量等级。对应 `NutritionGoal.activityLevel` 字符串：
 /// `SEDENTARY` / `LIGHT` / `MODERATE` / `ACTIVE` / `VERY_ACTIVE`。
@@ -37,6 +56,30 @@ enum ActivityLevel {
         ActivityLevel.active => 1.725,
         ActivityLevel.veryActive => 1.9,
       };
+
+  /// 对应 `NutritionGoal.activityLevel` 列存的字符串（与表 CHECK 约束一致）。
+  String get code => switch (this) {
+        ActivityLevel.sedentary => 'SEDENTARY',
+        ActivityLevel.light => 'LIGHT',
+        ActivityLevel.moderate => 'MODERATE',
+        ActivityLevel.active => 'ACTIVE',
+        ActivityLevel.veryActive => 'VERY_ACTIVE',
+      };
+
+  /// 中文展示。
+  String get label => switch (this) {
+        ActivityLevel.sedentary => '久坐',
+        ActivityLevel.light => '轻度',
+        ActivityLevel.moderate => '中度',
+        ActivityLevel.active => '活跃',
+        ActivityLevel.veryActive => '非常活跃',
+      };
+
+  /// 由 `NutritionGoal.activityLevel` 字符串还原；非法值回退到 [moderate]。
+  static ActivityLevel fromCode(String code) => values.firstWhere(
+        (e) => e.code == code,
+        orElse: () => ActivityLevel.moderate,
+      );
 }
 
 /// 健身目标。对应 `NutritionGoal.goalType` 字符串：
@@ -52,6 +95,26 @@ enum GoalType {
         GoalType.maintain => 1.0,
         GoalType.bulk => 1.1,
       };
+
+  /// 对应 `NutritionGoal.goalType` 列存的字符串（与表 CHECK 约束一致）。
+  String get code => switch (this) {
+        GoalType.cut => 'CUT',
+        GoalType.maintain => 'MAINTAIN',
+        GoalType.bulk => 'BULK',
+      };
+
+  /// 中文展示。
+  String get label => switch (this) {
+        GoalType.cut => '减脂',
+        GoalType.maintain => '维持',
+        GoalType.bulk => '增肌',
+      };
+
+  /// 由 `NutritionGoal.goalType` 字符串还原；非法值回退到 [maintain]。
+  static GoalType fromCode(String code) => values.firstWhere(
+        (e) => e.code == code,
+        orElse: () => GoalType.maintain,
+      );
 }
 
 /// TDEE 计算结果（每日目标）。不可变。
