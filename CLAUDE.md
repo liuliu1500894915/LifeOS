@@ -61,7 +61,7 @@ lib/
 
 ## 数据库规范
 
-- **迁移**：统一 Drift **versioned `stepByStep`**，禁止「`createAll` + 手写 `onUpgrade` 补表」混合模式。每次改 schema：`schemaVersion` +1、`drift_dev schema dump` 快照、补迁移测试、旧库升级不丢数据。当前 `drift_schemas/` 已有 v2 快照。
+- **迁移**：统一 Drift **versioned `stepByStep`**，禁止「`createAll` + 手写 `onUpgrade` 补表」混合模式。每次改 schema：`schemaVersion` +1、`drift_dev schema dump` 快照、补迁移测试、旧库升级不丢数据。`drift_schemas/` 已有 v1+v2 快照，迁移已改 stepByStep（P0-2 完成）。⚠️ **重新生成 `schema_versions.dart` / `test/generated_migrations/*` 后，需手动给这三个文件补 `tables/app_defaults.dart` 的 import** —— 生成代码引用 `AppDefaults.*` 列默认常量，但 drift schema dump 不会自动加 import，否则编译报 `Undefined name 'AppDefaults'`。
 - **外键**：跨表引用必须 `.references()`；`PRAGMA foreign_keys = ON` 放在 **`beforeOpen`**（不放 `setup`）。
 - **索引**：按列过滤/排序的查询列必须建索引；禁止「全表 `.get()` 后 Dart `.where` 过滤」。
 - **命名**：Table 类 `PascalCase` 单数（`MealLog`）；列 getter `camelCase`（Drift 自动映射 snake_case）；主键 `xxxId`。新表要注册进 `@DriftDatabase`、导出进 `tables/tables.dart`。
@@ -79,7 +79,7 @@ lib/
 
 ## 已知问题（重构中，勿假设已修复）
 
-- 🔴 加密 key 目前**硬编码**在 `encryption_config.dart`（P0-1 修）。
+- ✅ 加密 key 已移入 `flutter_secure_storage`（`key_store.dart`，P0-1 已完成 2026-07-24）；`encryption_config.dart` 不再含 key。
 - 🔴 Web 端（`database_connection_web.dart`）**无加密**（SQLCipher 不支持 Web）。
 - 🟠 全 App 单一硬编码系统用户 `user-001`（schema 是多用户，实现是单用户）。
 - 🟠 `finance` 模块正在从「presentation 写裸查询」重构到 Repository + `.watch()`（P0-3~P0-5）；`finance_providers.dart` 是**待重构的反面教材**，勿照抄其模式。
