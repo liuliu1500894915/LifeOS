@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import 'database_connection.dart';
+import 'schema_versions.dart';
 import 'tables/app_defaults.dart';
 import 'tables/pet_tables.dart';
 import 'tables/finance_tables.dart';
@@ -53,18 +54,19 @@ class AppDatabase extends _$AppDatabase {
         onCreate: (Migrator m) async {
           await m.createAll();
         },
-        onUpgrade: (Migrator m, int from, int to) async {
-          if (from < 2) {
-            // v1→v2: all finance tables + expenseCategories added
-            await m.createTable(userAccounts);
-            await m.createTable(paymentAccounts);
-            await m.createTable(financialTransaction);
-            await m.createTable(assetInventory);
-            await m.createTable(subscriptionServices);
-            await m.createTable(budgetSettings);
-            await m.createTable(assetValueSnapshots);
-            await m.createTable(expenseCategories);
-          }
+        onUpgrade: stepByStep(
+          from1To2: (m, schema) async {
+            // v1→v2: only ExpenseCategories is new. The previous onUpgrade
+            // re-created 8 finance tables, 7 of which already existed in v1
+            // and would have raised "table already exists" on a real upgrade.
+            await m.createTable(schema.expenseCategories);
+          },
+        ),
+        beforeOpen: (details) async {
+          // foreign_keys must be (re)enabled on every open — keeping it only
+          // in the native connection's `setup` is unreliable across migrations
+          // (blueprint §1.4 / 执行计划 §1.2).
+          await customStatement('PRAGMA foreign_keys = ON');
         },
       );
 }
