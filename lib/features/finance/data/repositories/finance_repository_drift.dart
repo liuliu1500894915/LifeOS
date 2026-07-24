@@ -176,7 +176,25 @@ class FinanceRepositoryDrift implements FinanceRepository {
     required String accountId,
     String? remark,
     DateTime? loggedAt,
+    String expenseNature = 'SPOT',
+    DateTime? amortizeStart,
+    DateTime? amortizeEnd,
+    String? sourceSubscriptionId,
   }) async {
+    // P1-2:AMORTIZED 必须带合法覆盖区间(含头含尾,end >= start),
+    // 否则摊销算法(§3.3)无区间可摊。SPOT 则区间应为空。校验放 data 层做
+    // 防御性兜底(调用方/UI 也会前置校验,但这里保证不写脏数据入库)。
+    if (expenseNature == 'AMORTIZED') {
+      if (amortizeStart == null || amortizeEnd == null) {
+        throw ArgumentError('AMORTIZED 交易必须填写覆盖起止日期');
+      }
+      final start = _dateOnly(amortizeStart);
+      final end = _dateOnly(amortizeEnd);
+      if (end.isBefore(start)) {
+        throw ArgumentError('AMORTIZED 交易覆盖结束日期不能早于开始日期');
+      }
+    }
+
     final dt = loggedAt ?? DateTime.now();
     final delta = flowType == 'EXPENSE' ? -amount : amount;
     await _db.transaction(() async {
@@ -190,11 +208,23 @@ class FinanceRepositoryDrift implements FinanceRepository {
               accountId: accountId,
               remark: Value(remark),
               loggedAt: dt,
+              // 摊销区间截断到本地日零点(与 domain §3.3 同口径),避免时分秒导致
+              // 边界错位。SPOT 时两值均 null。
+              expenseNature: Value(expenseNature),
+              amortizeStartDate: amortizeStart == null
+                  ? const Value.absent()
+                  : Value(_dateOnly(amortizeStart)),
+              amortizeEndDate: amortizeEnd == null
+                  ? const Value.absent()
+                  : Value(_dateOnly(amortizeEnd)),
+              sourceSubscriptionId: Value(sourceSubscriptionId),
             ),
           );
       // 余额增量用 SQL 表达式,原子且避免"先读再写回"的竞态。
       // 用 customUpdate(非 customStatement)声明受影响表 —— Drift 的 .watch() 流
       // (watchAccounts)才会在事务 commit 后重发,余额 UI 无需手动 invalidate。
+      // 注意:无论 SPOT 还是 AMORTIZED,余额都按**全额**扣减(现金流不变),
+      // 摊销只影响分析口径(P1-5)。
       await _db.customUpdate(
         'UPDATE payment_accounts SET balance = balance + ? WHERE account_id = ?',
         variables: [Variable.withReal(delta), Variable.withString(accountId)],
@@ -202,6 +232,12 @@ class FinanceRepositoryDrift implements FinanceRepository {
       );
     });
   }
+
+  /// 把 [DateTime] 截断到本地日零点(仅保留年月日)。
+  ///
+  /// 与 domain/amortization.dart 的 `_dateOnly`、midnight_settlement 同口径(风险 §5.6)。
+  /// 摊销区间按「日」存储,统一截断避免时分秒边界错位。
+  static DateTime _dateOnly(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
 
   @override
   Future<void> deleteTransaction(String transactionId) async {

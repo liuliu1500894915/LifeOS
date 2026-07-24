@@ -1,4 +1,5 @@
-import 'package:drift/drift.dart';
+// hide isNull:drift 与 flutter_test 都导出 isNull,本文件用 matcher 版本(drift 仅用 driftRuntimeOptions)。
+import 'package:drift/drift.dart' hide isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -174,6 +175,103 @@ void main() {
         ),
         throwsA(anything),
       );
+    });
+
+    // ── P1-2:一次性摊销开关 ──
+
+    test('AMORTIZED writes nature+range, balance still full-deducted (P1-2)',
+        () async {
+      await repo.addAccount('卡', 'CASH', false, 100);
+      final accountId = (await singleAccount()).accountId;
+
+      // 金额(300)超过余额(100):长期摊销只改分析口径,余额照常按**全额**扣 → -200。
+      await repo.addTransaction(
+        flowType: 'EXPENSE',
+        amount: 300,
+        categoryId: 'food',
+        accountId: accountId,
+        expenseNature: 'AMORTIZED',
+        amortizeStart: DateTime(2026, 1, 1),
+        amortizeEnd: DateTime(2026, 1, 30),
+      );
+      expect((await singleAccount()).balance, -200);
+
+      final tx = (await repo.getTransactions()).single;
+      expect(tx.expenseNature, 'AMORTIZED');
+      // 区间按 dateOnly 截断存储(含头含尾)。
+      expect(tx.amortizeStartDate, DateTime(2026, 1, 1));
+      expect(tx.amortizeEndDate, DateTime(2026, 1, 30));
+    });
+
+    test('AMORTIZED single-day range (end==start) is accepted (P1-2)', () async {
+      await repo.addAccount('卡', 'CASH', false, 100);
+      final accountId = (await singleAccount()).accountId;
+      await repo.addTransaction(
+        flowType: 'EXPENSE',
+        amount: 10,
+        categoryId: 'food',
+        accountId: accountId,
+        expenseNature: 'AMORTIZED',
+        amortizeStart: DateTime(2026, 2, 10),
+        amortizeEnd: DateTime(2026, 2, 10), // 单日合法(coverageDays=1)
+      );
+      final tx = (await repo.getTransactions()).single;
+      expect(tx.expenseNature, 'AMORTIZED');
+      expect(tx.amortizeStartDate, tx.amortizeEndDate);
+    });
+
+    test('AMORTIZED rejects end<start range (P1-2)', () async {
+      await repo.addAccount('卡', 'CASH', false, 100);
+      final accountId = (await singleAccount()).accountId;
+      await expectLater(
+        repo.addTransaction(
+          flowType: 'EXPENSE',
+          amount: 10,
+          categoryId: 'food',
+          accountId: accountId,
+          expenseNature: 'AMORTIZED',
+          amortizeStart: DateTime(2026, 1, 10),
+          amortizeEnd: DateTime(2026, 1, 1), // 结束早于开始
+        ),
+        throwsA(isA<ArgumentError>()),
+      );
+      // 校验拦截 → 未写入。
+      expect(await repo.getTransactions(), isEmpty);
+      expect((await singleAccount()).balance, 100);
+    });
+
+    test('AMORTIZED rejects missing range (P1-2)', () async {
+      await repo.addAccount('卡', 'CASH', false, 100);
+      final accountId = (await singleAccount()).accountId;
+      await expectLater(
+        repo.addTransaction(
+          flowType: 'EXPENSE',
+          amount: 10,
+          categoryId: 'food',
+          accountId: accountId,
+          expenseNature: 'AMORTIZED',
+          // 故意不带 amortizeStart/End
+        ),
+        throwsA(isA<ArgumentError>()),
+      );
+      expect(await repo.getTransactions(), isEmpty);
+    });
+
+    test('addTransaction defaults to SPOT, no amortize range (P1-2 回归)',
+        () async {
+      await repo.addAccount('卡', 'CASH', false, 100);
+      final accountId = (await singleAccount()).accountId;
+      await repo.addTransaction(
+        flowType: 'EXPENSE',
+        amount: 30,
+        categoryId: 'food',
+        accountId: accountId,
+      );
+      final tx = (await repo.getTransactions()).single;
+      expect(tx.expenseNature, 'SPOT');
+      expect(tx.amortizeStartDate, isNull);
+      expect(tx.amortizeEndDate, isNull);
+      expect(tx.sourceSubscriptionId, isNull);
     });
   });
 

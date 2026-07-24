@@ -19,6 +19,16 @@ class _TransactionDrawerState extends ConsumerState<TransactionDrawer> {
   String? _selectedAccountId;
   final _remarkController = TextEditingController();
   DateTime _date = DateTime.now();
+  // P1-2:一次性摊销开关。日常(SPOT,默认)= 当日记一笔全额支出;
+  // 长期(AMORTIZED)= 把全额平摊到覆盖区间每一天(见 domain/amortization.dart)。
+  // 两种模式余额都按全额扣,长期仅多带覆盖起止日期。
+  bool _isLongTerm = false;
+  DateTime? _amortizeStart;
+  DateTime? _amortizeEnd;
+
+  /// 把 [DateTime] 截断到本地日零点(仅保留年月日)。
+  /// 与 domain/amortization.dart、Repository 同口径(风险 §5.6),覆盖区间按日比较。
+  static DateTime _dateOnly(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
 
   void _onKey(String key) {
     setState(() {
@@ -67,6 +77,34 @@ class _TransactionDrawerState extends ConsumerState<TransactionDrawer> {
       return;
     }
 
+    // P1-2:长期摊销需带合法覆盖区间(含头含尾,end >= start;end==start 即单日合法)。
+    // 日常模式保持 SPOT,不传区间。Repository 也会做防御性兜底校验。
+    final expenseNature = _isLongTerm ? 'AMORTIZED' : 'SPOT';
+    DateTime? amortizeStart;
+    DateTime? amortizeEnd;
+    if (_isLongTerm) {
+      if (_amortizeStart == null || _amortizeEnd == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('请选择长期支出的覆盖起止日期'), behavior: SnackBarBehavior.floating),
+          );
+        }
+        return;
+      }
+      final start = _dateOnly(_amortizeStart!);
+      final end = _dateOnly(_amortizeEnd!);
+      if (end.isBefore(start)) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('覆盖结束日期不能早于开始日期'), behavior: SnackBarBehavior.floating),
+          );
+        }
+        return;
+      }
+      amortizeStart = start;
+      amortizeEnd = end;
+    }
+
     try {
       await ref.read(transactionProvider.notifier).addTransaction(
             flowType: 'EXPENSE',
@@ -75,6 +113,9 @@ class _TransactionDrawerState extends ConsumerState<TransactionDrawer> {
             accountId: _selectedAccountId!,
             remark: _remarkController.text.isEmpty ? null : _remarkController.text,
             loggedAt: _date,
+            expenseNature: expenseNature,
+            amortizeStart: amortizeStart,
+            amortizeEnd: amortizeEnd,
           );
 
       if (mounted) Navigator.of(context).pop();
@@ -91,6 +132,167 @@ class _TransactionDrawerState extends ConsumerState<TransactionDrawer> {
   void dispose() {
     _remarkController.dispose();
     super.dispose();
+  }
+
+  /// P1-2:「日常 / 长期」分段切换。日常=SPOT(当日记全额),长期=AMORTIZED(平摊到覆盖区间)。
+  Widget _buildNatureToggle() {
+    return Container(
+      height: 36,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        children: [
+          Expanded(child: _buildNatureSegment('日常', !_isLongTerm, () {
+            HapticFeedback.selectionClick();
+            setState(() => _isLongTerm = false);
+          })),
+          Expanded(child: _buildNatureSegment('长期', _isLongTerm, () {
+            HapticFeedback.selectionClick();
+            setState(() => _isLongTerm = true);
+          })),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNatureSegment(String label, bool selected, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        margin: const EdgeInsets.all(3),
+        decoration: BoxDecoration(
+          color: selected ? Theme.of(context).colorScheme.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(15),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: selected ? Colors.white : const Color(0xFF616161),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 日期选择 chip:[label]M月D日。label 为空时不显示前缀(日常模式的「记一笔日期」)。
+  Widget _dateChip({String label = '', required DateTime date, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.calendar_today, size: 14, color: Color(0xFF757575)),
+            const SizedBox(width: 4),
+            Text(
+              '$label${date.month}月${date.day}日',
+              style: const TextStyle(fontSize: 13, color: Color(0xFF616161)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _remarkField() {
+    return TextField(
+      controller: _remarkController,
+      decoration: const InputDecoration(
+        hintText: '备注',
+        hintStyle: TextStyle(fontSize: 13),
+        border: InputBorder.none,
+        contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        filled: true,
+        fillColor: Color(0xFFF5F5F5),
+      ),
+      style: const TextStyle(fontSize: 13),
+    );
+  }
+
+  /// 日期/备注区:随「日常/长期」模式切换。
+  /// 日常 = [记一笔日期] + 备注(单行);长期 = [覆盖起]~[覆盖止] + 备注(两行)。
+  /// 长期模式下「记一笔日期」(loggedAt)用默认今天,用户只关心覆盖区间。
+  Widget _buildDateAndRemarkArea() {
+    if (!_isLongTerm) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          children: [
+            _dateChip(
+              date: _date,
+              onTap: () async {
+                final d = await showDatePicker(
+                  context: context,
+                  initialDate: _date,
+                  firstDate: DateTime(2020),
+                  lastDate: DateTime.now(),
+                );
+                if (d != null) setState(() => _date = d);
+              },
+            ),
+            const SizedBox(width: 8),
+            Expanded(child: _remarkField()),
+          ],
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              _dateChip(
+                label: '覆盖起 ',
+                date: _amortizeStart ?? _date,
+                onTap: () async {
+                  final d = await showDatePicker(
+                    context: context,
+                    initialDate: _amortizeStart ?? _amortizeEnd ?? _date,
+                    firstDate: DateTime(2020),
+                    lastDate: _amortizeEnd ?? DateTime.now().add(const Duration(days: 365 * 5)),
+                  );
+                  if (d != null) setState(() => _amortizeStart = d);
+                },
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 6),
+                child: Text('~', style: TextStyle(fontSize: 14, color: Color(0xFF9E9E9E))),
+              ),
+              _dateChip(
+                label: '覆盖止 ',
+                date: _amortizeEnd ?? _date,
+                onTap: () async {
+                  final d = await showDatePicker(
+                    context: context,
+                    initialDate: _amortizeEnd ?? _amortizeStart ?? _date,
+                    firstDate: _amortizeStart ?? DateTime(2020),
+                    lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+                  );
+                  if (d != null) setState(() => _amortizeEnd = d);
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          _remarkField(),
+        ],
+      ),
+    );
   }
 
   @override
@@ -201,55 +403,10 @@ class _TransactionDrawerState extends ConsumerState<TransactionDrawer> {
             const SizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () async {
-                      final d = await showDatePicker(
-                        context: context,
-                        initialDate: _date,
-                        firstDate: DateTime(2020),
-                        lastDate: DateTime.now(),
-                      );
-                      if (d != null) setState(() => _date = d);
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.calendar_today, size: 14, color: Color(0xFF757575)),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${_date.month}月${_date.day}日',
-                            style: const TextStyle(fontSize: 13, color: Color(0xFF616161)),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      controller: _remarkController,
-                      decoration: const InputDecoration(
-                        hintText: '备注',
-                        hintStyle: TextStyle(fontSize: 13),
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                        filled: true,
-                        fillColor: Color(0xFFF5F5F5),
-                      ),
-                      style: const TextStyle(fontSize: 13),
-                    ),
-                  ),
-                ],
-              ),
+              child: _buildNatureToggle(),
             ),
+            const SizedBox(height: 8),
+            _buildDateAndRemarkArea(),
             const SizedBox(height: 8),
             NumberKeyboard(
               onKeyPressed: _onKey,
