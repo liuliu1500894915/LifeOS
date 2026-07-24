@@ -55,7 +55,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(QueryExecutor executor) : super(executor);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -133,6 +133,23 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(schema.lifeMoment);
             await m.createTable(schema.momentPhoto);
             await _createMomentIndexes(m);
+          },
+          from6To7: (m, schema) async {
+            // v6→v7: DailyReviewLog 加结构化复盘三列 highlight/improve/tomorrow（P4-2）。
+            // 均 addColumn、可空，旧库升级零数据风险：存量行落 NULL，语义不变。不建索引
+            // （这三列不参与过滤/排序，查询走 review_date+user_id 复合主键）。
+            await m.addColumn(
+              schema.dailyReviewLog,
+              schema.dailyReviewLog.highlightText,
+            );
+            await m.addColumn(
+              schema.dailyReviewLog,
+              schema.dailyReviewLog.improveText,
+            );
+            await m.addColumn(
+              schema.dailyReviewLog,
+              schema.dailyReviewLog.tomorrowPlanText,
+            );
           },
         ),
         beforeOpen: (details) async {

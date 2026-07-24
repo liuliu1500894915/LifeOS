@@ -10,6 +10,7 @@ import '../../features/analytics/presentation/pages/insight_detail_page.dart';
 import '../../features/analytics/presentation/pages/report_page.dart';
 import '../../features/daily/presentation/pages/daily_page.dart';
 import '../../features/daily/presentation/pages/moment_timeline_page.dart';
+import '../../features/daily/presentation/pages/review_editor_page.dart';
 import '../../features/finance/presentation/pages/finance_page.dart';
 import '../../features/health/presentation/pages/exercise_page.dart';
 import '../../features/health/presentation/pages/health_page.dart';
@@ -234,7 +235,7 @@ GoRouter createAppRouter() {
             _buildRealRoute('habit-detail', () => const HabitDetailPage()),
             _buildRealRoute('flag-timeline', () => const FlagTimelinePage()),
             _buildRoute('review-log', '复盘日志库'),
-            _buildRoute('review-editor', '复盘编辑'),
+            _buildRealRoute('review-editor', () => const ReviewEditorPage()),
             _buildRealRoute('moment-timeline', () => const MomentTimelinePage()),
           ]),
           _buildBranch(AppRoutes.profile, [

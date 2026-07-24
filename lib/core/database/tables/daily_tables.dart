@@ -118,6 +118,13 @@ class DailyReviewLog extends Table {
   TextColumn get insightsContent => text().nullable()();
   TextColumn get summarySnapshotJson => text()();
 
+  // 结构化复盘三列（P4-2 / §3.1）：高光 / 待改进 / 明日计划。均可空 ——
+  // 允许只填部分（甚至只存当日快照），与 [LifeMoment] 的可空语义一致。
+  // 三列本身不参与过滤/排序（查询一律按 reviewDate+userId 复合主键），故无需建索引。
+  TextColumn get highlightText => text().nullable()();
+  TextColumn get improveText => text().nullable()();
+  TextColumn get tomorrowPlanText => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {reviewDate, userId};
 }

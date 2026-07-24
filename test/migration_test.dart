@@ -104,5 +104,53 @@ void main() {
       final momentRows = schema.rawDatabase.select('SELECT COUNT(*) AS c FROM life_moment');
       expect(momentRows.single['c'], 0);
     });
+
+    test('v6 -> v7 migration yields a schema matching the v7 definition',
+        () async {
+      // v6→v7: DailyReviewLog 加结构化复盘三列 highlight/improve/tomorrow（P4-2）。
+      // 均 addColumn、可空，旧库升级零数据风险。migrateAndValidate 校验升级后 schema
+      // 与 fresh v7 定义一致（即「fresh install == upgrade install」）。
+      final connection = await verifier.startAt(6);
+      final db = AppDatabase.forTesting(connection);
+      addTearDown(db.close);
+      await verifier.migrateAndValidate(db, 7);
+    });
+
+    test('v6 -> v7 migration preserves review rows and adds nullable columns',
+        () async {
+      // 既有 daily_review_log 行的旧列（review_date/mood_tag/insights_content/
+      // summary_snapshot_json）升级后必须保留；新增的三列对存量行落 NULL（可空）。
+      final schema = await verifier.schemaAt(6);
+      schema.rawDatabase.execute(
+        "INSERT INTO user_accounts (user_id, display_name) "
+        "VALUES ('user-001', '默认用户')",
+      );
+      schema.rawDatabase.execute(
+        "INSERT INTO daily_review_log "
+        "(review_date, user_id, mood_tag, insights_content, summary_snapshot_json) "
+        "VALUES (1721779200, 'user-001', '😊', '旧复盘内容', '{\"expense\":50}')",
+      );
+
+      final db = AppDatabase.forTesting(schema.newConnection());
+      await verifier.migrateAndValidate(db, 7);
+      await db.close();
+
+      final rows = schema.rawDatabase.select(
+        'SELECT mood_tag, insights_content, summary_snapshot_json, '
+        'highlight_text, improve_text, tomorrow_plan_text '
+        'FROM daily_review_log WHERE user_id = ?',
+        ['user-001'],
+      );
+      expect(rows, hasLength(1));
+      final r = rows.first;
+      // 旧列保留。
+      expect(r['mood_tag'], '😊');
+      expect(r['insights_content'], '旧复盘内容');
+      expect(r['summary_snapshot_json'], '{"expense":50}');
+      // 新列存在且对存量行为 NULL（可空，旧库升级零数据风险）。
+      expect(r['highlight_text'], isNull);
+      expect(r['improve_text'], isNull);
+      expect(r['tomorrow_plan_text'], isNull);
+    });
   });
 }
