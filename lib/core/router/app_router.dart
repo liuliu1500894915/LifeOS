@@ -9,6 +9,7 @@ import '../../features/analytics/presentation/pages/habit_heatmap_page.dart';
 import '../../features/analytics/presentation/pages/insight_detail_page.dart';
 import '../../features/analytics/presentation/pages/report_page.dart';
 import '../../features/daily/presentation/pages/daily_page.dart';
+import '../../features/daily/presentation/pages/moment_timeline_page.dart';
 import '../../features/finance/presentation/pages/finance_page.dart';
 import '../../features/health/presentation/pages/exercise_page.dart';
 import '../../features/health/presentation/pages/health_page.dart';
@@ -99,6 +100,7 @@ class AppRoutes {
   static const flagTimeline = '/daily/flag-timeline';
   static const reviewLog = '/daily/review-log';
   static const reviewEditor = '/daily/review-editor';
+  static const momentTimeline = '/daily/moment-timeline';
 
   // Profile
   static const profileEdit = '/profile/edit';
@@ -233,6 +235,7 @@ GoRouter createAppRouter() {
             _buildRealRoute('flag-timeline', () => const FlagTimelinePage()),
             _buildRoute('review-log', '复盘日志库'),
             _buildRoute('review-editor', '复盘编辑'),
+            _buildRealRoute('moment-timeline', () => const MomentTimelinePage()),
           ]),
           _buildBranch(AppRoutes.profile, [
             _buildRoute('edit', '编辑档案'),

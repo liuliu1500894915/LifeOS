@@ -10480,6 +10480,715 @@ class DailyReviewLogCompanion extends UpdateCompanion<DailyReviewLogData> {
   }
 }
 
+class $LifeMomentTable extends LifeMoment
+    with TableInfo<$LifeMomentTable, LifeMomentData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LifeMomentTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _momentIdMeta = const VerificationMeta(
+    'momentId',
+  );
+  @override
+  late final GeneratedColumn<String> momentId = GeneratedColumn<String>(
+    'moment_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES user_accounts (user_id)',
+    ),
+  );
+  static const VerificationMeta _contentMeta = const VerificationMeta(
+    'content',
+  );
+  @override
+  late final GeneratedColumn<String> content = GeneratedColumn<String>(
+    'content',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 2000),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _moodTagMeta = const VerificationMeta(
+    'moodTag',
+  );
+  @override
+  late final GeneratedColumn<String> moodTag = GeneratedColumn<String>(
+    'mood_tag',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 20),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _loggedAtMeta = const VerificationMeta(
+    'loggedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> loggedAt = GeneratedColumn<DateTime>(
+    'logged_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    momentId,
+    userId,
+    content,
+    moodTag,
+    loggedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'life_moment';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LifeMomentData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('moment_id')) {
+      context.handle(
+        _momentIdMeta,
+        momentId.isAcceptableOrUnknown(data['moment_id']!, _momentIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_momentIdMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('content')) {
+      context.handle(
+        _contentMeta,
+        content.isAcceptableOrUnknown(data['content']!, _contentMeta),
+      );
+    }
+    if (data.containsKey('mood_tag')) {
+      context.handle(
+        _moodTagMeta,
+        moodTag.isAcceptableOrUnknown(data['mood_tag']!, _moodTagMeta),
+      );
+    }
+    if (data.containsKey('logged_at')) {
+      context.handle(
+        _loggedAtMeta,
+        loggedAt.isAcceptableOrUnknown(data['logged_at']!, _loggedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_loggedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {momentId};
+  @override
+  LifeMomentData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LifeMomentData(
+      momentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}moment_id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
+      content: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}content'],
+      ),
+      moodTag: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}mood_tag'],
+      ),
+      loggedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}logged_at'],
+      )!,
+    );
+  }
+
+  @override
+  $LifeMomentTable createAlias(String alias) {
+    return $LifeMomentTable(attachedDatabase, alias);
+  }
+}
+
+class LifeMomentData extends DataClass implements Insertable<LifeMomentData> {
+  final String momentId;
+  final String userId;
+  final String? content;
+  final String? moodTag;
+  final DateTime loggedAt;
+  const LifeMomentData({
+    required this.momentId,
+    required this.userId,
+    this.content,
+    this.moodTag,
+    required this.loggedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['moment_id'] = Variable<String>(momentId);
+    map['user_id'] = Variable<String>(userId);
+    if (!nullToAbsent || content != null) {
+      map['content'] = Variable<String>(content);
+    }
+    if (!nullToAbsent || moodTag != null) {
+      map['mood_tag'] = Variable<String>(moodTag);
+    }
+    map['logged_at'] = Variable<DateTime>(loggedAt);
+    return map;
+  }
+
+  LifeMomentCompanion toCompanion(bool nullToAbsent) {
+    return LifeMomentCompanion(
+      momentId: Value(momentId),
+      userId: Value(userId),
+      content: content == null && nullToAbsent
+          ? const Value.absent()
+          : Value(content),
+      moodTag: moodTag == null && nullToAbsent
+          ? const Value.absent()
+          : Value(moodTag),
+      loggedAt: Value(loggedAt),
+    );
+  }
+
+  factory LifeMomentData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LifeMomentData(
+      momentId: serializer.fromJson<String>(json['momentId']),
+      userId: serializer.fromJson<String>(json['userId']),
+      content: serializer.fromJson<String?>(json['content']),
+      moodTag: serializer.fromJson<String?>(json['moodTag']),
+      loggedAt: serializer.fromJson<DateTime>(json['loggedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'momentId': serializer.toJson<String>(momentId),
+      'userId': serializer.toJson<String>(userId),
+      'content': serializer.toJson<String?>(content),
+      'moodTag': serializer.toJson<String?>(moodTag),
+      'loggedAt': serializer.toJson<DateTime>(loggedAt),
+    };
+  }
+
+  LifeMomentData copyWith({
+    String? momentId,
+    String? userId,
+    Value<String?> content = const Value.absent(),
+    Value<String?> moodTag = const Value.absent(),
+    DateTime? loggedAt,
+  }) => LifeMomentData(
+    momentId: momentId ?? this.momentId,
+    userId: userId ?? this.userId,
+    content: content.present ? content.value : this.content,
+    moodTag: moodTag.present ? moodTag.value : this.moodTag,
+    loggedAt: loggedAt ?? this.loggedAt,
+  );
+  LifeMomentData copyWithCompanion(LifeMomentCompanion data) {
+    return LifeMomentData(
+      momentId: data.momentId.present ? data.momentId.value : this.momentId,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      content: data.content.present ? data.content.value : this.content,
+      moodTag: data.moodTag.present ? data.moodTag.value : this.moodTag,
+      loggedAt: data.loggedAt.present ? data.loggedAt.value : this.loggedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LifeMomentData(')
+          ..write('momentId: $momentId, ')
+          ..write('userId: $userId, ')
+          ..write('content: $content, ')
+          ..write('moodTag: $moodTag, ')
+          ..write('loggedAt: $loggedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(momentId, userId, content, moodTag, loggedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LifeMomentData &&
+          other.momentId == this.momentId &&
+          other.userId == this.userId &&
+          other.content == this.content &&
+          other.moodTag == this.moodTag &&
+          other.loggedAt == this.loggedAt);
+}
+
+class LifeMomentCompanion extends UpdateCompanion<LifeMomentData> {
+  final Value<String> momentId;
+  final Value<String> userId;
+  final Value<String?> content;
+  final Value<String?> moodTag;
+  final Value<DateTime> loggedAt;
+  final Value<int> rowid;
+  const LifeMomentCompanion({
+    this.momentId = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.content = const Value.absent(),
+    this.moodTag = const Value.absent(),
+    this.loggedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LifeMomentCompanion.insert({
+    required String momentId,
+    required String userId,
+    this.content = const Value.absent(),
+    this.moodTag = const Value.absent(),
+    required DateTime loggedAt,
+    this.rowid = const Value.absent(),
+  }) : momentId = Value(momentId),
+       userId = Value(userId),
+       loggedAt = Value(loggedAt);
+  static Insertable<LifeMomentData> custom({
+    Expression<String>? momentId,
+    Expression<String>? userId,
+    Expression<String>? content,
+    Expression<String>? moodTag,
+    Expression<DateTime>? loggedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (momentId != null) 'moment_id': momentId,
+      if (userId != null) 'user_id': userId,
+      if (content != null) 'content': content,
+      if (moodTag != null) 'mood_tag': moodTag,
+      if (loggedAt != null) 'logged_at': loggedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LifeMomentCompanion copyWith({
+    Value<String>? momentId,
+    Value<String>? userId,
+    Value<String?>? content,
+    Value<String?>? moodTag,
+    Value<DateTime>? loggedAt,
+    Value<int>? rowid,
+  }) {
+    return LifeMomentCompanion(
+      momentId: momentId ?? this.momentId,
+      userId: userId ?? this.userId,
+      content: content ?? this.content,
+      moodTag: moodTag ?? this.moodTag,
+      loggedAt: loggedAt ?? this.loggedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (momentId.present) {
+      map['moment_id'] = Variable<String>(momentId.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (content.present) {
+      map['content'] = Variable<String>(content.value);
+    }
+    if (moodTag.present) {
+      map['mood_tag'] = Variable<String>(moodTag.value);
+    }
+    if (loggedAt.present) {
+      map['logged_at'] = Variable<DateTime>(loggedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LifeMomentCompanion(')
+          ..write('momentId: $momentId, ')
+          ..write('userId: $userId, ')
+          ..write('content: $content, ')
+          ..write('moodTag: $moodTag, ')
+          ..write('loggedAt: $loggedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $MomentPhotoTable extends MomentPhoto
+    with TableInfo<$MomentPhotoTable, MomentPhotoData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MomentPhotoTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _photoIdMeta = const VerificationMeta(
+    'photoId',
+  );
+  @override
+  late final GeneratedColumn<String> photoId = GeneratedColumn<String>(
+    'photo_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _momentIdMeta = const VerificationMeta(
+    'momentId',
+  );
+  @override
+  late final GeneratedColumn<String> momentId = GeneratedColumn<String>(
+    'moment_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES life_moment (moment_id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _photoPathMeta = const VerificationMeta(
+    'photoPath',
+  );
+  @override
+  late final GeneratedColumn<String> photoPath = GeneratedColumn<String>(
+    'photo_path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    photoId,
+    momentId,
+    photoPath,
+    sortOrder,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'moment_photo';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MomentPhotoData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('photo_id')) {
+      context.handle(
+        _photoIdMeta,
+        photoId.isAcceptableOrUnknown(data['photo_id']!, _photoIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_photoIdMeta);
+    }
+    if (data.containsKey('moment_id')) {
+      context.handle(
+        _momentIdMeta,
+        momentId.isAcceptableOrUnknown(data['moment_id']!, _momentIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_momentIdMeta);
+    }
+    if (data.containsKey('photo_path')) {
+      context.handle(
+        _photoPathMeta,
+        photoPath.isAcceptableOrUnknown(data['photo_path']!, _photoPathMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_photoPathMeta);
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {photoId};
+  @override
+  MomentPhotoData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MomentPhotoData(
+      photoId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}photo_id'],
+      )!,
+      momentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}moment_id'],
+      )!,
+      photoPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}photo_path'],
+      )!,
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
+    );
+  }
+
+  @override
+  $MomentPhotoTable createAlias(String alias) {
+    return $MomentPhotoTable(attachedDatabase, alias);
+  }
+}
+
+class MomentPhotoData extends DataClass implements Insertable<MomentPhotoData> {
+  final String photoId;
+  final String momentId;
+  final String photoPath;
+  final int sortOrder;
+  const MomentPhotoData({
+    required this.photoId,
+    required this.momentId,
+    required this.photoPath,
+    required this.sortOrder,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['photo_id'] = Variable<String>(photoId);
+    map['moment_id'] = Variable<String>(momentId);
+    map['photo_path'] = Variable<String>(photoPath);
+    map['sort_order'] = Variable<int>(sortOrder);
+    return map;
+  }
+
+  MomentPhotoCompanion toCompanion(bool nullToAbsent) {
+    return MomentPhotoCompanion(
+      photoId: Value(photoId),
+      momentId: Value(momentId),
+      photoPath: Value(photoPath),
+      sortOrder: Value(sortOrder),
+    );
+  }
+
+  factory MomentPhotoData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MomentPhotoData(
+      photoId: serializer.fromJson<String>(json['photoId']),
+      momentId: serializer.fromJson<String>(json['momentId']),
+      photoPath: serializer.fromJson<String>(json['photoPath']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'photoId': serializer.toJson<String>(photoId),
+      'momentId': serializer.toJson<String>(momentId),
+      'photoPath': serializer.toJson<String>(photoPath),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+    };
+  }
+
+  MomentPhotoData copyWith({
+    String? photoId,
+    String? momentId,
+    String? photoPath,
+    int? sortOrder,
+  }) => MomentPhotoData(
+    photoId: photoId ?? this.photoId,
+    momentId: momentId ?? this.momentId,
+    photoPath: photoPath ?? this.photoPath,
+    sortOrder: sortOrder ?? this.sortOrder,
+  );
+  MomentPhotoData copyWithCompanion(MomentPhotoCompanion data) {
+    return MomentPhotoData(
+      photoId: data.photoId.present ? data.photoId.value : this.photoId,
+      momentId: data.momentId.present ? data.momentId.value : this.momentId,
+      photoPath: data.photoPath.present ? data.photoPath.value : this.photoPath,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MomentPhotoData(')
+          ..write('photoId: $photoId, ')
+          ..write('momentId: $momentId, ')
+          ..write('photoPath: $photoPath, ')
+          ..write('sortOrder: $sortOrder')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(photoId, momentId, photoPath, sortOrder);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MomentPhotoData &&
+          other.photoId == this.photoId &&
+          other.momentId == this.momentId &&
+          other.photoPath == this.photoPath &&
+          other.sortOrder == this.sortOrder);
+}
+
+class MomentPhotoCompanion extends UpdateCompanion<MomentPhotoData> {
+  final Value<String> photoId;
+  final Value<String> momentId;
+  final Value<String> photoPath;
+  final Value<int> sortOrder;
+  final Value<int> rowid;
+  const MomentPhotoCompanion({
+    this.photoId = const Value.absent(),
+    this.momentId = const Value.absent(),
+    this.photoPath = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MomentPhotoCompanion.insert({
+    required String photoId,
+    required String momentId,
+    required String photoPath,
+    this.sortOrder = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : photoId = Value(photoId),
+       momentId = Value(momentId),
+       photoPath = Value(photoPath);
+  static Insertable<MomentPhotoData> custom({
+    Expression<String>? photoId,
+    Expression<String>? momentId,
+    Expression<String>? photoPath,
+    Expression<int>? sortOrder,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (photoId != null) 'photo_id': photoId,
+      if (momentId != null) 'moment_id': momentId,
+      if (photoPath != null) 'photo_path': photoPath,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MomentPhotoCompanion copyWith({
+    Value<String>? photoId,
+    Value<String>? momentId,
+    Value<String>? photoPath,
+    Value<int>? sortOrder,
+    Value<int>? rowid,
+  }) {
+    return MomentPhotoCompanion(
+      photoId: photoId ?? this.photoId,
+      momentId: momentId ?? this.momentId,
+      photoPath: photoPath ?? this.photoPath,
+      sortOrder: sortOrder ?? this.sortOrder,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (photoId.present) {
+      map['photo_id'] = Variable<String>(photoId.value);
+    }
+    if (momentId.present) {
+      map['moment_id'] = Variable<String>(momentId.value);
+    }
+    if (photoPath.present) {
+      map['photo_path'] = Variable<String>(photoPath.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MomentPhotoCompanion(')
+          ..write('photoId: $photoId, ')
+          ..write('momentId: $momentId, ')
+          ..write('photoPath: $photoPath, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SecureDocumentsVaultTable extends SecureDocumentsVault
     with TableInfo<$SecureDocumentsVaultTable, SecureDocumentsVaultData> {
   @override
@@ -17500,6 +18209,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $HabitCheckLogTable habitCheckLog = $HabitCheckLogTable(this);
   late final $FlagMilestonesTable flagMilestones = $FlagMilestonesTable(this);
   late final $DailyReviewLogTable dailyReviewLog = $DailyReviewLogTable(this);
+  late final $LifeMomentTable lifeMoment = $LifeMomentTable(this);
+  late final $MomentPhotoTable momentPhoto = $MomentPhotoTable(this);
   late final $SecureDocumentsVaultTable secureDocumentsVault =
       $SecureDocumentsVaultTable(this);
   late final $MemorialDaysTable memorialDays = $MemorialDaysTable(this);
@@ -17542,6 +18253,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     habitCheckLog,
     flagMilestones,
     dailyReviewLog,
+    lifeMoment,
+    momentPhoto,
     secureDocumentsVault,
     memorialDays,
     relationshipNetwork,
@@ -17555,6 +18268,16 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     nutritionGoal,
     exerciseLog,
   ];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'life_moment',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('moment_photo', kind: UpdateKind.delete)],
+    ),
+  ]);
 }
 
 typedef $$UserAccountsTableCreateCompanionBuilder =
@@ -18021,6 +18744,26 @@ final class $$UserAccountsTableReferences
         );
 
     final cache = $_typedResult.readTableOrNull(_dailyReviewLogRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$LifeMomentTable, List<LifeMomentData>>
+  _lifeMomentRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.lifeMoment,
+    aliasName: $_aliasNameGenerator(
+      db.userAccounts.userId,
+      db.lifeMoment.userId,
+    ),
+  );
+
+  $$LifeMomentTableProcessedTableManager get lifeMomentRefs {
+    final manager = $$LifeMomentTableTableManager($_db, $_db.lifeMoment).filter(
+      (f) => f.userId.userId.sqlEquals($_itemColumn<String>('user_id')!),
+    );
+
+    final cache = $_typedResult.readTableOrNull(_lifeMomentRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -18810,6 +19553,31 @@ class $$UserAccountsTableFilterComposer
           }) => $$DailyReviewLogTableFilterComposer(
             $db: $db,
             $table: $db.dailyReviewLog,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> lifeMomentRefs(
+    Expression<bool> Function($$LifeMomentTableFilterComposer f) f,
+  ) {
+    final $$LifeMomentTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.lifeMoment,
+      getReferencedColumn: (t) => t.userId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LifeMomentTableFilterComposer(
+            $db: $db,
+            $table: $db.lifeMoment,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -19653,6 +20421,31 @@ class $$UserAccountsTableAnnotationComposer
     return f(composer);
   }
 
+  Expression<T> lifeMomentRefs<T extends Object>(
+    Expression<T> Function($$LifeMomentTableAnnotationComposer a) f,
+  ) {
+    final $$LifeMomentTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.lifeMoment,
+      getReferencedColumn: (t) => t.userId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LifeMomentTableAnnotationComposer(
+            $db: $db,
+            $table: $db.lifeMoment,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<T> secureDocumentsVaultRefs<T extends Object>(
     Expression<T> Function($$SecureDocumentsVaultTableAnnotationComposer a) f,
   ) {
@@ -19995,6 +20788,7 @@ class $$UserAccountsTableTableManager
             bool habitCheckLogRefs,
             bool flagMilestonesRefs,
             bool dailyReviewLogRefs,
+            bool lifeMomentRefs,
             bool secureDocumentsVaultRefs,
             bool memorialDaysRefs,
             bool relationshipNetworkRefs,
@@ -20084,6 +20878,7 @@ class $$UserAccountsTableTableManager
                 habitCheckLogRefs = false,
                 flagMilestonesRefs = false,
                 dailyReviewLogRefs = false,
+                lifeMomentRefs = false,
                 secureDocumentsVaultRefs = false,
                 memorialDaysRefs = false,
                 relationshipNetworkRefs = false,
@@ -20118,6 +20913,7 @@ class $$UserAccountsTableTableManager
                     if (habitCheckLogRefs) db.habitCheckLog,
                     if (flagMilestonesRefs) db.flagMilestones,
                     if (dailyReviewLogRefs) db.dailyReviewLog,
+                    if (lifeMomentRefs) db.lifeMoment,
                     if (secureDocumentsVaultRefs) db.secureDocumentsVault,
                     if (memorialDaysRefs) db.memorialDays,
                     if (relationshipNetworkRefs) db.relationshipNetwork,
@@ -20513,6 +21309,27 @@ class $$UserAccountsTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (lifeMomentRefs)
+                        await $_getPrefetchedData<
+                          UserAccount,
+                          $UserAccountsTable,
+                          LifeMomentData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$UserAccountsTableReferences
+                              ._lifeMomentRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$UserAccountsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).lifeMomentRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.userId == item.userId,
+                              ),
+                          typedResults: items,
+                        ),
                       if (secureDocumentsVaultRefs)
                         await $_getPrefetchedData<
                           UserAccount,
@@ -20804,6 +21621,7 @@ typedef $$UserAccountsTableProcessedTableManager =
         bool habitCheckLogRefs,
         bool flagMilestonesRefs,
         bool dailyReviewLogRefs,
+        bool lifeMomentRefs,
         bool secureDocumentsVaultRefs,
         bool memorialDaysRefs,
         bool relationshipNetworkRefs,
@@ -29640,6 +30458,719 @@ typedef $$DailyReviewLogTableProcessedTableManager =
       DailyReviewLogData,
       PrefetchHooks Function({bool userId})
     >;
+typedef $$LifeMomentTableCreateCompanionBuilder =
+    LifeMomentCompanion Function({
+      required String momentId,
+      required String userId,
+      Value<String?> content,
+      Value<String?> moodTag,
+      required DateTime loggedAt,
+      Value<int> rowid,
+    });
+typedef $$LifeMomentTableUpdateCompanionBuilder =
+    LifeMomentCompanion Function({
+      Value<String> momentId,
+      Value<String> userId,
+      Value<String?> content,
+      Value<String?> moodTag,
+      Value<DateTime> loggedAt,
+      Value<int> rowid,
+    });
+
+final class $$LifeMomentTableReferences
+    extends BaseReferences<_$AppDatabase, $LifeMomentTable, LifeMomentData> {
+  $$LifeMomentTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $UserAccountsTable _userIdTable(_$AppDatabase db) =>
+      db.userAccounts.createAlias(
+        $_aliasNameGenerator(db.lifeMoment.userId, db.userAccounts.userId),
+      );
+
+  $$UserAccountsTableProcessedTableManager get userId {
+    final $_column = $_itemColumn<String>('user_id')!;
+
+    final manager = $$UserAccountsTableTableManager(
+      $_db,
+      $_db.userAccounts,
+    ).filter((f) => f.userId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_userIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$MomentPhotoTable, List<MomentPhotoData>>
+  _momentPhotoRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.momentPhoto,
+    aliasName: $_aliasNameGenerator(
+      db.lifeMoment.momentId,
+      db.momentPhoto.momentId,
+    ),
+  );
+
+  $$MomentPhotoTableProcessedTableManager get momentPhotoRefs {
+    final manager = $$MomentPhotoTableTableManager($_db, $_db.momentPhoto)
+        .filter(
+          (f) =>
+              f.momentId.momentId.sqlEquals($_itemColumn<String>('moment_id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(_momentPhotoRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$LifeMomentTableFilterComposer
+    extends Composer<_$AppDatabase, $LifeMomentTable> {
+  $$LifeMomentTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get momentId => $composableBuilder(
+    column: $table.momentId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get content => $composableBuilder(
+    column: $table.content,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get moodTag => $composableBuilder(
+    column: $table.moodTag,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get loggedAt => $composableBuilder(
+    column: $table.loggedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$UserAccountsTableFilterComposer get userId {
+    final $$UserAccountsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.userAccounts,
+      getReferencedColumn: (t) => t.userId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UserAccountsTableFilterComposer(
+            $db: $db,
+            $table: $db.userAccounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> momentPhotoRefs(
+    Expression<bool> Function($$MomentPhotoTableFilterComposer f) f,
+  ) {
+    final $$MomentPhotoTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.momentId,
+      referencedTable: $db.momentPhoto,
+      getReferencedColumn: (t) => t.momentId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MomentPhotoTableFilterComposer(
+            $db: $db,
+            $table: $db.momentPhoto,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$LifeMomentTableOrderingComposer
+    extends Composer<_$AppDatabase, $LifeMomentTable> {
+  $$LifeMomentTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get momentId => $composableBuilder(
+    column: $table.momentId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get content => $composableBuilder(
+    column: $table.content,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get moodTag => $composableBuilder(
+    column: $table.moodTag,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get loggedAt => $composableBuilder(
+    column: $table.loggedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$UserAccountsTableOrderingComposer get userId {
+    final $$UserAccountsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.userAccounts,
+      getReferencedColumn: (t) => t.userId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UserAccountsTableOrderingComposer(
+            $db: $db,
+            $table: $db.userAccounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LifeMomentTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LifeMomentTable> {
+  $$LifeMomentTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get momentId =>
+      $composableBuilder(column: $table.momentId, builder: (column) => column);
+
+  GeneratedColumn<String> get content =>
+      $composableBuilder(column: $table.content, builder: (column) => column);
+
+  GeneratedColumn<String> get moodTag =>
+      $composableBuilder(column: $table.moodTag, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get loggedAt =>
+      $composableBuilder(column: $table.loggedAt, builder: (column) => column);
+
+  $$UserAccountsTableAnnotationComposer get userId {
+    final $$UserAccountsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.userAccounts,
+      getReferencedColumn: (t) => t.userId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UserAccountsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.userAccounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> momentPhotoRefs<T extends Object>(
+    Expression<T> Function($$MomentPhotoTableAnnotationComposer a) f,
+  ) {
+    final $$MomentPhotoTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.momentId,
+      referencedTable: $db.momentPhoto,
+      getReferencedColumn: (t) => t.momentId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MomentPhotoTableAnnotationComposer(
+            $db: $db,
+            $table: $db.momentPhoto,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$LifeMomentTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LifeMomentTable,
+          LifeMomentData,
+          $$LifeMomentTableFilterComposer,
+          $$LifeMomentTableOrderingComposer,
+          $$LifeMomentTableAnnotationComposer,
+          $$LifeMomentTableCreateCompanionBuilder,
+          $$LifeMomentTableUpdateCompanionBuilder,
+          (LifeMomentData, $$LifeMomentTableReferences),
+          LifeMomentData,
+          PrefetchHooks Function({bool userId, bool momentPhotoRefs})
+        > {
+  $$LifeMomentTableTableManager(_$AppDatabase db, $LifeMomentTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LifeMomentTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LifeMomentTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LifeMomentTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> momentId = const Value.absent(),
+                Value<String> userId = const Value.absent(),
+                Value<String?> content = const Value.absent(),
+                Value<String?> moodTag = const Value.absent(),
+                Value<DateTime> loggedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LifeMomentCompanion(
+                momentId: momentId,
+                userId: userId,
+                content: content,
+                moodTag: moodTag,
+                loggedAt: loggedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String momentId,
+                required String userId,
+                Value<String?> content = const Value.absent(),
+                Value<String?> moodTag = const Value.absent(),
+                required DateTime loggedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => LifeMomentCompanion.insert(
+                momentId: momentId,
+                userId: userId,
+                content: content,
+                moodTag: moodTag,
+                loggedAt: loggedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$LifeMomentTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({userId = false, momentPhotoRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (momentPhotoRefs) db.momentPhoto],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (userId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.userId,
+                                referencedTable: $$LifeMomentTableReferences
+                                    ._userIdTable(db),
+                                referencedColumn: $$LifeMomentTableReferences
+                                    ._userIdTable(db)
+                                    .userId,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (momentPhotoRefs)
+                    await $_getPrefetchedData<
+                      LifeMomentData,
+                      $LifeMomentTable,
+                      MomentPhotoData
+                    >(
+                      currentTable: table,
+                      referencedTable: $$LifeMomentTableReferences
+                          ._momentPhotoRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$LifeMomentTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).momentPhotoRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where(
+                            (e) => e.momentId == item.momentId,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$LifeMomentTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LifeMomentTable,
+      LifeMomentData,
+      $$LifeMomentTableFilterComposer,
+      $$LifeMomentTableOrderingComposer,
+      $$LifeMomentTableAnnotationComposer,
+      $$LifeMomentTableCreateCompanionBuilder,
+      $$LifeMomentTableUpdateCompanionBuilder,
+      (LifeMomentData, $$LifeMomentTableReferences),
+      LifeMomentData,
+      PrefetchHooks Function({bool userId, bool momentPhotoRefs})
+    >;
+typedef $$MomentPhotoTableCreateCompanionBuilder =
+    MomentPhotoCompanion Function({
+      required String photoId,
+      required String momentId,
+      required String photoPath,
+      Value<int> sortOrder,
+      Value<int> rowid,
+    });
+typedef $$MomentPhotoTableUpdateCompanionBuilder =
+    MomentPhotoCompanion Function({
+      Value<String> photoId,
+      Value<String> momentId,
+      Value<String> photoPath,
+      Value<int> sortOrder,
+      Value<int> rowid,
+    });
+
+final class $$MomentPhotoTableReferences
+    extends BaseReferences<_$AppDatabase, $MomentPhotoTable, MomentPhotoData> {
+  $$MomentPhotoTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $LifeMomentTable _momentIdTable(_$AppDatabase db) =>
+      db.lifeMoment.createAlias(
+        $_aliasNameGenerator(db.momentPhoto.momentId, db.lifeMoment.momentId),
+      );
+
+  $$LifeMomentTableProcessedTableManager get momentId {
+    final $_column = $_itemColumn<String>('moment_id')!;
+
+    final manager = $$LifeMomentTableTableManager(
+      $_db,
+      $_db.lifeMoment,
+    ).filter((f) => f.momentId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_momentIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$MomentPhotoTableFilterComposer
+    extends Composer<_$AppDatabase, $MomentPhotoTable> {
+  $$MomentPhotoTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get photoId => $composableBuilder(
+    column: $table.photoId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get photoPath => $composableBuilder(
+    column: $table.photoPath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$LifeMomentTableFilterComposer get momentId {
+    final $$LifeMomentTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.momentId,
+      referencedTable: $db.lifeMoment,
+      getReferencedColumn: (t) => t.momentId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LifeMomentTableFilterComposer(
+            $db: $db,
+            $table: $db.lifeMoment,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$MomentPhotoTableOrderingComposer
+    extends Composer<_$AppDatabase, $MomentPhotoTable> {
+  $$MomentPhotoTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get photoId => $composableBuilder(
+    column: $table.photoId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get photoPath => $composableBuilder(
+    column: $table.photoPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$LifeMomentTableOrderingComposer get momentId {
+    final $$LifeMomentTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.momentId,
+      referencedTable: $db.lifeMoment,
+      getReferencedColumn: (t) => t.momentId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LifeMomentTableOrderingComposer(
+            $db: $db,
+            $table: $db.lifeMoment,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$MomentPhotoTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MomentPhotoTable> {
+  $$MomentPhotoTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get photoId =>
+      $composableBuilder(column: $table.photoId, builder: (column) => column);
+
+  GeneratedColumn<String> get photoPath =>
+      $composableBuilder(column: $table.photoPath, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  $$LifeMomentTableAnnotationComposer get momentId {
+    final $$LifeMomentTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.momentId,
+      referencedTable: $db.lifeMoment,
+      getReferencedColumn: (t) => t.momentId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LifeMomentTableAnnotationComposer(
+            $db: $db,
+            $table: $db.lifeMoment,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$MomentPhotoTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MomentPhotoTable,
+          MomentPhotoData,
+          $$MomentPhotoTableFilterComposer,
+          $$MomentPhotoTableOrderingComposer,
+          $$MomentPhotoTableAnnotationComposer,
+          $$MomentPhotoTableCreateCompanionBuilder,
+          $$MomentPhotoTableUpdateCompanionBuilder,
+          (MomentPhotoData, $$MomentPhotoTableReferences),
+          MomentPhotoData,
+          PrefetchHooks Function({bool momentId})
+        > {
+  $$MomentPhotoTableTableManager(_$AppDatabase db, $MomentPhotoTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MomentPhotoTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MomentPhotoTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MomentPhotoTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> photoId = const Value.absent(),
+                Value<String> momentId = const Value.absent(),
+                Value<String> photoPath = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MomentPhotoCompanion(
+                photoId: photoId,
+                momentId: momentId,
+                photoPath: photoPath,
+                sortOrder: sortOrder,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String photoId,
+                required String momentId,
+                required String photoPath,
+                Value<int> sortOrder = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MomentPhotoCompanion.insert(
+                photoId: photoId,
+                momentId: momentId,
+                photoPath: photoPath,
+                sortOrder: sortOrder,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$MomentPhotoTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({momentId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (momentId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.momentId,
+                                referencedTable: $$MomentPhotoTableReferences
+                                    ._momentIdTable(db),
+                                referencedColumn: $$MomentPhotoTableReferences
+                                    ._momentIdTable(db)
+                                    .momentId,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$MomentPhotoTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MomentPhotoTable,
+      MomentPhotoData,
+      $$MomentPhotoTableFilterComposer,
+      $$MomentPhotoTableOrderingComposer,
+      $$MomentPhotoTableAnnotationComposer,
+      $$MomentPhotoTableCreateCompanionBuilder,
+      $$MomentPhotoTableUpdateCompanionBuilder,
+      (MomentPhotoData, $$MomentPhotoTableReferences),
+      MomentPhotoData,
+      PrefetchHooks Function({bool momentId})
+    >;
 typedef $$SecureDocumentsVaultTableCreateCompanionBuilder =
     SecureDocumentsVaultCompanion Function({
       required String docId,
@@ -35170,6 +36701,10 @@ class $AppDatabaseManager {
       $$FlagMilestonesTableTableManager(_db, _db.flagMilestones);
   $$DailyReviewLogTableTableManager get dailyReviewLog =>
       $$DailyReviewLogTableTableManager(_db, _db.dailyReviewLog);
+  $$LifeMomentTableTableManager get lifeMoment =>
+      $$LifeMomentTableTableManager(_db, _db.lifeMoment);
+  $$MomentPhotoTableTableManager get momentPhoto =>
+      $$MomentPhotoTableTableManager(_db, _db.momentPhoto);
   $$SecureDocumentsVaultTableTableManager get secureDocumentsVault =>
       $$SecureDocumentsVaultTableTableManager(_db, _db.secureDocumentsVault);
   $$MemorialDaysTableTableManager get memorialDays =>

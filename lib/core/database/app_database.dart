@@ -32,6 +32,8 @@ part 'app_database.g.dart';
     FlagGoals,
     FlagMilestones,
     DailyReviewLog,
+    LifeMoment,
+    MomentPhoto,
     SecureDocumentsVault,
     MemorialDays,
     RelationshipNetwork,
@@ -53,7 +55,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(QueryExecutor executor) : super(executor);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -63,6 +65,7 @@ class AppDatabase extends _$AppDatabase {
           // 对称，保证新旧安装 schema 一致）。
           await _createHealthIndexes(m);
           await _createFinanceIndexes(m);
+          await _createMomentIndexes(m);
         },
         onUpgrade: stepByStep(
           from1To2: (m, schema) async {
@@ -124,6 +127,13 @@ class AppDatabase extends _$AppDatabase {
               schema.financialTransaction.sourceSubscriptionId,
             );
           },
+          from5To6: (m, schema) async {
+            // v5→v6: 生活瞬间两张新表（P4-1）。只 createTable，不触碰既有表；
+            // 旧库升级零数据风险。LifeMoment/MomentPhoto 为全新表，无存量数据。
+            await m.createTable(schema.lifeMoment);
+            await m.createTable(schema.momentPhoto);
+            await _createMomentIndexes(m);
+          },
         ),
         beforeOpen: (details) async {
           // foreign_keys must be (re)enabled on every open — keeping it only
@@ -162,6 +172,21 @@ class AppDatabase extends _$AppDatabase {
     await m.database.customStatement(
       'CREATE INDEX IF NOT EXISTS idx_ftx_account '
       'ON financial_transaction(account_id)',
+    );
+  }
+
+  /// 生活瞬间索引（P4-1）：LifeMoment 的「用户 + 时间」复合索引支撑时间线按
+  /// user_id 过滤、logged_at 倒序；MomentPhoto(moment_id) 支撑按瞬间取其照片
+  /// （SQLite 的 FK 不自动建索引，子表按外键查必须显式建）。与上面两个索引
+  /// 对称：onCreate（fresh）与 from5To6（升级）都调一次，IF NOT EXISTS 幂等。
+  Future<void> _createMomentIndexes(Migrator m) async {
+    await m.database.customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_life_moment_user_date '
+      'ON life_moment(user_id, logged_at)',
+    );
+    await m.database.customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_moment_photo_moment '
+      'ON moment_photo(moment_id)',
     );
   }
 }

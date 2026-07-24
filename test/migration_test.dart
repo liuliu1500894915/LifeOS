@@ -68,5 +68,41 @@ void main() {
       // Fresh schema matches the generated definition (no missing/extra tables).
       await db.validateDatabaseSchema();
     });
+
+    test('v5 -> v6 migration yields a schema matching the v6 definition',
+        () async {
+      // v5→v6: 生活瞬间两张新表 life_moment / moment_photo（P4-1）。只 createTable，
+      // 不触碰既有表，旧库升级零数据风险。migrateAndValidate 校验升级后 schema
+      // 与 fresh v6 定义一致（即「fresh install == upgrade install」）。
+      final connection = await verifier.startAt(5);
+      final db = AppDatabase.forTesting(connection);
+      addTearDown(db.close);
+      await verifier.migrateAndValidate(db, 6);
+    });
+
+    test('v5 -> v6 migration preserves pre-existing rows', () async {
+      // v6 仅新增表，既有数据不受影响；此处验证升级路径不丢旧数据
+      // （以 user_accounts 为代表），并确认新表 life_moment 可用。
+      final schema = await verifier.schemaAt(5);
+      schema.rawDatabase.execute(
+        "INSERT INTO user_accounts (user_id, display_name) "
+        "VALUES ('user-001', '默认用户')",
+      );
+
+      final db = AppDatabase.forTesting(schema.newConnection());
+      await verifier.migrateAndValidate(db, 6);
+      await db.close();
+
+      final rows = schema.rawDatabase.select(
+        'SELECT display_name FROM user_accounts WHERE user_id = ?',
+        ['user-001'],
+      );
+      expect(rows, hasLength(1));
+      expect(rows.first['display_name'], '默认用户');
+
+      // 新表存在且空（升级未破坏其创建）。
+      final momentRows = schema.rawDatabase.select('SELECT COUNT(*) AS c FROM life_moment');
+      expect(momentRows.single['c'], 0);
+    });
   });
 }
