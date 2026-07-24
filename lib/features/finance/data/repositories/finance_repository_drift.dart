@@ -136,9 +136,12 @@ class FinanceRepositoryDrift implements FinanceRepository {
             ),
           );
       // 余额增量用 SQL 表达式,原子且避免"先读再写回"的竞态。
-      await _db.customStatement(
+      // 用 customUpdate(非 customStatement)声明受影响表 —— Drift 的 .watch() 流
+      // (watchAccounts)才会在事务 commit 后重发,余额 UI 无需手动 invalidate。
+      await _db.customUpdate(
         'UPDATE payment_accounts SET balance = balance + ? WHERE account_id = ?',
-        [delta, accountId],
+        variables: [Variable.withReal(delta), Variable.withString(accountId)],
+        updates: {_db.paymentAccounts},
       );
     });
   }
@@ -154,9 +157,11 @@ class FinanceRepositoryDrift implements FinanceRepository {
       await (_db.delete(_db.financialTransaction)
             ..where((t) => t.transactionId.equals(transactionId)))
           .go();
-      await _db.customStatement(
+      // customUpdate 声明受影响表,使 watchAccounts 流在 commit 后重发(见上)。
+      await _db.customUpdate(
         'UPDATE payment_accounts SET balance = balance + ? WHERE account_id = ?',
-        [delta, tx.accountId],
+        variables: [Variable.withReal(delta), Variable.withString(tx.accountId)],
+        updates: {_db.paymentAccounts},
       );
     });
   }

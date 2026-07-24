@@ -5,69 +5,55 @@ import '../../../../core/database/system_bootstrap.dart';
 import '../../data/category_seeds.dart';
 import '../../data/repositories/finance_repository_drift.dart';
 
-// ── Notifiers ──
+// ── Stream-backed notifiers ──
 //
-// 这些 AsyncNotifier 是 presentation 层的状态编排 —— 只调
-// [FinanceRepository] 接口,无任何 `db.`/`Companion`/裸查询(P0-3)。
-// 读取仍是 Future 一次性取 + 写后手动 refetch;P0-4 将改为 `.watch()` 流,
-// 届时移除 `state = AsyncData(await getXxx())`、`ref.invalidate` 与 prev 回滚。
-
-class AccountNotifier extends AsyncNotifier<List<PaymentAccount>> {
+// 这些 Notifier 是 presentation 层的状态编排 —— 只调 [FinanceRepository] 接口,
+// 无任何 `db.`/`Companion`/裸查询(P0-3)。读取走 Repository 的 `.watch()` 流
+// (Drift StreamQueries):写库后流自动重发新值,UI 自动刷新。因此:
+//   - 命令(add/update/delete)只转发给 Repository,**不触碰 state**;
+//   - **不**手动 `_fetchAll` 全量重查;
+//   - **不**靠 `ref.invalidate` 维持跨 Provider 同步(交易改余额由
+//     `watchAccounts()` 流承载 —— Repository 的余额写用 `customUpdate`
+//     声明受影响表,Drift 在事务 commit 后自动通知该流);
+//   - **无** `prev`→出错还原的死乐观回滚(P0-4)。
+//
+// 系统用户前置:每个写方法首行 `await ref.read(systemBootstrapProvider.future)`。
+// 旧 AsyncNotifier 的 `async` build 在被访问时**同步**执行到首个 await,顺带把
+// systemBootstrap 排进队列,使随后的写不会撞 FK;StreamNotifier 的 `async*`
+// build 体是惰性的(被 listen 才跑),这层隐式保证失效,故改为写方法显式自保护。
+class AccountNotifier extends StreamNotifier<List<PaymentAccount>> {
   @override
-  Future<List<PaymentAccount>> build() async {
+  Stream<List<PaymentAccount>> build() async* {
     await ref.read(systemBootstrapProvider.future);
-    final repo = ref.read(financeRepositoryProvider);
-    var accounts = await repo.getAccounts();
-    if (accounts.isEmpty) {
+    final repo = ref.watch(financeRepositoryProvider);
+    // 首启种子:仅当库为空时补默认账户(ensureAccountsSeeded 非幂等,故需空检查)。
+    if ((await repo.getAccounts()).isEmpty) {
       await repo.ensureAccountsSeeded();
-      accounts = await repo.getAccounts();
     }
-    return accounts;
+    yield* repo.watchAccounts();
   }
 
   Future<void> addAccount(String name, String type, bool isLiability, double balance) async {
-    final prev = state.valueOrNull ?? [];
-    try {
-      final repo = ref.read(financeRepositoryProvider);
-      await repo.addAccount(name, type, isLiability, balance);
-      state = AsyncData(await repo.getAccounts());
-    } catch (e) {
-      state = AsyncData(prev);
-      rethrow;
-    }
+    await ref.read(systemBootstrapProvider.future);
+    await ref.read(financeRepositoryProvider).addAccount(name, type, isLiability, balance);
   }
 
   Future<void> updateAccount(String accountId, {String? name, double? balance}) async {
-    final prev = state.valueOrNull ?? [];
-    try {
-      final repo = ref.read(financeRepositoryProvider);
-      await repo.updateAccount(accountId, name: name, balance: balance);
-      state = AsyncData(await repo.getAccounts());
-    } catch (e) {
-      state = AsyncData(prev);
-      rethrow;
-    }
+    await ref.read(systemBootstrapProvider.future);
+    await ref.read(financeRepositoryProvider).updateAccount(accountId, name: name, balance: balance);
   }
 
   Future<void> deleteAccount(String accountId) async {
-    final prev = state.valueOrNull ?? [];
-    try {
-      final repo = ref.read(financeRepositoryProvider);
-      await repo.deleteAccount(accountId);
-      state = AsyncData(await repo.getAccounts());
-    } catch (e) {
-      state = AsyncData(prev);
-      rethrow;
-    }
+    await ref.read(systemBootstrapProvider.future);
+    await ref.read(financeRepositoryProvider).deleteAccount(accountId);
   }
 }
 
-class TransactionNotifier extends AsyncNotifier<List<FinancialTransactionData>> {
+class TransactionNotifier extends StreamNotifier<List<FinancialTransactionData>> {
   @override
-  Future<List<FinancialTransactionData>> build() async {
+  Stream<List<FinancialTransactionData>> build() async* {
     await ref.read(systemBootstrapProvider.future);
-    final repo = ref.read(financeRepositoryProvider);
-    return await repo.getTransactions();
+    yield* ref.watch(financeRepositoryProvider).watchTransactions();
   }
 
   Future<void> addTransaction({
@@ -78,45 +64,28 @@ class TransactionNotifier extends AsyncNotifier<List<FinancialTransactionData>> 
     String? remark,
     DateTime? loggedAt,
   }) async {
-    final prev = state.valueOrNull ?? [];
-    try {
-      final repo = ref.read(financeRepositoryProvider);
-      await repo.addTransaction(
-        flowType: flowType,
-        amount: amount,
-        categoryId: categoryId,
-        accountId: accountId,
-        remark: remark,
-        loggedAt: loggedAt,
-      );
-      ref.invalidate(accountProvider);
-      state = AsyncData(await repo.getTransactions());
-    } catch (e) {
-      state = AsyncData(prev);
-      rethrow;
-    }
+    await ref.read(systemBootstrapProvider.future);
+    await ref.read(financeRepositoryProvider).addTransaction(
+          flowType: flowType,
+          amount: amount,
+          categoryId: categoryId,
+          accountId: accountId,
+          remark: remark,
+          loggedAt: loggedAt,
+        );
   }
 
   Future<void> deleteTransaction(String transactionId) async {
-    final prev = state.valueOrNull ?? [];
-    try {
-      final repo = ref.read(financeRepositoryProvider);
-      await repo.deleteTransaction(transactionId);
-      ref.invalidate(accountProvider);
-      state = AsyncData(await repo.getTransactions());
-    } catch (e) {
-      state = AsyncData(prev);
-      rethrow;
-    }
+    await ref.read(systemBootstrapProvider.future);
+    await ref.read(financeRepositoryProvider).deleteTransaction(transactionId);
   }
 }
 
-class AssetNotifier extends AsyncNotifier<List<AssetInventoryData>> {
+class AssetNotifier extends StreamNotifier<List<AssetInventoryData>> {
   @override
-  Future<List<AssetInventoryData>> build() async {
+  Stream<List<AssetInventoryData>> build() async* {
     await ref.read(systemBootstrapProvider.future);
-    final repo = ref.read(financeRepositoryProvider);
-    return await repo.getAssets();
+    yield* ref.watch(financeRepositoryProvider).watchAssets();
   }
 
   Future<void> addAsset({
@@ -126,21 +95,14 @@ class AssetNotifier extends AsyncNotifier<List<AssetInventoryData>> {
     required String iconId,
     bool projectToRoom = true,
   }) async {
-    final prev = state.valueOrNull ?? [];
-    try {
-      final repo = ref.read(financeRepositoryProvider);
-      await repo.addAsset(
-        name: name,
-        price: price,
-        purchaseDate: purchaseDate,
-        iconId: iconId,
-        projectToRoom: projectToRoom,
-      );
-      state = AsyncData(await repo.getAssets());
-    } catch (e) {
-      state = AsyncData(prev);
-      rethrow;
-    }
+    await ref.read(systemBootstrapProvider.future);
+    await ref.read(financeRepositoryProvider).addAsset(
+          name: name,
+          price: price,
+          purchaseDate: purchaseDate,
+          iconId: iconId,
+          projectToRoom: projectToRoom,
+        );
   }
 
   Future<void> updateAsset(
@@ -151,43 +113,28 @@ class AssetNotifier extends AsyncNotifier<List<AssetInventoryData>> {
     String? iconId,
     bool? projectToRoom,
   }) async {
-    final prev = state.valueOrNull ?? [];
-    try {
-      final repo = ref.read(financeRepositoryProvider);
-      await repo.updateAsset(
-        assetId,
-        name: name,
-        price: price,
-        purchaseDate: purchaseDate,
-        iconId: iconId,
-        projectToRoom: projectToRoom,
-      );
-      state = AsyncData(await repo.getAssets());
-    } catch (e) {
-      state = AsyncData(prev);
-      rethrow;
-    }
+    await ref.read(systemBootstrapProvider.future);
+    await ref.read(financeRepositoryProvider).updateAsset(
+            assetId,
+            name: name,
+            price: price,
+            purchaseDate: purchaseDate,
+            iconId: iconId,
+            projectToRoom: projectToRoom,
+          );
   }
 
   Future<void> deleteAsset(String assetId) async {
-    final prev = state.valueOrNull ?? [];
-    try {
-      final repo = ref.read(financeRepositoryProvider);
-      await repo.deleteAsset(assetId);
-      state = AsyncData(await repo.getAssets());
-    } catch (e) {
-      state = AsyncData(prev);
-      rethrow;
-    }
+    await ref.read(systemBootstrapProvider.future);
+    await ref.read(financeRepositoryProvider).deleteAsset(assetId);
   }
 }
 
-class SubscriptionNotifier extends AsyncNotifier<List<SubscriptionService>> {
+class SubscriptionNotifier extends StreamNotifier<List<SubscriptionService>> {
   @override
-  Future<List<SubscriptionService>> build() async {
+  Stream<List<SubscriptionService>> build() async* {
     await ref.read(systemBootstrapProvider.future);
-    final repo = ref.read(financeRepositoryProvider);
-    return await repo.getSubscriptions();
+    yield* ref.watch(financeRepositoryProvider).watchSubscriptions();
   }
 
   Future<void> addSubscription({
@@ -198,22 +145,15 @@ class SubscriptionNotifier extends AsyncNotifier<List<SubscriptionService>> {
     required String accountId,
     bool alertEnabled = true,
   }) async {
-    final prev = state.valueOrNull ?? [];
-    try {
-      final repo = ref.read(financeRepositoryProvider);
-      await repo.addSubscription(
-        serviceName: serviceName,
-        amount: amount,
-        billingCycle: billingCycle,
-        nextBillingDate: nextBillingDate,
-        accountId: accountId,
-        alertEnabled: alertEnabled,
-      );
-      state = AsyncData(await repo.getSubscriptions());
-    } catch (e) {
-      state = AsyncData(prev);
-      rethrow;
-    }
+    await ref.read(systemBootstrapProvider.future);
+    await ref.read(financeRepositoryProvider).addSubscription(
+          serviceName: serviceName,
+          amount: amount,
+          billingCycle: billingCycle,
+          nextBillingDate: nextBillingDate,
+          accountId: accountId,
+          alertEnabled: alertEnabled,
+        );
   }
 
   Future<void> updateSubscription(
@@ -226,83 +166,53 @@ class SubscriptionNotifier extends AsyncNotifier<List<SubscriptionService>> {
     bool? alertEnabled,
     bool? isActive,
   }) async {
-    final prev = state.valueOrNull ?? [];
-    try {
-      final repo = ref.read(financeRepositoryProvider);
-      await repo.updateSubscription(
-        subscriptionId,
-        serviceName: serviceName,
-        amount: amount,
-        billingCycle: billingCycle,
-        nextBillingDate: nextBillingDate,
-        accountId: accountId,
-        alertEnabled: alertEnabled,
-        isActive: isActive,
-      );
-      state = AsyncData(await repo.getSubscriptions());
-    } catch (e) {
-      state = AsyncData(prev);
-      rethrow;
-    }
+    await ref.read(systemBootstrapProvider.future);
+    await ref.read(financeRepositoryProvider).updateSubscription(
+            subscriptionId,
+            serviceName: serviceName,
+            amount: amount,
+            billingCycle: billingCycle,
+            nextBillingDate: nextBillingDate,
+            accountId: accountId,
+            alertEnabled: alertEnabled,
+            isActive: isActive,
+          );
   }
 
   Future<void> deleteSubscription(String subscriptionId) async {
-    final prev = state.valueOrNull ?? [];
-    try {
-      final repo = ref.read(financeRepositoryProvider);
-      await repo.deleteSubscription(subscriptionId);
-      state = AsyncData(await repo.getSubscriptions());
-    } catch (e) {
-      state = AsyncData(prev);
-      rethrow;
-    }
+    await ref.read(systemBootstrapProvider.future);
+    await ref.read(financeRepositoryProvider).deleteSubscription(subscriptionId);
   }
 }
 
-class BudgetNotifier extends AsyncNotifier<List<BudgetSetting>> {
+class BudgetNotifier extends StreamNotifier<List<BudgetSetting>> {
   @override
-  Future<List<BudgetSetting>> build() async {
+  Stream<List<BudgetSetting>> build() async* {
     await ref.read(systemBootstrapProvider.future);
-    final repo = ref.read(financeRepositoryProvider);
-    return await repo.getBudgets();
+    yield* ref.watch(financeRepositoryProvider).watchBudgets();
   }
 
   Future<void> setBudget(String monthKey, double amount) async {
-    final prev = state.valueOrNull ?? [];
-    try {
-      final repo = ref.read(financeRepositoryProvider);
-      await repo.setBudget(monthKey, amount);
-      state = AsyncData(await repo.getBudgets());
-    } catch (e) {
-      state = AsyncData(prev);
-      rethrow;
-    }
+    await ref.read(systemBootstrapProvider.future);
+    await ref.read(financeRepositoryProvider).setBudget(monthKey, amount);
   }
 }
 
-class CategoryNotifier extends AsyncNotifier<List<ExpenseCategory>> {
+class CategoryNotifier extends StreamNotifier<List<ExpenseCategory>> {
   @override
-  Future<List<ExpenseCategory>> build() async {
+  Stream<List<ExpenseCategory>> build() async* {
     await ref.read(systemBootstrapProvider.future);
-    final repo = ref.read(financeRepositoryProvider);
-    var categories = await repo.getCategories();
-    if (categories.isEmpty) {
+    final repo = ref.watch(financeRepositoryProvider);
+    // 首启种子:仅当库为空时补默认分类(ensureCategoriesSeeded 非幂等,故需空检查)。
+    if ((await repo.getCategories()).isEmpty) {
       await repo.ensureCategoriesSeeded();
-      categories = await repo.getCategories();
     }
-    return categories;
+    yield* repo.watchCategories();
   }
 
   Future<void> addCategory(String name, String icon, {bool isIncome = false}) async {
-    final prev = state.valueOrNull ?? [];
-    try {
-      final repo = ref.read(financeRepositoryProvider);
-      await repo.addCategory(name, icon, isIncome: isIncome);
-      state = AsyncData(await repo.getCategories());
-    } catch (e) {
-      state = AsyncData(prev);
-      rethrow;
-    }
+    await ref.read(systemBootstrapProvider.future);
+    await ref.read(financeRepositoryProvider).addCategory(name, icon, isIncome: isIncome);
   }
 
   Future<void> updateCategory(
@@ -311,55 +221,43 @@ class CategoryNotifier extends AsyncNotifier<List<ExpenseCategory>> {
     String? icon,
     bool? isIncome,
   }) async {
-    final prev = state.valueOrNull ?? [];
-    try {
-      final repo = ref.read(financeRepositoryProvider);
-      await repo.updateCategory(categoryId, name: name, icon: icon, isIncome: isIncome);
-      state = AsyncData(await repo.getCategories());
-    } catch (e) {
-      state = AsyncData(prev);
-      rethrow;
-    }
+    await ref.read(systemBootstrapProvider.future);
+    await ref
+        .read(financeRepositoryProvider)
+        .updateCategory(categoryId, name: name, icon: icon, isIncome: isIncome);
   }
 
   Future<void> deleteCategory(String categoryId) async {
-    final prev = state.valueOrNull ?? [];
-    try {
-      final repo = ref.read(financeRepositoryProvider);
-      await repo.deleteCategory(categoryId);
-      state = AsyncData(await repo.getCategories());
-    } catch (e) {
-      state = AsyncData(prev);
-      rethrow;
-    }
+    await ref.read(systemBootstrapProvider.future);
+    await ref.read(financeRepositoryProvider).deleteCategory(categoryId);
   }
 }
 
 // ── Providers ──
 
-final accountProvider = AsyncNotifierProvider<AccountNotifier, List<PaymentAccount>>(
+final accountProvider = StreamNotifierProvider<AccountNotifier, List<PaymentAccount>>(
   AccountNotifier.new,
 );
 
 final transactionProvider =
-    AsyncNotifierProvider<TransactionNotifier, List<FinancialTransactionData>>(
+    StreamNotifierProvider<TransactionNotifier, List<FinancialTransactionData>>(
   TransactionNotifier.new,
 );
 
-final assetProvider = AsyncNotifierProvider<AssetNotifier, List<AssetInventoryData>>(
+final assetProvider = StreamNotifierProvider<AssetNotifier, List<AssetInventoryData>>(
   AssetNotifier.new,
 );
 
 final subscriptionProvider =
-    AsyncNotifierProvider<SubscriptionNotifier, List<SubscriptionService>>(
+    StreamNotifierProvider<SubscriptionNotifier, List<SubscriptionService>>(
   SubscriptionNotifier.new,
 );
 
-final budgetProvider = AsyncNotifierProvider<BudgetNotifier, List<BudgetSetting>>(
+final budgetProvider = StreamNotifierProvider<BudgetNotifier, List<BudgetSetting>>(
   BudgetNotifier.new,
 );
 
-final categoryProvider = AsyncNotifierProvider<CategoryNotifier, List<ExpenseCategory>>(
+final categoryProvider = StreamNotifierProvider<CategoryNotifier, List<ExpenseCategory>>(
   CategoryNotifier.new,
 );
 
@@ -510,22 +408,42 @@ class SubscriptionItem {
   int daysUntilBilling(DateTime today) => nextBillingDate.difference(today).inDays;
 }
 
-class _TransactionItemNotifier extends StateNotifier<List<TransactionItem>> {
-  _TransactionItemNotifier(this._ref) : super([]);
-
-  final Ref _ref;
+/// 把交易流 + 账户流派生成展示用的 [TransactionItem](带分类名/账户名)。
+///
+/// 用同步 [Notifier] 直接 `ref.watch` 两路流 —— 任一变化自动重建,**无需**
+/// 手动 `ref.listen` + 外部写 `state`(那会触发 `invalid_use_of_protected_member`,
+/// P0-4 已消除)。写路径 `addTransaction` 解析账户名→id 后转发 [TransactionNotifier]。
+class TransactionItemListNotifier extends Notifier<List<TransactionItem>> {
+  @override
+  List<TransactionItem> build() {
+    final txs = ref.watch(transactionProvider).valueOrNull ?? const <FinancialTransactionData>[];
+    final accounts = ref.watch(accountProvider).valueOrNull ?? const <PaymentAccount>[];
+    final accountMap = {for (final a in accounts) a.accountId: a.accountName};
+    return txs.map((t) {
+      final cat = categoryForId(t.categoryId);
+      return TransactionItem(
+        id: t.transactionId,
+        flowType: t.flowType,
+        amount: t.amount,
+        categoryId: t.categoryId,
+        categoryName: cat.name,
+        accountName: accountMap[t.accountId] ?? t.accountId,
+        remark: t.remark,
+        loggedAt: t.loggedAt,
+      );
+    }).toList();
+  }
 
   void addTransaction(TransactionItem item) {
-    final accounts = _ref.read(accountProvider).valueOrNull ?? [];
-    String accountId = item.accountName;
+    final accounts = ref.read(accountProvider).valueOrNull ?? const <PaymentAccount>[];
+    var accountId = item.accountName;
     for (final a in accounts) {
       if (a.accountName == item.accountName) {
         accountId = a.accountId;
         break;
       }
     }
-
-    _ref.read(transactionProvider.notifier).addTransaction(
+    ref.read(transactionProvider.notifier).addTransaction(
           flowType: item.flowType,
           amount: item.amount,
           categoryId: item.categoryId,
@@ -537,32 +455,9 @@ class _TransactionItemNotifier extends StateNotifier<List<TransactionItem>> {
 }
 
 final transactionNotifierProvider =
-    StateNotifierProvider<_TransactionItemNotifier, List<TransactionItem>>((ref) {
-  final notifier = _TransactionItemNotifier(ref);
-
-  ref.listen(transactionProvider, (_, next) {
-    final accounts = ref.read(accountProvider).valueOrNull ?? [];
-    final accountMap = {for (final a in accounts) a.accountId: a.accountName};
-
-    final items = next.whenOrNull(data: (txs) => txs.map((t) {
-          final cat = categoryForId(t.categoryId);
-          return TransactionItem(
-            id: t.transactionId,
-            flowType: t.flowType,
-            amount: t.amount,
-            categoryId: t.categoryId,
-            categoryName: cat.name,
-            accountName: accountMap[t.accountId] ?? t.accountId,
-            remark: t.remark,
-            loggedAt: t.loggedAt,
-          );
-        }).toList()) ?? [];
-    // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member, P0-4 将改用流式,届时移除此直接写 state
-    notifier.state = items;
-  }, fireImmediately: true);
-
-  return notifier;
-});
+    NotifierProvider<TransactionItemListNotifier, List<TransactionItem>>(
+  TransactionItemListNotifier.new,
+);
 
 final assetListProvider = Provider<List<AssetItem>>((ref) {
   final asyncAssets = ref.watch(assetProvider);
