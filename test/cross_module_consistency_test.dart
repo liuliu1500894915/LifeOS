@@ -20,6 +20,16 @@ ProviderContainer _containerWithDb() {
   return ProviderContainer(overrides: [databaseProvider.overrideWithValue(db)]);
 }
 
+/// P0-4:finance 读取走 Repository 的 `.watch()` 流,写库后流**异步**重发。
+/// 测试里写完一笔后需泵送事件队列,直到该写出现在 provider 里(模拟真实
+/// widget 帧循环对流重发的持续泵送),否则会读到旧值。
+Future<void> _pumpUntil(bool Function() done, {int rounds = 300}) async {
+  for (var i = 0; i < rounds; i++) {
+    if (done()) return;
+    await Future<void>.delayed(Duration.zero);
+  }
+}
+
 void main() {
   group('cross-module consistency', () {
     test('memorial additions enqueue a daily todo through the event bridge', () async {
@@ -103,11 +113,12 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Wait for the async Drift write triggered by drink_drawer's _save
-      await container.read(transactionProvider.future);
-      await container.read(accountProvider.future);
-      // Allow Riverpod listeners to propagate
-      await tester.pump();
+      // drink_drawer 的 _save 触发 Drift 写;P0-4 起 finance 读走 .watch() 流,
+      // 写后异步重发,泵送直到新交易(¥12.5)出现在 transactionProvider。
+      await _pumpUntil(
+        () => (container.read(transactionProvider).valueOrNull ?? const [])
+            .any((t) => t.amount == 12.5),
+      );
 
       final logs = container.read(actionLogNotifierProvider);
       final lastLog = logs.last;
@@ -158,6 +169,12 @@ void main() {
             accountId: wechatAccount.accountId,
             loggedAt: DateTime.now(),
           );
+      // P0-4:写后流异步重发,泵送直到这笔 ¥30 进入 transactionProvider,
+      // 其后 weeklyReportProvider 等派生 provider 才能读到。
+      await _pumpUntil(
+        () => (container.read(transactionProvider).valueOrNull ?? const [])
+            .any((t) => t.amount == 30),
+      );
 
       final daily = container.read(dailyAnalyticsProvider);
       final report = container.read(weeklyReportProvider);

@@ -82,7 +82,7 @@ lib/
 - ✅ 加密 key 已移入 `flutter_secure_storage`（`key_store.dart`，P0-1 已完成 2026-07-24）；`encryption_config.dart` 不再含 key。
 - 🔴 Web 端（`database_connection_web.dart`）**无加密**（SQLCipher 不支持 Web）。
 - 🟠 全 App 单一硬编码系统用户 `user-001`（schema 是多用户，实现是单用户）。
-- 🟠 `finance` 模块正在从「presentation 写裸查询」重构到 Repository + `.watch()`（P0-3~P0-5）；`finance_providers.dart` 是**待重构的反面教材**，勿照抄其模式。
+- 🟠 `finance` 模块重构进度：✅ P0-3（Repository/DAO）、✅ P0-4（读取走 Repository 的 `.watch()` 流，`finance_providers.dart` 现为流式范式**范例**，可参照）；🔴 P0-5 仍待办——交易表 `categoryId`/`accountId` 仍是裸 text **无 FK**、分类名仍走 `categoryForId` 硬编码（`category_seeds.dart`）而非 DB 单一真相。
 
 ## 反面模式清单（勿重蹈）
 
