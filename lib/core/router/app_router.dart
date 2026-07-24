@@ -10,6 +10,7 @@ import '../../features/analytics/presentation/pages/insight_detail_page.dart';
 import '../../features/analytics/presentation/pages/report_page.dart';
 import '../../features/daily/presentation/pages/daily_page.dart';
 import '../../features/finance/presentation/pages/finance_page.dart';
+import '../../features/health/presentation/pages/exercise_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/home/presentation/pages/pet_panel_page.dart';
 import '../../features/home/presentation/pages/room_edit_page.dart';
@@ -185,6 +186,7 @@ GoRouter createAppRouter() {
           _buildBranch(AppRoutes.home, [
             _buildRealRoute('pet-panel', () => const PetPanelPage()),
             _buildRealRoute('room-edit', () => const RoomEditPage()),
+            _buildRealRoute('exercise', () => const ExercisePage()),
           ]),
           _buildBranch(AppRoutes.finance, [
             _buildRealRoute('today-expenses', () => const TodayExpensesPage()),
