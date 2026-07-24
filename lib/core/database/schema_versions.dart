@@ -2580,8 +2580,1049 @@ i1.GeneratedColumn<String> _column_162(String aliasedName) =>
           (i0.VersionedTable.col<String>('status')).equals('FAILED'),
       type: i1.DriftSqlType.string,
     );
+
+final class Schema3 extends i0.VersionedSchema {
+  Schema3({required super.database}) : super(version: 3);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    userAccounts,
+    petStatusCore,
+    petActionQuickLog,
+    assetInventory,
+    roomFurniturePlacement,
+    userProfile,
+    weightHistory,
+    financialTransaction,
+    paymentAccounts,
+    subscriptionServices,
+    budgetSettings,
+    assetValueSnapshots,
+    expenseCategories,
+    flagGoals,
+    todoExecutionList,
+    habitDefinitions,
+    habitCheckLog,
+    flagMilestones,
+    dailyReviewLog,
+    secureDocumentsVault,
+    memorialDays,
+    relationshipNetwork,
+    relationshipInteractionLog,
+    analyticalInsights,
+    dailyAggregationCache,
+    backgroundWorkerLog,
+    foodCategory,
+    foodLibrary,
+    mealLog,
+    nutritionGoal,
+    exerciseLog,
+  ];
+  late final Shape0 userAccounts = Shape0(
+    source: i0.VersionedTable(
+      entityName: 'user_accounts',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(user_id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_4,
+        _column_5,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape1 petStatusCore = Shape1(
+    source: i0.VersionedTable(
+      entityName: 'pet_status_core',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(pet_id)'],
+      columns: [
+        _column_6,
+        _column_7,
+        _column_8,
+        _column_9,
+        _column_10,
+        _column_11,
+        _column_12,
+        _column_13,
+        _column_14,
+        _column_15,
+        _column_16,
+        _column_17,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape2 petActionQuickLog = Shape2(
+    source: i0.VersionedTable(
+      entityName: 'pet_action_quick_log',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(log_id)'],
+      columns: [
+        _column_18,
+        _column_7,
+        _column_19,
+        _column_20,
+        _column_21,
+        _column_22,
+        _column_23,
+        _column_24,
+        _column_5,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape3 assetInventory = Shape3(
+    source: i0.VersionedTable(
+      entityName: 'asset_inventory',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(asset_id)'],
+      columns: [
+        _column_25,
+        _column_7,
+        _column_26,
+        _column_27,
+        _column_28,
+        _column_29,
+        _column_30,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape4 roomFurniturePlacement = Shape4(
+    source: i0.VersionedTable(
+      entityName: 'room_furniture_placement',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(placement_id)'],
+      columns: [
+        _column_31,
+        _column_7,
+        _column_32,
+        _column_33,
+        _column_34,
+        _column_35,
+        _column_36,
+        _column_37,
+        _column_17,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape5 userProfile = Shape5(
+    source: i0.VersionedTable(
+      entityName: 'user_profile',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(user_id)'],
+      columns: [
+        _column_7,
+        _column_38,
+        _column_39,
+        _column_40,
+        _column_41,
+        _column_42,
+        _column_43,
+        _column_44,
+        _column_17,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape6 weightHistory = Shape6(
+    source: i0.VersionedTable(
+      entityName: 'weight_history',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'PRIMARY KEY(record_id)',
+        'UNIQUE(user_id, recorded_date)',
+      ],
+      columns: [
+        _column_45,
+        _column_7,
+        _column_46,
+        _column_47,
+        _column_48,
+        _column_49,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape7 financialTransaction = Shape7(
+    source: i0.VersionedTable(
+      entityName: 'financial_transaction',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(transaction_id)'],
+      columns: [
+        _column_50,
+        _column_7,
+        _column_51,
+        _column_52,
+        _column_53,
+        _column_54,
+        _column_55,
+        _column_56,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape8 paymentAccounts = Shape8(
+    source: i0.VersionedTable(
+      entityName: 'payment_accounts',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(account_id)'],
+      columns: [
+        _column_57,
+        _column_7,
+        _column_58,
+        _column_59,
+        _column_60,
+        _column_61,
+        _column_62,
+        _column_5,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape9 subscriptionServices = Shape9(
+    source: i0.VersionedTable(
+      entityName: 'subscription_services',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(subscription_id)'],
+      columns: [
+        _column_63,
+        _column_7,
+        _column_64,
+        _column_52,
+        _column_65,
+        _column_66,
+        _column_67,
+        _column_68,
+        _column_4,
+        _column_5,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape10 budgetSettings = Shape10(
+    source: i0.VersionedTable(
+      entityName: 'budget_settings',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'PRIMARY KEY(budget_id)',
+        'UNIQUE(user_id, category_id, month_key)',
+      ],
+      columns: [
+        _column_69,
+        _column_7,
+        _column_53,
+        _column_70,
+        _column_71,
+        _column_72,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape11 assetValueSnapshots = Shape11(
+    source: i0.VersionedTable(
+      entityName: 'asset_value_snapshots',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'PRIMARY KEY(snapshot_id)',
+        'UNIQUE(user_id, snapshot_date)',
+      ],
+      columns: [
+        _column_73,
+        _column_7,
+        _column_74,
+        _column_75,
+        _column_76,
+        _column_77,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape12 expenseCategories = Shape12(
+    source: i0.VersionedTable(
+      entityName: 'expense_categories',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(category_id)'],
+      columns: [
+        _column_78,
+        _column_7,
+        _column_79,
+        _column_80,
+        _column_81,
+        _column_62,
+        _column_4,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape13 flagGoals = Shape13(
+    source: i0.VersionedTable(
+      entityName: 'flag_goals',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(flag_id)'],
+      columns: [
+        _column_82,
+        _column_7,
+        _column_83,
+        _column_84,
+        _column_85,
+        _column_86,
+        _column_87,
+        _column_88,
+        _column_89,
+        _column_5,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape14 todoExecutionList = Shape14(
+    source: i0.VersionedTable(
+      entityName: 'todo_execution_list',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(todo_id)'],
+      columns: [
+        _column_90,
+        _column_7,
+        _column_83,
+        _column_91,
+        _column_92,
+        _column_93,
+        _column_89,
+        _column_94,
+        _column_95,
+        _column_96,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape15 habitDefinitions = Shape15(
+    source: i0.VersionedTable(
+      entityName: 'habit_definitions',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(habit_id)'],
+      columns: [
+        _column_97,
+        _column_7,
+        _column_98,
+        _column_99,
+        _column_100,
+        _column_85,
+        _column_101,
+        _column_4,
+        _column_5,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape16 habitCheckLog = Shape16(
+    source: i0.VersionedTable(
+      entityName: 'habit_check_log',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(log_id)', 'UNIQUE(habit_id, check_date)'],
+      columns: [
+        _column_18,
+        _column_7,
+        _column_102,
+        _column_103,
+        _column_104,
+        _column_105,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape17 flagMilestones = Shape17(
+    source: i0.VersionedTable(
+      entityName: 'flag_milestones',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(milestone_id)'],
+      columns: [
+        _column_106,
+        _column_7,
+        _column_107,
+        _column_83,
+        _column_85,
+        _column_108,
+        _column_109,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape18 dailyReviewLog = Shape18(
+    source: i0.VersionedTable(
+      entityName: 'daily_review_log',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(review_date, user_id)'],
+      columns: [_column_110, _column_7, _column_111, _column_112, _column_113],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape19 secureDocumentsVault = Shape19(
+    source: i0.VersionedTable(
+      entityName: 'secure_documents_vault',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(doc_id)'],
+      columns: [
+        _column_114,
+        _column_7,
+        _column_115,
+        _column_116,
+        _column_117,
+        _column_118,
+        _column_119,
+        _column_120,
+        _column_17,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape20 memorialDays = Shape20(
+    source: i0.VersionedTable(
+      entityName: 'memorial_days',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(memorial_id)'],
+      columns: [
+        _column_121,
+        _column_7,
+        _column_122,
+        _column_123,
+        _column_124,
+        _column_125,
+        _column_126,
+        _column_127,
+        _column_128,
+        _column_4,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape21 relationshipNetwork = Shape21(
+    source: i0.VersionedTable(
+      entityName: 'relationship_network',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(contact_id)'],
+      columns: [
+        _column_129,
+        _column_7,
+        _column_130,
+        _column_131,
+        _column_132,
+        _column_133,
+        _column_134,
+        _column_135,
+        _column_5,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape22 relationshipInteractionLog = Shape22(
+    source: i0.VersionedTable(
+      entityName: 'relationship_interaction_log',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(interaction_id)'],
+      columns: [
+        _column_136,
+        _column_7,
+        _column_137,
+        _column_138,
+        _column_139,
+        _column_140,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape23 analyticalInsights = Shape23(
+    source: i0.VersionedTable(
+      entityName: 'analytical_insights',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(insight_id)'],
+      columns: [
+        _column_141,
+        _column_7,
+        _column_142,
+        _column_143,
+        _column_144,
+        _column_145,
+        _column_146,
+        _column_147,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape24 dailyAggregationCache = Shape24(
+    source: i0.VersionedTable(
+      entityName: 'daily_aggregation_cache',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(cache_date, user_id)'],
+      columns: [
+        _column_148,
+        _column_7,
+        _column_149,
+        _column_150,
+        _column_151,
+        _column_152,
+        _column_153,
+        _column_154,
+        _column_155,
+        _column_156,
+        _column_157,
+        _column_158,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape25 backgroundWorkerLog = Shape25(
+    source: i0.VersionedTable(
+      entityName: 'background_worker_log',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'PRIMARY KEY(worker_id)',
+        'UNIQUE(worker_type, target_date)',
+      ],
+      columns: [
+        _column_159,
+        _column_7,
+        _column_160,
+        _column_161,
+        _column_92,
+        _column_162,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape26 foodCategory = Shape26(
+    source: i0.VersionedTable(
+      entityName: 'food_category',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(category_id)'],
+      columns: [
+        _column_78,
+        _column_7,
+        _column_163,
+        _column_80,
+        _column_62,
+        _column_164,
+        _column_4,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape27 foodLibrary = Shape27(
+    source: i0.VersionedTable(
+      entityName: 'food_library',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(food_id)'],
+      columns: [
+        _column_165,
+        _column_7,
+        _column_166,
+        _column_167,
+        _column_168,
+        _column_169,
+        _column_170,
+        _column_171,
+        _column_172,
+        _column_173,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape28 mealLog = Shape28(
+    source: i0.VersionedTable(
+      entityName: 'meal_log',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(log_id)'],
+      columns: [
+        _column_18,
+        _column_7,
+        _column_174,
+        _column_175,
+        _column_176,
+        _column_177,
+        _column_178,
+        _column_179,
+        _column_180,
+        _column_56,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape29 nutritionGoal = Shape29(
+    source: i0.VersionedTable(
+      entityName: 'nutrition_goal',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(user_id)'],
+      columns: [
+        _column_7,
+        _column_181,
+        _column_182,
+        _column_183,
+        _column_184,
+        _column_185,
+        _column_186,
+        _column_187,
+        _column_17,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape30 exerciseLog = Shape30(
+    source: i0.VersionedTable(
+      entityName: 'exercise_log',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(log_id)'],
+      columns: [
+        _column_18,
+        _column_7,
+        _column_188,
+        _column_189,
+        _column_190,
+        _column_191,
+        _column_56,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+}
+
+class Shape26 extends i0.VersionedTable {
+  Shape26({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get categoryId =>
+      columnsByName['category_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get userId =>
+      columnsByName['user_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get categoryName =>
+      columnsByName['category_name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get categoryIcon =>
+      columnsByName['category_icon']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get sortOrder =>
+      columnsByName['sort_order']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<bool> get isBuiltIn =>
+      columnsByName['is_built_in']! as i1.GeneratedColumn<bool>;
+  i1.GeneratedColumn<bool> get isActive =>
+      columnsByName['is_active']! as i1.GeneratedColumn<bool>;
+}
+
+i1.GeneratedColumn<String> _column_163(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'category_name',
+      aliasedName,
+      false,
+      additionalChecks: i1.GeneratedColumn.checkTextLength(maxTextLength: 30),
+      type: i1.DriftSqlType.string,
+    );
+i1.GeneratedColumn<bool> _column_164(String aliasedName) =>
+    i1.GeneratedColumn<bool>(
+      'is_built_in',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.bool,
+      defaultConstraints: i1.GeneratedColumn.constraintIsAlways(
+        'CHECK ("is_built_in" IN (0, 1))',
+      ),
+      defaultValue: const Constant(false),
+    );
+
+class Shape27 extends i0.VersionedTable {
+  Shape27({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get foodId =>
+      columnsByName['food_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get userId =>
+      columnsByName['user_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get foodName =>
+      columnsByName['food_name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get categoryId =>
+      columnsByName['category_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<bool> get isCustom =>
+      columnsByName['is_custom']! as i1.GeneratedColumn<bool>;
+  i1.GeneratedColumn<double> get caloriesPer100g =>
+      columnsByName['calories_per100g']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get proteinPer100g =>
+      columnsByName['protein_per100g']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get fatPer100g =>
+      columnsByName['fat_per100g']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get carbsPer100g =>
+      columnsByName['carbs_per100g']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get defaultServingGrams =>
+      columnsByName['default_serving_grams']! as i1.GeneratedColumn<double>;
+}
+
+i1.GeneratedColumn<String> _column_165(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'food_id',
+      aliasedName,
+      false,
+      additionalChecks: i1.GeneratedColumn.checkTextLength(
+        minTextLength: 1,
+        maxTextLength: 36,
+      ),
+      type: i1.DriftSqlType.string,
+    );
+i1.GeneratedColumn<String> _column_166(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'food_name',
+      aliasedName,
+      false,
+      additionalChecks: i1.GeneratedColumn.checkTextLength(maxTextLength: 100),
+      type: i1.DriftSqlType.string,
+    );
+i1.GeneratedColumn<String> _column_167(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'category_id',
+      aliasedName,
+      false,
+      additionalChecks: i1.GeneratedColumn.checkTextLength(
+        minTextLength: 1,
+        maxTextLength: 36,
+      ),
+      type: i1.DriftSqlType.string,
+      defaultConstraints: i1.GeneratedColumn.constraintIsAlways(
+        'REFERENCES food_category (category_id)',
+      ),
+    );
+i1.GeneratedColumn<bool> _column_168(String aliasedName) =>
+    i1.GeneratedColumn<bool>(
+      'is_custom',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.bool,
+      defaultConstraints: i1.GeneratedColumn.constraintIsAlways(
+        'CHECK ("is_custom" IN (0, 1))',
+      ),
+      defaultValue: const Constant(false),
+    );
+i1.GeneratedColumn<double> _column_169(String aliasedName) =>
+    i1.GeneratedColumn<double>(
+      'calories_per100g',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.double,
+    );
+i1.GeneratedColumn<double> _column_170(String aliasedName) =>
+    i1.GeneratedColumn<double>(
+      'protein_per100g',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.double,
+      defaultValue: const Constant(0.0),
+    );
+i1.GeneratedColumn<double> _column_171(String aliasedName) =>
+    i1.GeneratedColumn<double>(
+      'fat_per100g',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.double,
+      defaultValue: const Constant(0.0),
+    );
+i1.GeneratedColumn<double> _column_172(String aliasedName) =>
+    i1.GeneratedColumn<double>(
+      'carbs_per100g',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.double,
+      defaultValue: const Constant(0.0),
+    );
+i1.GeneratedColumn<double> _column_173(String aliasedName) =>
+    i1.GeneratedColumn<double>(
+      'default_serving_grams',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.double,
+      defaultValue: const Constant(100.0),
+    );
+
+class Shape28 extends i0.VersionedTable {
+  Shape28({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get logId =>
+      columnsByName['log_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get userId =>
+      columnsByName['user_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get foodId =>
+      columnsByName['food_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get mealType =>
+      columnsByName['meal_type']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<double> get grams =>
+      columnsByName['grams']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get snapCalories =>
+      columnsByName['snap_calories']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get snapProtein =>
+      columnsByName['snap_protein']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get snapFat =>
+      columnsByName['snap_fat']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get snapCarbs =>
+      columnsByName['snap_carbs']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<DateTime> get loggedAt =>
+      columnsByName['logged_at']! as i1.GeneratedColumn<DateTime>;
+}
+
+i1.GeneratedColumn<String> _column_174(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'food_id',
+      aliasedName,
+      false,
+      additionalChecks: i1.GeneratedColumn.checkTextLength(
+        minTextLength: 1,
+        maxTextLength: 36,
+      ),
+      type: i1.DriftSqlType.string,
+      defaultConstraints: i1.GeneratedColumn.constraintIsAlways(
+        'REFERENCES food_library (food_id)',
+      ),
+    );
+i1.GeneratedColumn<String> _column_175(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'meal_type',
+      aliasedName,
+      false,
+      check: () =>
+          (i0.VersionedTable.col<String>('meal_type')).equals('BREAKFAST') |
+          (i0.VersionedTable.col<String>('meal_type')).equals('LUNCH') |
+          (i0.VersionedTable.col<String>('meal_type')).equals('DINNER') |
+          (i0.VersionedTable.col<String>('meal_type')).equals('SNACK'),
+      type: i1.DriftSqlType.string,
+    );
+i1.GeneratedColumn<double> _column_176(String aliasedName) =>
+    i1.GeneratedColumn<double>(
+      'grams',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.double,
+    );
+i1.GeneratedColumn<double> _column_177(String aliasedName) =>
+    i1.GeneratedColumn<double>(
+      'snap_calories',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.double,
+    );
+i1.GeneratedColumn<double> _column_178(String aliasedName) =>
+    i1.GeneratedColumn<double>(
+      'snap_protein',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.double,
+    );
+i1.GeneratedColumn<double> _column_179(String aliasedName) =>
+    i1.GeneratedColumn<double>(
+      'snap_fat',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.double,
+    );
+i1.GeneratedColumn<double> _column_180(String aliasedName) =>
+    i1.GeneratedColumn<double>(
+      'snap_carbs',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.double,
+    );
+
+class Shape29 extends i0.VersionedTable {
+  Shape29({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get userId =>
+      columnsByName['user_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get activityLevel =>
+      columnsByName['activity_level']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get goalType =>
+      columnsByName['goal_type']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<double> get calorieTarget =>
+      columnsByName['calorie_target']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get proteinTarget =>
+      columnsByName['protein_target']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get fatTarget =>
+      columnsByName['fat_target']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get carbTarget =>
+      columnsByName['carb_target']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<bool> get isAutoCalculated =>
+      columnsByName['is_auto_calculated']! as i1.GeneratedColumn<bool>;
+  i1.GeneratedColumn<DateTime> get updatedAt =>
+      columnsByName['updated_at']! as i1.GeneratedColumn<DateTime>;
+}
+
+i1.GeneratedColumn<String> _column_181(
+  String aliasedName,
+) => i1.GeneratedColumn<String>(
+  'activity_level',
+  aliasedName,
+  false,
+  check: () =>
+      (i0.VersionedTable.col<String>('activity_level')).equals('SEDENTARY') |
+      (i0.VersionedTable.col<String>('activity_level')).equals('LIGHT') |
+      (i0.VersionedTable.col<String>('activity_level')).equals('MODERATE') |
+      (i0.VersionedTable.col<String>('activity_level')).equals('ACTIVE') |
+      (i0.VersionedTable.col<String>('activity_level')).equals('VERY_ACTIVE'),
+  type: i1.DriftSqlType.string,
+);
+i1.GeneratedColumn<String> _column_182(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'goal_type',
+      aliasedName,
+      false,
+      check: () =>
+          (i0.VersionedTable.col<String>('goal_type')).equals('CUT') |
+          (i0.VersionedTable.col<String>('goal_type')).equals('MAINTAIN') |
+          (i0.VersionedTable.col<String>('goal_type')).equals('BULK'),
+      type: i1.DriftSqlType.string,
+    );
+i1.GeneratedColumn<double> _column_183(String aliasedName) =>
+    i1.GeneratedColumn<double>(
+      'calorie_target',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.double,
+    );
+i1.GeneratedColumn<double> _column_184(String aliasedName) =>
+    i1.GeneratedColumn<double>(
+      'protein_target',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.double,
+    );
+i1.GeneratedColumn<double> _column_185(String aliasedName) =>
+    i1.GeneratedColumn<double>(
+      'fat_target',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.double,
+    );
+i1.GeneratedColumn<double> _column_186(String aliasedName) =>
+    i1.GeneratedColumn<double>(
+      'carb_target',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.double,
+    );
+i1.GeneratedColumn<bool> _column_187(String aliasedName) =>
+    i1.GeneratedColumn<bool>(
+      'is_auto_calculated',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.bool,
+      defaultConstraints: i1.GeneratedColumn.constraintIsAlways(
+        'CHECK ("is_auto_calculated" IN (0, 1))',
+      ),
+      defaultValue: const Constant(true),
+    );
+
+class Shape30 extends i0.VersionedTable {
+  Shape30({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get logId =>
+      columnsByName['log_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get userId =>
+      columnsByName['user_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get exerciseName =>
+      columnsByName['exercise_name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get durationMinutes =>
+      columnsByName['duration_minutes']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get intensity =>
+      columnsByName['intensity']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<double> get caloriesBurned =>
+      columnsByName['calories_burned']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<DateTime> get loggedAt =>
+      columnsByName['logged_at']! as i1.GeneratedColumn<DateTime>;
+}
+
+i1.GeneratedColumn<String> _column_188(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'exercise_name',
+      aliasedName,
+      false,
+      additionalChecks: i1.GeneratedColumn.checkTextLength(maxTextLength: 50),
+      type: i1.DriftSqlType.string,
+    );
+i1.GeneratedColumn<int> _column_189(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'duration_minutes',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.int,
+    );
+i1.GeneratedColumn<String> _column_190(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'intensity',
+      aliasedName,
+      true,
+      check: () =>
+          (i0.VersionedTable.col<String>('intensity')).equals('LOW') |
+          (i0.VersionedTable.col<String>('intensity')).equals('MEDIUM') |
+          (i0.VersionedTable.col<String>('intensity')).equals('HIGH'),
+      type: i1.DriftSqlType.string,
+    );
+i1.GeneratedColumn<double> _column_191(String aliasedName) =>
+    i1.GeneratedColumn<double>(
+      'calories_burned',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.double,
+    );
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
+  required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -2590,6 +3631,11 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from1To2(migrator, schema);
         return 2;
+      case 2:
+        final schema = Schema3(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from2To3(migrator, schema);
+        return 3;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -2598,6 +3644,7 @@ i0.MigrationStepWithVersion migrationSteps({
 
 i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
+  required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
 }) => i0.VersionedSchema.stepByStepHelper(
-  step: migrationSteps(from1To2: from1To2),
+  step: migrationSteps(from1To2: from1To2, from2To3: from2To3),
 );

@@ -1,0 +1,70 @@
+{
+  "categories": [
+    {"categoryId": "cat-staple", "categoryName": "主食", "categoryIcon": "🍚", "sortOrder": 1},
+    {"categoryId": "cat-vegetable", "categoryName": "蔬菜", "categoryIcon": "🥬", "sortOrder": 2},
+    {"categoryId": "cat-fruit", "categoryName": "水果", "categoryIcon": "🍎", "sortOrder": 3},
+    {"categoryId": "cat-meat", "categoryName": "肉禽蛋", "categoryIcon": "🍗", "sortOrder": 4},
+    {"categoryId": "cat-seafood", "categoryName": "水产", "categoryIcon": "🐟", "sortOrder": 5},
+    {"categoryId": "cat-bean", "categoryName": "豆奶", "categoryIcon": "🥛", "sortOrder": 6},
+    {"categoryId": "cat-nut", "categoryName": "坚果", "categoryIcon": "🥜", "sortOrder": 7},
+    {"categoryId": "cat-drink", "categoryName": "饮品", "categoryIcon": "🥤", "sortOrder": 8},
+    {"categoryId": "cat-condiment", "categoryName": "调味", "categoryIcon": "🧂", "sortOrder": 9}
+  ],
+  "foods": [
+    {"foodId": "food-rice", "foodName": "米饭", "categoryId": "cat-staple", "caloriesPer100g": 116, "proteinPer100g": 2.6, "fatPer100g": 0.3, "carbsPer100g": 25.9, "defaultServingGrams": 150},
+    {"foodId": "food-steambun", "foodName": "馒头", "categoryId": "cat-staple", "caloriesPer100g": 223, "proteinPer100g": 7.0, "fatPer100g": 1.1, "carbsPer100g": 47.0, "defaultServingGrams": 100},
+    {"foodId": "food-noodle", "foodName": "面条(煮)", "categoryId": "cat-staple", "caloriesPer100g": 110, "proteinPer100g": 3.5, "fatPer100g": 0.6, "carbsPer100g": 22.0, "defaultServingGrams": 200},
+    {"foodId": "food-corn", "foodName": "玉米(鲜)", "categoryId": "cat-staple", "caloriesPer100g": 112, "proteinPer100g": 4.0, "fatPer100g": 1.2, "carbsPer100g": 22.8, "defaultServingGrams": 100},
+    {"foodId": "food-sweetpotato", "foodName": "红薯", "categoryId": "cat-staple", "caloriesPer100g": 86, "proteinPer100g": 1.6, "fatPer100g": 0.1, "carbsPer100g": 20.0, "defaultServingGrams": 200},
+    {"foodId": "food-oats", "foodName": "燕麦片", "categoryId": "cat-staple", "caloriesPer100g": 338, "proteinPer100g": 15.0, "fatPer100g": 7.0, "carbsPer100g": 61.0, "defaultServingGrams": 40},
+    {"foodId": "food-bread", "foodName": "面包", "categoryId": "cat-staple", "caloriesPer100g": 313, "proteinPer100g": 8.3, "fatPer100g": 5.1, "carbsPer100g": 58.6, "defaultServingGrams": 80},
+
+    {"foodId": "food-cabbage", "foodName": "大白菜", "categoryId": "cat-vegetable", "caloriesPer100g": 17, "proteinPer100g": 1.5, "fatPer100g": 0.1, "carbsPer100g": 3.2, "defaultServingGrams": 200},
+    {"foodId": "food-tomato", "foodName": "西红柿", "categoryId": "cat-vegetable", "caloriesPer100g": 19, "proteinPer100g": 0.9, "fatPer100g": 0.2, "carbsPer100g": 4.0, "defaultServingGrams": 150},
+    {"foodId": "food-cucumber", "foodName": "黄瓜", "categoryId": "cat-vegetable", "caloriesPer100g": 16, "proteinPer100g": 0.8, "fatPer100g": 0.2, "carbsPer100g": 2.9, "defaultServingGrams": 200},
+    {"foodId": "food-carrot", "foodName": "胡萝卜", "categoryId": "cat-vegetable", "caloriesPer100g": 32, "proteinPer100g": 1.0, "fatPer100g": 0.2, "carbsPer100g": 8.1, "defaultServingGrams": 100},
+    {"foodId": "food-spinach", "foodName": "菠菜", "categoryId": "cat-vegetable", "caloriesPer100g": 24, "proteinPer100g": 2.6, "fatPer100g": 0.3, "carbsPer100g": 4.5, "defaultServingGrams": 150},
+    {"foodId": "food-potato", "foodName": "土豆", "categoryId": "cat-vegetable", "caloriesPer100g": 77, "proteinPer100g": 2.0, "fatPer100g": 0.2, "carbsPer100g": 17.2, "defaultServingGrams": 150},
+    {"foodId": "food-broccoli", "foodName": "西兰花", "categoryId": "cat-vegetable", "caloriesPer100g": 36, "proteinPer100g": 4.1, "fatPer100g": 0.6, "carbsPer100g": 4.3, "defaultServingGrams": 150},
+    {"foodId": "food-eggplant", "foodName": "茄子", "categoryId": "cat-vegetable", "caloriesPer100g": 21, "proteinPer100g": 1.1, "fatPer100g": 0.2, "carbsPer100g": 4.9, "defaultServingGrams": 150},
+    {"foodId": "food-lettuce", "foodName": "生菜", "categoryId": "cat-vegetable", "caloriesPer100g": 13, "proteinPer100g": 1.4, "fatPer100g": 0.2, "carbsPer100g": 2.0, "defaultServingGrams": 150},
+
+    {"foodId": "food-apple", "foodName": "苹果", "categoryId": "cat-fruit", "caloriesPer100g": 52, "proteinPer100g": 0.3, "fatPer100g": 0.2, "carbsPer100g": 13.8, "defaultServingGrams": 200},
+    {"foodId": "food-banana", "foodName": "香蕉", "categoryId": "cat-fruit", "caloriesPer100g": 93, "proteinPer100g": 1.4, "fatPer100g": 0.2, "carbsPer100g": 22.0, "defaultServingGrams": 150},
+    {"foodId": "food-orange", "foodName": "橙子", "categoryId": "cat-fruit", "caloriesPer100g": 48, "proteinPer100g": 0.8, "fatPer100g": 0.2, "carbsPer100g": 11.1, "defaultServingGrams": 200},
+    {"foodId": "food-grape", "foodName": "葡萄", "categoryId": "cat-fruit", "caloriesPer100g": 44, "proteinPer100g": 0.5, "fatPer100g": 0.2, "carbsPer100g": 10.3, "defaultServingGrams": 150},
+    {"foodId": "food-watermelon", "foodName": "西瓜", "categoryId": "cat-fruit", "caloriesPer100g": 26, "proteinPer100g": 0.6, "fatPer100g": 0.2, "carbsPer100g": 5.8, "defaultServingGrams": 300},
+    {"foodId": "food-pear", "foodName": "梨", "categoryId": "cat-fruit", "caloriesPer100g": 50, "proteinPer100g": 0.4, "fatPer100g": 0.2, "carbsPer100g": 13.3, "defaultServingGrams": 200},
+    {"foodId": "food-strawberry", "foodName": "草莓", "categoryId": "cat-fruit", "caloriesPer100g": 32, "proteinPer100g": 1.0, "fatPer100g": 0.2, "carbsPer100g": 7.1, "defaultServingGrams": 150},
+
+    {"foodId": "food-chickenbreast", "foodName": "鸡胸肉", "categoryId": "cat-meat", "caloriesPer100g": 133, "proteinPer100g": 19.4, "fatPer100g": 5.0, "carbsPer100g": 2.5, "defaultServingGrams": 100},
+    {"foodId": "food-porklean", "foodName": "猪肉(瘦)", "categoryId": "cat-meat", "caloriesPer100g": 143, "proteinPer100g": 20.3, "fatPer100g": 6.2, "carbsPer100g": 1.5, "defaultServingGrams": 100},
+    {"foodId": "food-beeflean", "foodName": "牛肉(瘦)", "categoryId": "cat-meat", "caloriesPer100g": 125, "proteinPer100g": 20.2, "fatPer100g": 4.2, "carbsPer100g": 1.2, "defaultServingGrams": 100},
+    {"foodId": "food-egg", "foodName": "鸡蛋", "categoryId": "cat-meat", "caloriesPer100g": 147, "proteinPer100g": 12.7, "fatPer100g": 9.0, "carbsPer100g": 1.1, "defaultServingGrams": 50},
+    {"foodId": "food-chickenleg", "foodName": "鸡腿", "categoryId": "cat-meat", "caloriesPer100g": 181, "proteinPer100g": 16.4, "fatPer100g": 13.0, "carbsPer100g": 0.0, "defaultServingGrams": 100},
+    {"foodId": "food-duck", "foodName": "鸭肉", "categoryId": "cat-meat", "caloriesPer100g": 240, "proteinPer100g": 15.5, "fatPer100g": 19.7, "carbsPer100g": 0.2, "defaultServingGrams": 100},
+    {"foodId": "food-mutton", "foodName": "羊肉(瘦)", "categoryId": "cat-meat", "caloriesPer100g": 203, "proteinPer100g": 19.0, "fatPer100g": 14.1, "carbsPer100g": 0.0, "defaultServingGrams": 100},
+
+    {"foodId": "food-grasscarp", "foodName": "草鱼", "categoryId": "cat-seafood", "caloriesPer100g": 113, "proteinPer100g": 16.6, "fatPer100g": 5.2, "carbsPer100g": 0.0, "defaultServingGrams": 100},
+    {"foodId": "food-shrimp", "foodName": "虾仁", "categoryId": "cat-seafood", "caloriesPer100g": 87, "proteinPer100g": 18.6, "fatPer100g": 0.8, "carbsPer100g": 0.7, "defaultServingGrams": 100},
+    {"foodId": "food-seabass", "foodName": "鲈鱼", "categoryId": "cat-seafood", "caloriesPer100g": 105, "proteinPer100g": 18.6, "fatPer100g": 3.4, "carbsPer100g": 0.0, "defaultServingGrams": 100},
+    {"foodId": "food-salmon", "foodName": "三文鱼", "categoryId": "cat-seafood", "caloriesPer100g": 208, "proteinPer100g": 20.0, "fatPer100g": 13.0, "carbsPer100g": 0.0, "defaultServingGrams": 100},
+
+    {"foodId": "food-tofu", "foodName": "豆腐", "categoryId": "cat-bean", "caloriesPer100g": 81, "proteinPer100g": 8.1, "fatPer100g": 3.7, "carbsPer100g": 4.2, "defaultServingGrams": 150},
+    {"foodId": "food-soymilk", "foodName": "豆浆", "categoryId": "cat-bean", "caloriesPer100g": 31, "proteinPer100g": 3.0, "fatPer100g": 1.6, "carbsPer100g": 1.2, "defaultServingGrams": 250},
+    {"foodId": "food-milk", "foodName": "牛奶", "categoryId": "cat-bean", "caloriesPer100g": 54, "proteinPer100g": 3.0, "fatPer100g": 3.2, "carbsPer100g": 3.4, "defaultServingGrams": 250},
+    {"foodId": "food-yogurt", "foodName": "酸奶", "categoryId": "cat-bean", "caloriesPer100g": 72, "proteinPer100g": 2.5, "fatPer100g": 2.7, "carbsPer100g": 9.3, "defaultServingGrams": 200},
+
+    {"foodId": "food-peanut", "foodName": "花生", "categoryId": "cat-nut", "caloriesPer100g": 567, "proteinPer100g": 25.8, "fatPer100g": 49.2, "carbsPer100g": 16.1, "defaultServingGrams": 30},
+    {"foodId": "food-walnut", "foodName": "核桃", "categoryId": "cat-nut", "caloriesPer100g": 654, "proteinPer100g": 14.9, "fatPer100g": 65.2, "carbsPer100g": 13.7, "defaultServingGrams": 30},
+    {"foodId": "food-almond", "foodName": "杏仁", "categoryId": "cat-nut", "caloriesPer100g": 578, "proteinPer100g": 21.0, "fatPer100g": 50.0, "carbsPer100g": 22.0, "defaultServingGrams": 30},
+    {"foodId": "food-cashew", "foodName": "腰果", "categoryId": "cat-nut", "caloriesPer100g": 553, "proteinPer100g": 18.0, "fatPer100g": 44.0, "carbsPer100g": 30.0, "defaultServingGrams": 30},
+
+    {"foodId": "food-orangejuice", "foodName": "橙汁", "categoryId": "cat-drink", "caloriesPer100g": 45, "proteinPer100g": 0.7, "fatPer100g": 0.2, "carbsPer100g": 10.4, "defaultServingGrams": 250},
+    {"foodId": "food-cola", "foodName": "可乐", "categoryId": "cat-drink", "caloriesPer100g": 43, "proteinPer100g": 0.0, "fatPer100g": 0.0, "carbsPer100g": 10.6, "defaultServingGrams": 330},
+    {"foodId": "food-blackcoffee", "foodName": "黑咖啡", "categoryId": "cat-drink", "caloriesPer100g": 2, "proteinPer100g": 0.1, "fatPer100g": 0.0, "carbsPer100g": 0.0, "defaultServingGrams": 250},
+
+    {"foodId": "food-sugar", "foodName": "白糖", "categoryId": "cat-condiment", "caloriesPer100g": 400, "proteinPer100g": 0.0, "fatPer100g": 0.0, "carbsPer100g": 99.9, "defaultServingGrams": 5},
+    {"foodId": "food-soysauce", "foodName": "酱油", "categoryId": "cat-condiment", "caloriesPer100g": 53, "proteinPer100g": 8.1, "fatPer100g": 0.6, "carbsPer100g": 4.9, "defaultServingGrams": 10}
+  ]
+}
