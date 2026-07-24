@@ -93,10 +93,10 @@ class AccountsPage extends ConsumerWidget {
       isScrollControlled: true,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setModalState) => SafeArea(
+      builder: (sheetCtx) => StatefulBuilder(
+        builder: (_, setModalState) => SafeArea(
           child: Padding(
-            padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+            padding: EdgeInsets.only(bottom: MediaQuery.of(sheetCtx).viewInsets.bottom),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -135,12 +135,30 @@ class AccountsPage extends ConsumerWidget {
                       SizedBox(
                         width: double.infinity,
                         child: FilledButton(
-                          onPressed: () {
+                          onPressed: () async {
                             final name = nameCtl.text.trim();
                             final balance = double.tryParse(balanceCtl.text) ?? 0;
-                            if (name.isEmpty) return;
-                            ref.read(accountProvider.notifier).addAccount(name, type, isLiability, balance);
-                            Navigator.pop(ctx);
+                            if (name.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('请输入账户名称'), behavior: SnackBarBehavior.floating),
+                              );
+                              return;
+                            }
+                            try {
+                              await ref.read(accountProvider.notifier).addAccount(name, type, isLiability, balance);
+                              if (sheetCtx.mounted) Navigator.pop(sheetCtx);
+                            } catch (e) {
+                              debugPrint('[AccountsPage] addAccount error: $e');
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('添加失败: $e'),
+                                    behavior: SnackBarBehavior.floating,
+                                    duration: const Duration(seconds: 5),
+                                  ),
+                                );
+                              }
+                            }
                           },
                           child: const Text('添加账户'),
                         ),
@@ -250,9 +268,9 @@ class _AccountCard extends ConsumerWidget {
       context: context,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (ctx) => SafeArea(
+      builder: (sheetCtx) => SafeArea(
         child: Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom, left: 20, right: 20, top: 20),
+          padding: EdgeInsets.only(bottom: MediaQuery.of(sheetCtx).viewInsets.bottom, left: 20, right: 20, top: 20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -274,9 +292,18 @@ class _AccountCard extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () {
-                        ref.read(accountProvider.notifier).deleteAccount(account.accountId);
-                        Navigator.pop(ctx);
+                      onPressed: () async {
+                        try {
+                          await ref.read(accountProvider.notifier).deleteAccount(account.accountId);
+                          if (sheetCtx.mounted) Navigator.pop(sheetCtx);
+                        } catch (e) {
+                          debugPrint('[AccountsPage] deleteAccount error: $e');
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('删除失败: $e'), behavior: SnackBarBehavior.floating, duration: const Duration(seconds: 5)),
+                            );
+                          }
+                        }
                       },
                       style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
                       child: const Text('删除账户'),
@@ -285,11 +312,25 @@ class _AccountCard extends ConsumerWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: FilledButton(
-                      onPressed: () {
+                      onPressed: () async {
                         final newBalance = double.tryParse(ctl.text);
-                        if (newBalance == null) return;
-                        ref.read(accountProvider.notifier).updateAccount(account.accountId, balance: newBalance);
-                        Navigator.pop(ctx);
+                        if (newBalance == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('请输入有效余额'), behavior: SnackBarBehavior.floating),
+                          );
+                          return;
+                        }
+                        try {
+                          await ref.read(accountProvider.notifier).updateAccount(account.accountId, balance: newBalance);
+                          if (sheetCtx.mounted) Navigator.pop(sheetCtx);
+                        } catch (e) {
+                          debugPrint('[AccountsPage] updateAccount error: $e');
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('保存失败: $e'), behavior: SnackBarBehavior.floating, duration: const Duration(seconds: 5)),
+                            );
+                          }
+                        }
                       },
                       child: const Text('保存'),
                     ),

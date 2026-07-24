@@ -6513,6 +6513,498 @@ class AssetValueSnapshotsCompanion extends UpdateCompanion<AssetValueSnapshot> {
   }
 }
 
+class $ExpenseCategoriesTable extends ExpenseCategories
+    with TableInfo<$ExpenseCategoriesTable, ExpenseCategory> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ExpenseCategoriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _categoryIdMeta = const VerificationMeta(
+    'categoryId',
+  );
+  @override
+  late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
+    'category_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES user_accounts (user_id)',
+    ),
+  );
+  static const VerificationMeta _categoryNameMeta = const VerificationMeta(
+    'categoryName',
+  );
+  @override
+  late final GeneratedColumn<String> categoryName = GeneratedColumn<String>(
+    'category_name',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 50),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoryIconMeta = const VerificationMeta(
+    'categoryIcon',
+  );
+  @override
+  late final GeneratedColumn<String> categoryIcon = GeneratedColumn<String>(
+    'category_icon',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 10),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isIncomeMeta = const VerificationMeta(
+    'isIncome',
+  );
+  @override
+  late final GeneratedColumn<bool> isIncome = GeneratedColumn<bool>(
+    'is_income',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_income" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _isActiveMeta = const VerificationMeta(
+    'isActive',
+  );
+  @override
+  late final GeneratedColumn<bool> isActive = GeneratedColumn<bool>(
+    'is_active',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_active" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    categoryId,
+    userId,
+    categoryName,
+    categoryIcon,
+    isIncome,
+    sortOrder,
+    isActive,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'expense_categories';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ExpenseCategory> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('category_id')) {
+      context.handle(
+        _categoryIdMeta,
+        categoryId.isAcceptableOrUnknown(data['category_id']!, _categoryIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryIdMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('category_name')) {
+      context.handle(
+        _categoryNameMeta,
+        categoryName.isAcceptableOrUnknown(
+          data['category_name']!,
+          _categoryNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryNameMeta);
+    }
+    if (data.containsKey('category_icon')) {
+      context.handle(
+        _categoryIconMeta,
+        categoryIcon.isAcceptableOrUnknown(
+          data['category_icon']!,
+          _categoryIconMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryIconMeta);
+    }
+    if (data.containsKey('is_income')) {
+      context.handle(
+        _isIncomeMeta,
+        isIncome.isAcceptableOrUnknown(data['is_income']!, _isIncomeMeta),
+      );
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    }
+    if (data.containsKey('is_active')) {
+      context.handle(
+        _isActiveMeta,
+        isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {categoryId};
+  @override
+  ExpenseCategory map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ExpenseCategory(
+      categoryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category_id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
+      categoryName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category_name'],
+      )!,
+      categoryIcon: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category_icon'],
+      )!,
+      isIncome: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_income'],
+      )!,
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
+      isActive: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_active'],
+      )!,
+    );
+  }
+
+  @override
+  $ExpenseCategoriesTable createAlias(String alias) {
+    return $ExpenseCategoriesTable(attachedDatabase, alias);
+  }
+}
+
+class ExpenseCategory extends DataClass implements Insertable<ExpenseCategory> {
+  final String categoryId;
+  final String userId;
+  final String categoryName;
+  final String categoryIcon;
+  final bool isIncome;
+  final int sortOrder;
+  final bool isActive;
+  const ExpenseCategory({
+    required this.categoryId,
+    required this.userId,
+    required this.categoryName,
+    required this.categoryIcon,
+    required this.isIncome,
+    required this.sortOrder,
+    required this.isActive,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['category_id'] = Variable<String>(categoryId);
+    map['user_id'] = Variable<String>(userId);
+    map['category_name'] = Variable<String>(categoryName);
+    map['category_icon'] = Variable<String>(categoryIcon);
+    map['is_income'] = Variable<bool>(isIncome);
+    map['sort_order'] = Variable<int>(sortOrder);
+    map['is_active'] = Variable<bool>(isActive);
+    return map;
+  }
+
+  ExpenseCategoriesCompanion toCompanion(bool nullToAbsent) {
+    return ExpenseCategoriesCompanion(
+      categoryId: Value(categoryId),
+      userId: Value(userId),
+      categoryName: Value(categoryName),
+      categoryIcon: Value(categoryIcon),
+      isIncome: Value(isIncome),
+      sortOrder: Value(sortOrder),
+      isActive: Value(isActive),
+    );
+  }
+
+  factory ExpenseCategory.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ExpenseCategory(
+      categoryId: serializer.fromJson<String>(json['categoryId']),
+      userId: serializer.fromJson<String>(json['userId']),
+      categoryName: serializer.fromJson<String>(json['categoryName']),
+      categoryIcon: serializer.fromJson<String>(json['categoryIcon']),
+      isIncome: serializer.fromJson<bool>(json['isIncome']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      isActive: serializer.fromJson<bool>(json['isActive']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'categoryId': serializer.toJson<String>(categoryId),
+      'userId': serializer.toJson<String>(userId),
+      'categoryName': serializer.toJson<String>(categoryName),
+      'categoryIcon': serializer.toJson<String>(categoryIcon),
+      'isIncome': serializer.toJson<bool>(isIncome),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'isActive': serializer.toJson<bool>(isActive),
+    };
+  }
+
+  ExpenseCategory copyWith({
+    String? categoryId,
+    String? userId,
+    String? categoryName,
+    String? categoryIcon,
+    bool? isIncome,
+    int? sortOrder,
+    bool? isActive,
+  }) => ExpenseCategory(
+    categoryId: categoryId ?? this.categoryId,
+    userId: userId ?? this.userId,
+    categoryName: categoryName ?? this.categoryName,
+    categoryIcon: categoryIcon ?? this.categoryIcon,
+    isIncome: isIncome ?? this.isIncome,
+    sortOrder: sortOrder ?? this.sortOrder,
+    isActive: isActive ?? this.isActive,
+  );
+  ExpenseCategory copyWithCompanion(ExpenseCategoriesCompanion data) {
+    return ExpenseCategory(
+      categoryId: data.categoryId.present
+          ? data.categoryId.value
+          : this.categoryId,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      categoryName: data.categoryName.present
+          ? data.categoryName.value
+          : this.categoryName,
+      categoryIcon: data.categoryIcon.present
+          ? data.categoryIcon.value
+          : this.categoryIcon,
+      isIncome: data.isIncome.present ? data.isIncome.value : this.isIncome,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      isActive: data.isActive.present ? data.isActive.value : this.isActive,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExpenseCategory(')
+          ..write('categoryId: $categoryId, ')
+          ..write('userId: $userId, ')
+          ..write('categoryName: $categoryName, ')
+          ..write('categoryIcon: $categoryIcon, ')
+          ..write('isIncome: $isIncome, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('isActive: $isActive')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    categoryId,
+    userId,
+    categoryName,
+    categoryIcon,
+    isIncome,
+    sortOrder,
+    isActive,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ExpenseCategory &&
+          other.categoryId == this.categoryId &&
+          other.userId == this.userId &&
+          other.categoryName == this.categoryName &&
+          other.categoryIcon == this.categoryIcon &&
+          other.isIncome == this.isIncome &&
+          other.sortOrder == this.sortOrder &&
+          other.isActive == this.isActive);
+}
+
+class ExpenseCategoriesCompanion extends UpdateCompanion<ExpenseCategory> {
+  final Value<String> categoryId;
+  final Value<String> userId;
+  final Value<String> categoryName;
+  final Value<String> categoryIcon;
+  final Value<bool> isIncome;
+  final Value<int> sortOrder;
+  final Value<bool> isActive;
+  final Value<int> rowid;
+  const ExpenseCategoriesCompanion({
+    this.categoryId = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.categoryName = const Value.absent(),
+    this.categoryIcon = const Value.absent(),
+    this.isIncome = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.isActive = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ExpenseCategoriesCompanion.insert({
+    required String categoryId,
+    required String userId,
+    required String categoryName,
+    required String categoryIcon,
+    this.isIncome = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.isActive = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : categoryId = Value(categoryId),
+       userId = Value(userId),
+       categoryName = Value(categoryName),
+       categoryIcon = Value(categoryIcon);
+  static Insertable<ExpenseCategory> custom({
+    Expression<String>? categoryId,
+    Expression<String>? userId,
+    Expression<String>? categoryName,
+    Expression<String>? categoryIcon,
+    Expression<bool>? isIncome,
+    Expression<int>? sortOrder,
+    Expression<bool>? isActive,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (categoryId != null) 'category_id': categoryId,
+      if (userId != null) 'user_id': userId,
+      if (categoryName != null) 'category_name': categoryName,
+      if (categoryIcon != null) 'category_icon': categoryIcon,
+      if (isIncome != null) 'is_income': isIncome,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (isActive != null) 'is_active': isActive,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ExpenseCategoriesCompanion copyWith({
+    Value<String>? categoryId,
+    Value<String>? userId,
+    Value<String>? categoryName,
+    Value<String>? categoryIcon,
+    Value<bool>? isIncome,
+    Value<int>? sortOrder,
+    Value<bool>? isActive,
+    Value<int>? rowid,
+  }) {
+    return ExpenseCategoriesCompanion(
+      categoryId: categoryId ?? this.categoryId,
+      userId: userId ?? this.userId,
+      categoryName: categoryName ?? this.categoryName,
+      categoryIcon: categoryIcon ?? this.categoryIcon,
+      isIncome: isIncome ?? this.isIncome,
+      sortOrder: sortOrder ?? this.sortOrder,
+      isActive: isActive ?? this.isActive,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (categoryId.present) {
+      map['category_id'] = Variable<String>(categoryId.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (categoryName.present) {
+      map['category_name'] = Variable<String>(categoryName.value);
+    }
+    if (categoryIcon.present) {
+      map['category_icon'] = Variable<String>(categoryIcon.value);
+    }
+    if (isIncome.present) {
+      map['is_income'] = Variable<bool>(isIncome.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (isActive.present) {
+      map['is_active'] = Variable<bool>(isActive.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExpenseCategoriesCompanion(')
+          ..write('categoryId: $categoryId, ')
+          ..write('userId: $userId, ')
+          ..write('categoryName: $categoryName, ')
+          ..write('categoryIcon: $categoryIcon, ')
+          ..write('isIncome: $isIncome, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('isActive: $isActive, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $FlagGoalsTable extends FlagGoals
     with TableInfo<$FlagGoalsTable, FlagGoal> {
   @override
@@ -13864,6 +14356,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $BudgetSettingsTable budgetSettings = $BudgetSettingsTable(this);
   late final $AssetValueSnapshotsTable assetValueSnapshots =
       $AssetValueSnapshotsTable(this);
+  late final $ExpenseCategoriesTable expenseCategories =
+      $ExpenseCategoriesTable(this);
   late final $FlagGoalsTable flagGoals = $FlagGoalsTable(this);
   late final $TodoExecutionListTable todoExecutionList =
       $TodoExecutionListTable(this);
@@ -13903,6 +14397,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     subscriptionServices,
     budgetSettings,
     assetValueSnapshots,
+    expenseCategories,
     flagGoals,
     todoExecutionList,
     habitDefinitions,
@@ -14219,6 +14714,33 @@ final class $$UserAccountsTableReferences
 
     final cache = $_typedResult.readTableOrNull(
       _assetValueSnapshotsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$ExpenseCategoriesTable, List<ExpenseCategory>>
+  _expenseCategoriesRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.expenseCategories,
+        aliasName: $_aliasNameGenerator(
+          db.userAccounts.userId,
+          db.expenseCategories.userId,
+        ),
+      );
+
+  $$ExpenseCategoriesTableProcessedTableManager get expenseCategoriesRefs {
+    final manager =
+        $$ExpenseCategoriesTableTableManager(
+          $_db,
+          $_db.expenseCategories,
+        ).filter(
+          (f) => f.userId.userId.sqlEquals($_itemColumn<String>('user_id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _expenseCategoriesRefsTable($_db),
     );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
@@ -14869,6 +15391,31 @@ class $$UserAccountsTableFilterComposer
           }) => $$AssetValueSnapshotsTableFilterComposer(
             $db: $db,
             $table: $db.assetValueSnapshots,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> expenseCategoriesRefs(
+    Expression<bool> Function($$ExpenseCategoriesTableFilterComposer f) f,
+  ) {
+    final $$ExpenseCategoriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.expenseCategories,
+      getReferencedColumn: (t) => t.userId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ExpenseCategoriesTableFilterComposer(
+            $db: $db,
+            $table: $db.expenseCategories,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -15560,6 +16107,32 @@ class $$UserAccountsTableAnnotationComposer
     return f(composer);
   }
 
+  Expression<T> expenseCategoriesRefs<T extends Object>(
+    Expression<T> Function($$ExpenseCategoriesTableAnnotationComposer a) f,
+  ) {
+    final $$ExpenseCategoriesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.userId,
+          referencedTable: $db.expenseCategories,
+          getReferencedColumn: (t) => t.userId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ExpenseCategoriesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.expenseCategories,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
   Expression<T> flagGoalsRefs<T extends Object>(
     Expression<T> Function($$FlagGoalsTableAnnotationComposer a) f,
   ) {
@@ -15921,6 +16494,7 @@ class $$UserAccountsTableTableManager
             bool subscriptionServicesRefs,
             bool budgetSettingsRefs,
             bool assetValueSnapshotsRefs,
+            bool expenseCategoriesRefs,
             bool flagGoalsRefs,
             bool todoExecutionListRefs,
             bool habitDefinitionsRefs,
@@ -16004,6 +16578,7 @@ class $$UserAccountsTableTableManager
                 subscriptionServicesRefs = false,
                 budgetSettingsRefs = false,
                 assetValueSnapshotsRefs = false,
+                expenseCategoriesRefs = false,
                 flagGoalsRefs = false,
                 todoExecutionListRefs = false,
                 habitDefinitionsRefs = false,
@@ -16032,6 +16607,7 @@ class $$UserAccountsTableTableManager
                     if (subscriptionServicesRefs) db.subscriptionServices,
                     if (budgetSettingsRefs) db.budgetSettings,
                     if (assetValueSnapshotsRefs) db.assetValueSnapshots,
+                    if (expenseCategoriesRefs) db.expenseCategories,
                     if (flagGoalsRefs) db.flagGoals,
                     if (todoExecutionListRefs) db.todoExecutionList,
                     if (habitDefinitionsRefs) db.habitDefinitions,
@@ -16275,6 +16851,27 @@ class $$UserAccountsTableTableManager
                                 table,
                                 p0,
                               ).assetValueSnapshotsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.userId == item.userId,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (expenseCategoriesRefs)
+                        await $_getPrefetchedData<
+                          UserAccount,
+                          $UserAccountsTable,
+                          ExpenseCategory
+                        >(
+                          currentTable: table,
+                          referencedTable: $$UserAccountsTableReferences
+                              ._expenseCategoriesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$UserAccountsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).expenseCategoriesRefs,
                           referencedItemsForCurrentItem:
                               (item, referencedItems) => referencedItems.where(
                                 (e) => e.userId == item.userId,
@@ -16586,6 +17183,7 @@ typedef $$UserAccountsTableProcessedTableManager =
         bool subscriptionServicesRefs,
         bool budgetSettingsRefs,
         bool assetValueSnapshotsRefs,
+        bool expenseCategoriesRefs,
         bool flagGoalsRefs,
         bool todoExecutionListRefs,
         bool habitDefinitionsRefs,
@@ -21397,6 +21995,388 @@ typedef $$AssetValueSnapshotsTableProcessedTableManager =
       $$AssetValueSnapshotsTableUpdateCompanionBuilder,
       (AssetValueSnapshot, $$AssetValueSnapshotsTableReferences),
       AssetValueSnapshot,
+      PrefetchHooks Function({bool userId})
+    >;
+typedef $$ExpenseCategoriesTableCreateCompanionBuilder =
+    ExpenseCategoriesCompanion Function({
+      required String categoryId,
+      required String userId,
+      required String categoryName,
+      required String categoryIcon,
+      Value<bool> isIncome,
+      Value<int> sortOrder,
+      Value<bool> isActive,
+      Value<int> rowid,
+    });
+typedef $$ExpenseCategoriesTableUpdateCompanionBuilder =
+    ExpenseCategoriesCompanion Function({
+      Value<String> categoryId,
+      Value<String> userId,
+      Value<String> categoryName,
+      Value<String> categoryIcon,
+      Value<bool> isIncome,
+      Value<int> sortOrder,
+      Value<bool> isActive,
+      Value<int> rowid,
+    });
+
+final class $$ExpenseCategoriesTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $ExpenseCategoriesTable,
+          ExpenseCategory
+        > {
+  $$ExpenseCategoriesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $UserAccountsTable _userIdTable(_$AppDatabase db) =>
+      db.userAccounts.createAlias(
+        $_aliasNameGenerator(
+          db.expenseCategories.userId,
+          db.userAccounts.userId,
+        ),
+      );
+
+  $$UserAccountsTableProcessedTableManager get userId {
+    final $_column = $_itemColumn<String>('user_id')!;
+
+    final manager = $$UserAccountsTableTableManager(
+      $_db,
+      $_db.userAccounts,
+    ).filter((f) => f.userId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_userIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ExpenseCategoriesTableFilterComposer
+    extends Composer<_$AppDatabase, $ExpenseCategoriesTable> {
+  $$ExpenseCategoriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get categoryName => $composableBuilder(
+    column: $table.categoryName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get categoryIcon => $composableBuilder(
+    column: $table.categoryIcon,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isIncome => $composableBuilder(
+    column: $table.isIncome,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$UserAccountsTableFilterComposer get userId {
+    final $$UserAccountsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.userAccounts,
+      getReferencedColumn: (t) => t.userId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UserAccountsTableFilterComposer(
+            $db: $db,
+            $table: $db.userAccounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ExpenseCategoriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ExpenseCategoriesTable> {
+  $$ExpenseCategoriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get categoryName => $composableBuilder(
+    column: $table.categoryName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get categoryIcon => $composableBuilder(
+    column: $table.categoryIcon,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isIncome => $composableBuilder(
+    column: $table.isIncome,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$UserAccountsTableOrderingComposer get userId {
+    final $$UserAccountsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.userAccounts,
+      getReferencedColumn: (t) => t.userId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UserAccountsTableOrderingComposer(
+            $db: $db,
+            $table: $db.userAccounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ExpenseCategoriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ExpenseCategoriesTable> {
+  $$ExpenseCategoriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get categoryName => $composableBuilder(
+    column: $table.categoryName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get categoryIcon => $composableBuilder(
+    column: $table.categoryIcon,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isIncome =>
+      $composableBuilder(column: $table.isIncome, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<bool> get isActive =>
+      $composableBuilder(column: $table.isActive, builder: (column) => column);
+
+  $$UserAccountsTableAnnotationComposer get userId {
+    final $$UserAccountsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.userAccounts,
+      getReferencedColumn: (t) => t.userId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UserAccountsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.userAccounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ExpenseCategoriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ExpenseCategoriesTable,
+          ExpenseCategory,
+          $$ExpenseCategoriesTableFilterComposer,
+          $$ExpenseCategoriesTableOrderingComposer,
+          $$ExpenseCategoriesTableAnnotationComposer,
+          $$ExpenseCategoriesTableCreateCompanionBuilder,
+          $$ExpenseCategoriesTableUpdateCompanionBuilder,
+          (ExpenseCategory, $$ExpenseCategoriesTableReferences),
+          ExpenseCategory,
+          PrefetchHooks Function({bool userId})
+        > {
+  $$ExpenseCategoriesTableTableManager(
+    _$AppDatabase db,
+    $ExpenseCategoriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ExpenseCategoriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ExpenseCategoriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ExpenseCategoriesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> categoryId = const Value.absent(),
+                Value<String> userId = const Value.absent(),
+                Value<String> categoryName = const Value.absent(),
+                Value<String> categoryIcon = const Value.absent(),
+                Value<bool> isIncome = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ExpenseCategoriesCompanion(
+                categoryId: categoryId,
+                userId: userId,
+                categoryName: categoryName,
+                categoryIcon: categoryIcon,
+                isIncome: isIncome,
+                sortOrder: sortOrder,
+                isActive: isActive,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String categoryId,
+                required String userId,
+                required String categoryName,
+                required String categoryIcon,
+                Value<bool> isIncome = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ExpenseCategoriesCompanion.insert(
+                categoryId: categoryId,
+                userId: userId,
+                categoryName: categoryName,
+                categoryIcon: categoryIcon,
+                isIncome: isIncome,
+                sortOrder: sortOrder,
+                isActive: isActive,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$ExpenseCategoriesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({userId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (userId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.userId,
+                                referencedTable:
+                                    $$ExpenseCategoriesTableReferences
+                                        ._userIdTable(db),
+                                referencedColumn:
+                                    $$ExpenseCategoriesTableReferences
+                                        ._userIdTable(db)
+                                        .userId,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ExpenseCategoriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ExpenseCategoriesTable,
+      ExpenseCategory,
+      $$ExpenseCategoriesTableFilterComposer,
+      $$ExpenseCategoriesTableOrderingComposer,
+      $$ExpenseCategoriesTableAnnotationComposer,
+      $$ExpenseCategoriesTableCreateCompanionBuilder,
+      $$ExpenseCategoriesTableUpdateCompanionBuilder,
+      (ExpenseCategory, $$ExpenseCategoriesTableReferences),
+      ExpenseCategory,
       PrefetchHooks Function({bool userId})
     >;
 typedef $$FlagGoalsTableCreateCompanionBuilder =
@@ -27475,6 +28455,8 @@ class $AppDatabaseManager {
       $$BudgetSettingsTableTableManager(_db, _db.budgetSettings);
   $$AssetValueSnapshotsTableTableManager get assetValueSnapshots =>
       $$AssetValueSnapshotsTableTableManager(_db, _db.assetValueSnapshots);
+  $$ExpenseCategoriesTableTableManager get expenseCategories =>
+      $$ExpenseCategoriesTableTableManager(_db, _db.expenseCategories);
   $$FlagGoalsTableTableManager get flagGoals =>
       $$FlagGoalsTableTableManager(_db, _db.flagGoals);
   $$TodoExecutionListTableTableManager get todoExecutionList =>

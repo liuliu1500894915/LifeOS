@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
@@ -14,10 +15,11 @@ class CategoryMeta {
   final String id;
   final String icon;
   final String name;
-  const CategoryMeta(this.id, this.icon, this.name);
+  final bool isIncome;
+  const CategoryMeta(this.id, this.icon, this.name, {this.isIncome = false});
 }
 
-const categoryMetaList = [
+const _defaultCategorySeeds = [
   CategoryMeta('food', '🍱', '三餐'),
   CategoryMeta('transport', '🚗', '交通'),
   CategoryMeta('entertainment', '🎉', '娱乐'),
@@ -27,10 +29,29 @@ const categoryMetaList = [
   CategoryMeta('pet', '🐱', '宠物'),
   CategoryMeta('other', '⚙️', '自定义'),
   CategoryMeta('subscription', '🔄', '订阅'),
+  CategoryMeta('salary', '💰', '工资', isIncome: true),
+  CategoryMeta('bonus', '🎁', '奖金', isIncome: true),
+  CategoryMeta('investment', '📈', '投资收益', isIncome: true),
 ];
 
 CategoryMeta categoryForId(String id) {
-  return categoryMetaList.firstWhere((c) => c.id == id, orElse: () => const CategoryMeta('other', '⚙️', '自定义'));
+  return _defaultCategorySeeds.firstWhere((c) => c.id == id, orElse: () => CategoryMeta(id, '📦', id));
+}
+
+// ── Helpers ──
+
+Future<void> _ensureSystemUser(AppDatabase db) async {
+  try {
+    await db.into(db.userAccounts).insertOnConflictUpdate(
+          UserAccountsCompanion.insert(
+            userId: _systemUserId,
+            displayName: '默认用户',
+          ),
+        );
+  } catch (e) {
+    debugPrint('[ensureSystemUser] FAILED: $e');
+    rethrow;
+  }
 }
 
 // ── Notifiers ──
@@ -39,17 +60,39 @@ class AccountNotifier extends AsyncNotifier<List<PaymentAccount>> {
   @override
   Future<List<PaymentAccount>> build() async {
     final db = ref.read(databaseProvider);
-    var accounts = await (db.select(db.paymentAccounts)
-          ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
-        .get();
-
-    if (accounts.isEmpty) {
-      await _seedDefaults(db);
-      accounts = await (db.select(db.paymentAccounts)
+    try {
+      await _ensureSystemUser(db);
+      var accounts = await (db.select(db.paymentAccounts)
             ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
           .get();
+
+      if (accounts.isEmpty) {
+        await _seedDefaults(db);
+        accounts = await (db.select(db.paymentAccounts)
+              ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
+            .get();
+      }
+      return accounts;
+    } catch (e) {
+      debugPrint('[AccountNotifier] build() failed on first attempt: $e');
+      // Retry once — migration may not have run yet
+      try {
+        await _ensureSystemUser(db);
+        var accounts = await (db.select(db.paymentAccounts)
+              ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
+              .get();
+        if (accounts.isEmpty) {
+          await _seedDefaults(db);
+          accounts = await (db.select(db.paymentAccounts)
+                ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
+              .get();
+        }
+        return accounts;
+      } catch (e2) {
+        debugPrint('[AccountNotifier] build() retry also failed: $e2');
+        rethrow;
+      }
     }
-    return accounts;
   }
 
   Future<void> _seedDefaults(AppDatabase db) async {
@@ -73,57 +116,66 @@ class AccountNotifier extends AsyncNotifier<List<PaymentAccount>> {
             ),
           );
     }
-    await _ensureSystemUser(db);
-  }
-
-  Future<void> _ensureSystemUser(AppDatabase db) async {
-    await db.into(db.userAccounts).insertOnConflictUpdate(
-          UserAccountsCompanion.insert(
-            userId: _systemUserId,
-            displayName: '默认用户',
-          ),
-        );
   }
 
   Future<void> addAccount(String name, String type, bool isLiability, double balance) async {
-    state = const AsyncLoading();
-    final db = ref.read(databaseProvider);
-    await _ensureSystemUser(db);
-    final maxSort = await (db.select(db.paymentAccounts)
-          ..orderBy([(t) => OrderingTerm.desc(t.sortOrder)])
-          ..limit(1))
-        .getSingleOrNull();
-    await db.into(db.paymentAccounts).insert(
-          PaymentAccountsCompanion.insert(
-            accountId: _uuid.v4(),
-            userId: _systemUserId,
-            accountName: name,
-            accountType: type,
-            isLiability: Value(isLiability),
-            balance: Value(balance),
-            sortOrder: Value((maxSort?.sortOrder ?? -1) + 1),
-          ),
-        );
-    state = AsyncData(await _fetchAll(db));
+    final prev = state.valueOrNull ?? [];
+    try {
+      final db = ref.read(databaseProvider);
+      await _ensureSystemUser(db);
+      debugPrint('[AccountNotifier] addAccount: name=$name, type=$type, isLiability=$isLiability, balance=$balance');
+      final maxSort = await (db.select(db.paymentAccounts)
+            ..orderBy([(t) => OrderingTerm.desc(t.sortOrder)])
+            ..limit(1))
+          .getSingleOrNull();
+      await db.into(db.paymentAccounts).insert(
+            PaymentAccountsCompanion.insert(
+              accountId: _uuid.v4(),
+              userId: _systemUserId,
+              accountName: name,
+              accountType: type,
+              isLiability: Value(isLiability),
+              balance: Value(balance),
+              sortOrder: Value((maxSort?.sortOrder ?? -1) + 1),
+            ),
+          );
+      state = AsyncData(await _fetchAll(db));
+      debugPrint('[AccountNotifier] addAccount: success');
+    } catch (e, stackTrace) {
+      debugPrint('[AccountNotifier] addAccount FAILED: $e');
+      debugPrint('[AccountNotifier] stackTrace: $stackTrace');
+      state = AsyncData(prev);
+      rethrow;
+    }
   }
 
   Future<void> updateAccount(String accountId, {String? name, double? balance}) async {
-    state = const AsyncLoading();
-    final db = ref.read(databaseProvider);
-    await (db.update(db.paymentAccounts)..where((t) => t.accountId.equals(accountId))).write(
-      PaymentAccountsCompanion(
-        accountName: name != null ? Value(name) : const Value.absent(),
-        balance: balance != null ? Value(balance) : const Value.absent(),
-      ),
-    );
-    state = AsyncData(await _fetchAll(db));
+    final prev = state.valueOrNull ?? [];
+    try {
+      final db = ref.read(databaseProvider);
+      await (db.update(db.paymentAccounts)..where((t) => t.accountId.equals(accountId))).write(
+        PaymentAccountsCompanion(
+          accountName: name != null ? Value(name) : const Value.absent(),
+          balance: balance != null ? Value(balance) : const Value.absent(),
+        ),
+      );
+      state = AsyncData(await _fetchAll(db));
+    } catch (e) {
+      state = AsyncData(prev);
+      rethrow;
+    }
   }
 
   Future<void> deleteAccount(String accountId) async {
-    state = const AsyncLoading();
-    final db = ref.read(databaseProvider);
-    await (db.delete(db.paymentAccounts)..where((t) => t.accountId.equals(accountId))).go();
-    state = AsyncData(await _fetchAll(db));
+    final prev = state.valueOrNull ?? [];
+    try {
+      final db = ref.read(databaseProvider);
+      await (db.delete(db.paymentAccounts)..where((t) => t.accountId.equals(accountId))).go();
+      state = AsyncData(await _fetchAll(db));
+    } catch (e) {
+      state = AsyncData(prev);
+      rethrow;
+    }
   }
 
   Future<List<PaymentAccount>> _fetchAll(AppDatabase db) async {
@@ -149,65 +201,68 @@ class TransactionNotifier extends AsyncNotifier<List<FinancialTransactionData>> 
     String? remark,
     DateTime? loggedAt,
   }) async {
-    final db = ref.read(databaseProvider);
-    await _ensureSystemUser(db);
-    final dt = loggedAt ?? DateTime.now();
+    final prev = state.valueOrNull ?? [];
+    try {
+      final db = ref.read(databaseProvider);
+      await _ensureSystemUser(db);
+      final dt = loggedAt ?? DateTime.now();
 
-    await db.transaction(() async {
-      await db.into(db.financialTransaction).insert(
-            FinancialTransactionCompanion.insert(
-              transactionId: _uuid.v4(),
-              userId: _systemUserId,
-              flowType: flowType,
-              amount: amount,
-              categoryId: categoryId,
-              accountId: accountId,
-              remark: Value(remark),
-              loggedAt: dt,
-            ),
+      await db.transaction(() async {
+        await db.into(db.financialTransaction).insert(
+              FinancialTransactionCompanion.insert(
+                transactionId: _uuid.v4(),
+                userId: _systemUserId,
+                flowType: flowType,
+                amount: amount,
+                categoryId: categoryId,
+                accountId: accountId,
+                remark: Value(remark),
+                loggedAt: dt,
+              ),
+            );
+
+        final delta = flowType == 'EXPENSE' ? -amount : amount;
+        final account = await (db.select(db.paymentAccounts)..where((t) => t.accountId.equals(accountId))).getSingleOrNull();
+        if (account != null) {
+          await (db.update(db.paymentAccounts)..where((t) => t.accountId.equals(accountId))).write(
+            PaymentAccountsCompanion(balance: Value(account.balance + delta)),
           );
+        }
+      });
 
-      final delta = flowType == 'EXPENSE' ? -amount : amount;
-      final account = await (db.select(db.paymentAccounts)..where((t) => t.accountId.equals(accountId))).getSingleOrNull();
-      if (account != null) {
-        await (db.update(db.paymentAccounts)..where((t) => t.accountId.equals(accountId))).write(
-          PaymentAccountsCompanion(balance: Value(account.balance + delta)),
-        );
-      }
-    });
-
-    ref.invalidate(accountProvider);
-    state = AsyncData(await _fetchAll(db));
+      ref.invalidate(accountProvider);
+      state = AsyncData(await _fetchAll(db));
+    } catch (e) {
+      state = AsyncData(prev);
+      rethrow;
+    }
   }
 
   Future<void> deleteTransaction(String transactionId) async {
-    final db = ref.read(databaseProvider);
-    final tx = await (db.select(db.financialTransaction)..where((t) => t.transactionId.equals(transactionId))).getSingleOrNull();
-    if (tx == null) return;
+    final prev = state.valueOrNull ?? [];
+    try {
+      final db = ref.read(databaseProvider);
+      final tx = await (db.select(db.financialTransaction)..where((t) => t.transactionId.equals(transactionId))).getSingleOrNull();
+      if (tx == null) return;
 
-    await db.transaction(() async {
-      await (db.delete(db.financialTransaction)..where((t) => t.transactionId.equals(transactionId))).go();
+      await db.transaction(() async {
+        await (db.delete(db.financialTransaction)..where((t) => t.transactionId.equals(transactionId))).go();
 
-      final delta = tx.flowType == 'EXPENSE' ? tx.amount : -tx.amount;
-      final account = await (db.select(db.paymentAccounts)..where((t) => t.accountId.equals(tx.accountId))).getSingleOrNull();
-      if (account != null) {
-        await (db.update(db.paymentAccounts)..where((t) => t.accountId.equals(tx.accountId))).write(
-          PaymentAccountsCompanion(balance: Value(account.balance + delta)),
-        );
-      }
-    });
+        final delta = tx.flowType == 'EXPENSE' ? tx.amount : -tx.amount;
+        final account = await (db.select(db.paymentAccounts)..where((t) => t.accountId.equals(tx.accountId))).getSingleOrNull();
+        if (account != null) {
+          await (db.update(db.paymentAccounts)..where((t) => t.accountId.equals(tx.accountId))).write(
+            PaymentAccountsCompanion(balance: Value(account.balance + delta)),
+          );
+        }
+      });
 
-    ref.invalidate(accountProvider);
-    state = AsyncData(await _fetchAll(db));
-  }
-
-  Future<void> _ensureSystemUser(AppDatabase db) async {
-    await db.into(db.userAccounts).insertOnConflictUpdate(
-          UserAccountsCompanion.insert(
-            userId: _systemUserId,
-            displayName: '默认用户',
-          ),
-        );
+      ref.invalidate(accountProvider);
+      state = AsyncData(await _fetchAll(db));
+    } catch (e) {
+      state = AsyncData(prev);
+      rethrow;
+    }
   }
 
   Future<List<FinancialTransactionData>> _fetchAll(AppDatabase db) async {
@@ -224,52 +279,58 @@ class AssetNotifier extends AsyncNotifier<List<AssetInventoryData>> {
   }
 
   Future<void> addAsset({required String name, required double price, required DateTime purchaseDate, required String iconId, bool projectToRoom = true}) async {
-    state = const AsyncLoading();
-    final db = ref.read(databaseProvider);
-    await _ensureSystemUser(db);
-    await db.into(db.assetInventory).insert(
-          AssetInventoryCompanion.insert(
-            assetId: _uuid.v4(),
-            userId: _systemUserId,
-            assetName: name,
-            purchasePrice: price,
-            purchaseDate: purchaseDate,
-            iconId: iconId,
-            projectToRoom: Value(projectToRoom),
-          ),
-        );
-    state = AsyncData(await db.select(db.assetInventory).get());
+    final prev = state.valueOrNull ?? [];
+    try {
+      final db = ref.read(databaseProvider);
+      await _ensureSystemUser(db);
+      await db.into(db.assetInventory).insert(
+            AssetInventoryCompanion.insert(
+              assetId: _uuid.v4(),
+              userId: _systemUserId,
+              assetName: name,
+              purchasePrice: price,
+              purchaseDate: purchaseDate,
+              iconId: iconId,
+              projectToRoom: Value(projectToRoom),
+            ),
+          );
+      state = AsyncData(await db.select(db.assetInventory).get());
+    } catch (e) {
+      state = AsyncData(prev);
+      rethrow;
+    }
   }
 
   Future<void> updateAsset(String assetId, {String? name, double? price, DateTime? purchaseDate, String? iconId, bool? projectToRoom}) async {
-    state = const AsyncLoading();
-    final db = ref.read(databaseProvider);
-    await (db.update(db.assetInventory)..where((t) => t.assetId.equals(assetId))).write(
-      AssetInventoryCompanion(
-        assetName: name != null ? Value(name) : const Value.absent(),
-        purchasePrice: price != null ? Value(price) : const Value.absent(),
-        purchaseDate: purchaseDate != null ? Value(purchaseDate) : const Value.absent(),
-        iconId: iconId != null ? Value(iconId) : const Value.absent(),
-        projectToRoom: projectToRoom != null ? Value(projectToRoom) : const Value.absent(),
-      ),
-    );
-    state = AsyncData(await db.select(db.assetInventory).get());
+    final prev = state.valueOrNull ?? [];
+    try {
+      final db = ref.read(databaseProvider);
+      await (db.update(db.assetInventory)..where((t) => t.assetId.equals(assetId))).write(
+        AssetInventoryCompanion(
+          assetName: name != null ? Value(name) : const Value.absent(),
+          purchasePrice: price != null ? Value(price) : const Value.absent(),
+          purchaseDate: purchaseDate != null ? Value(purchaseDate) : const Value.absent(),
+          iconId: iconId != null ? Value(iconId) : const Value.absent(),
+          projectToRoom: projectToRoom != null ? Value(projectToRoom) : const Value.absent(),
+        ),
+      );
+      state = AsyncData(await db.select(db.assetInventory).get());
+    } catch (e) {
+      state = AsyncData(prev);
+      rethrow;
+    }
   }
 
   Future<void> deleteAsset(String assetId) async {
-    state = const AsyncLoading();
-    final db = ref.read(databaseProvider);
-    await (db.delete(db.assetInventory)..where((t) => t.assetId.equals(assetId))).go();
-    state = AsyncData(await db.select(db.assetInventory).get());
-  }
-
-  Future<void> _ensureSystemUser(AppDatabase db) async {
-    await db.into(db.userAccounts).insertOnConflictUpdate(
-          UserAccountsCompanion.insert(
-            userId: _systemUserId,
-            displayName: '默认用户',
-          ),
-        );
+    final prev = state.valueOrNull ?? [];
+    try {
+      final db = ref.read(databaseProvider);
+      await (db.delete(db.assetInventory)..where((t) => t.assetId.equals(assetId))).go();
+      state = AsyncData(await db.select(db.assetInventory).get());
+    } catch (e) {
+      state = AsyncData(prev);
+      rethrow;
+    }
   }
 }
 
@@ -289,55 +350,61 @@ class SubscriptionNotifier extends AsyncNotifier<List<SubscriptionService>> {
     required String accountId,
     bool alertEnabled = true,
   }) async {
-    state = const AsyncLoading();
-    final db = ref.read(databaseProvider);
-    await _ensureSystemUser(db);
-    await db.into(db.subscriptionServices).insert(
-          SubscriptionServicesCompanion.insert(
-            subscriptionId: _uuid.v4(),
-            userId: _systemUserId,
-            serviceName: serviceName,
-            amount: amount,
-            billingCycle: billingCycle,
-            nextBillingDate: nextBillingDate,
-            accountId: accountId,
-            alertEnabled: Value(alertEnabled),
-          ),
-        );
-    state = AsyncData(await db.select(db.subscriptionServices).get());
+    final prev = state.valueOrNull ?? [];
+    try {
+      final db = ref.read(databaseProvider);
+      await _ensureSystemUser(db);
+      await db.into(db.subscriptionServices).insert(
+            SubscriptionServicesCompanion.insert(
+              subscriptionId: _uuid.v4(),
+              userId: _systemUserId,
+              serviceName: serviceName,
+              amount: amount,
+              billingCycle: billingCycle,
+              nextBillingDate: nextBillingDate,
+              accountId: accountId,
+              alertEnabled: Value(alertEnabled),
+            ),
+          );
+      state = AsyncData(await db.select(db.subscriptionServices).get());
+    } catch (e) {
+      state = AsyncData(prev);
+      rethrow;
+    }
   }
 
   Future<void> updateSubscription(String subscriptionId, {String? serviceName, double? amount, String? billingCycle, DateTime? nextBillingDate, String? accountId, bool? alertEnabled, bool? isActive}) async {
-    state = const AsyncLoading();
-    final db = ref.read(databaseProvider);
-    await (db.update(db.subscriptionServices)..where((t) => t.subscriptionId.equals(subscriptionId))).write(
-      SubscriptionServicesCompanion(
-        serviceName: serviceName != null ? Value(serviceName) : const Value.absent(),
-        amount: amount != null ? Value(amount) : const Value.absent(),
-        billingCycle: billingCycle != null ? Value(billingCycle) : const Value.absent(),
-        nextBillingDate: nextBillingDate != null ? Value(nextBillingDate) : const Value.absent(),
-        accountId: accountId != null ? Value(accountId) : const Value.absent(),
-        alertEnabled: alertEnabled != null ? Value(alertEnabled) : const Value.absent(),
-        isActive: isActive != null ? Value(isActive) : const Value.absent(),
-      ),
-    );
-    state = AsyncData(await db.select(db.subscriptionServices).get());
+    final prev = state.valueOrNull ?? [];
+    try {
+      final db = ref.read(databaseProvider);
+      await (db.update(db.subscriptionServices)..where((t) => t.subscriptionId.equals(subscriptionId))).write(
+        SubscriptionServicesCompanion(
+          serviceName: serviceName != null ? Value(serviceName) : const Value.absent(),
+          amount: amount != null ? Value(amount) : const Value.absent(),
+          billingCycle: billingCycle != null ? Value(billingCycle) : const Value.absent(),
+          nextBillingDate: nextBillingDate != null ? Value(nextBillingDate) : const Value.absent(),
+          accountId: accountId != null ? Value(accountId) : const Value.absent(),
+          alertEnabled: alertEnabled != null ? Value(alertEnabled) : const Value.absent(),
+          isActive: isActive != null ? Value(isActive) : const Value.absent(),
+        ),
+      );
+      state = AsyncData(await db.select(db.subscriptionServices).get());
+    } catch (e) {
+      state = AsyncData(prev);
+      rethrow;
+    }
   }
 
   Future<void> deleteSubscription(String subscriptionId) async {
-    state = const AsyncLoading();
-    final db = ref.read(databaseProvider);
-    await (db.delete(db.subscriptionServices)..where((t) => t.subscriptionId.equals(subscriptionId))).go();
-    state = AsyncData(await db.select(db.subscriptionServices).get());
-  }
-
-  Future<void> _ensureSystemUser(AppDatabase db) async {
-    await db.into(db.userAccounts).insertOnConflictUpdate(
-          UserAccountsCompanion.insert(
-            userId: _systemUserId,
-            displayName: '默认用户',
-          ),
-        );
+    final prev = state.valueOrNull ?? [];
+    try {
+      final db = ref.read(databaseProvider);
+      await (db.delete(db.subscriptionServices)..where((t) => t.subscriptionId.equals(subscriptionId))).go();
+      state = AsyncData(await db.select(db.subscriptionServices).get());
+    } catch (e) {
+      state = AsyncData(prev);
+      rethrow;
+    }
   }
 }
 
@@ -350,35 +417,126 @@ class BudgetNotifier extends AsyncNotifier<List<BudgetSetting>> {
   }
 
   Future<void> setBudget(String monthKey, double amount) async {
-    state = const AsyncLoading();
+    final prev = state.valueOrNull ?? [];
+    try {
+      final db = ref.read(databaseProvider);
+      await _ensureSystemUser(db);
+      final existing = await (db.select(db.budgetSettings)..where((t) => t.monthKey.equals(monthKey))).getSingleOrNull();
+      if (existing != null) {
+        await (db.update(db.budgetSettings)..where((t) => t.budgetId.equals(existing.budgetId))).write(
+          BudgetSettingsCompanion(budgetAmount: Value(amount)),
+        );
+      } else {
+        await db.into(db.budgetSettings).insert(
+              BudgetSettingsCompanion.insert(
+                budgetId: _uuid.v4(),
+                userId: _systemUserId,
+                categoryId: 'total',
+                monthKey: monthKey,
+                budgetAmount: amount,
+              ),
+            );
+      }
+      state = AsyncData(await db.select(db.budgetSettings).get());
+    } catch (e) {
+      state = AsyncData(prev);
+      rethrow;
+    }
+  }
+}
+
+class CategoryNotifier extends AsyncNotifier<List<ExpenseCategory>> {
+  @override
+  Future<List<ExpenseCategory>> build() async {
     final db = ref.read(databaseProvider);
     await _ensureSystemUser(db);
-    final existing = await (db.select(db.budgetSettings)..where((t) => t.monthKey.equals(monthKey))).getSingleOrNull();
-    if (existing != null) {
-      await (db.update(db.budgetSettings)..where((t) => t.budgetId.equals(existing.budgetId))).write(
-        BudgetSettingsCompanion(budgetAmount: Value(amount)),
-      );
-    } else {
-      await db.into(db.budgetSettings).insert(
-            BudgetSettingsCompanion.insert(
-              budgetId: _uuid.v4(),
+    var categories = await (db.select(db.expenseCategories)
+          ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
+        .get();
+
+    if (categories.isEmpty) {
+      await _seedDefaults(db);
+      categories = await (db.select(db.expenseCategories)
+            ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
+          .get();
+    }
+    return categories;
+  }
+
+  Future<void> _seedDefaults(AppDatabase db) async {
+    for (var i = 0; i < _defaultCategorySeeds.length; i++) {
+      final c = _defaultCategorySeeds[i];
+      await db.into(db.expenseCategories).insert(
+            ExpenseCategoriesCompanion.insert(
+              categoryId: c.id,
               userId: _systemUserId,
-              categoryId: 'total',
-              monthKey: monthKey,
-              budgetAmount: amount,
+              categoryName: c.name,
+              categoryIcon: c.icon,
+              isIncome: Value(c.isIncome),
+              sortOrder: Value(i),
             ),
           );
     }
-    state = AsyncData(await db.select(db.budgetSettings).get());
   }
 
-  Future<void> _ensureSystemUser(AppDatabase db) async {
-    await db.into(db.userAccounts).insertOnConflictUpdate(
-          UserAccountsCompanion.insert(
-            userId: _systemUserId,
-            displayName: '默认用户',
-          ),
-        );
+  Future<void> addCategory(String name, String icon, {bool isIncome = false}) async {
+    final prev = state.valueOrNull ?? [];
+    try {
+      final db = ref.read(databaseProvider);
+      await _ensureSystemUser(db);
+      final maxSort = await (db.select(db.expenseCategories)
+            ..orderBy([(t) => OrderingTerm.desc(t.sortOrder)])
+            ..limit(1))
+          .getSingleOrNull();
+      await db.into(db.expenseCategories).insert(
+            ExpenseCategoriesCompanion.insert(
+              categoryId: _uuid.v4(),
+              userId: _systemUserId,
+              categoryName: name,
+              categoryIcon: icon,
+              isIncome: Value(isIncome),
+              sortOrder: Value((maxSort?.sortOrder ?? -1) + 1),
+            ),
+          );
+      state = AsyncData(await _fetchAll(db));
+    } catch (e) {
+      state = AsyncData(prev);
+      rethrow;
+    }
+  }
+
+  Future<void> updateCategory(String categoryId, {String? name, String? icon, bool? isIncome}) async {
+    final prev = state.valueOrNull ?? [];
+    try {
+      final db = ref.read(databaseProvider);
+      await (db.update(db.expenseCategories)..where((t) => t.categoryId.equals(categoryId))).write(
+        ExpenseCategoriesCompanion(
+          categoryName: name != null ? Value(name) : const Value.absent(),
+          categoryIcon: icon != null ? Value(icon) : const Value.absent(),
+          isIncome: isIncome != null ? Value(isIncome) : const Value.absent(),
+        ),
+      );
+      state = AsyncData(await _fetchAll(db));
+    } catch (e) {
+      state = AsyncData(prev);
+      rethrow;
+    }
+  }
+
+  Future<void> deleteCategory(String categoryId) async {
+    final prev = state.valueOrNull ?? [];
+    try {
+      final db = ref.read(databaseProvider);
+      await (db.delete(db.expenseCategories)..where((t) => t.categoryId.equals(categoryId))).go();
+      state = AsyncData(await _fetchAll(db));
+    } catch (e) {
+      state = AsyncData(prev);
+      rethrow;
+    }
+  }
+
+  Future<List<ExpenseCategory>> _fetchAll(AppDatabase db) async {
+    return await (db.select(db.expenseCategories)..orderBy([(t) => OrderingTerm.asc(t.sortOrder)])).get();
   }
 }
 
@@ -403,6 +561,20 @@ final subscriptionProvider = AsyncNotifierProvider<SubscriptionNotifier, List<Su
 final budgetProvider = AsyncNotifierProvider<BudgetNotifier, List<BudgetSetting>>(
   BudgetNotifier.new,
 );
+
+final categoryProvider = AsyncNotifierProvider<CategoryNotifier, List<ExpenseCategory>>(
+  CategoryNotifier.new,
+);
+
+final expenseCategoryListProvider = Provider<List<ExpenseCategory>>((ref) {
+  final asyncCats = ref.watch(categoryProvider);
+  return asyncCats.whenOrNull(data: (cats) => cats.where((c) => !c.isIncome && c.isActive).toList()) ?? [];
+});
+
+final incomeCategoryListProvider = Provider<List<ExpenseCategory>>((ref) {
+  final asyncCats = ref.watch(categoryProvider);
+  return asyncCats.whenOrNull(data: (cats) => cats.where((c) => c.isIncome && c.isActive).toList()) ?? [];
+});
 
 // ── Derived providers ──
 
@@ -463,7 +635,6 @@ final monthBudgetProvider = Provider<double>((ref) {
   return budget?.budgetAmount ?? 0;
 });
 
-/// Per-day expense amounts for the current month, keyed by day-of-month.
 final monthDailyExpenseProvider = Provider<Map<int, double>>((ref) {
   final txs = ref.watch(monthTransactionsProvider);
   final result = <int, double>{};
@@ -475,9 +646,6 @@ final monthDailyExpenseProvider = Provider<Map<int, double>>((ref) {
 });
 
 // ── Backward-compatible providers for existing consumers ──
-
-// These are used by analytics, drink_drawer, cross-module tests, etc.
-// They wrap the new Drift-backed providers so existing code doesn't break.
 
 class TransactionItem {
   final String id;
@@ -545,22 +713,12 @@ class SubscriptionItem {
   int daysUntilBilling(DateTime today) => nextBillingDate.difference(today).inDays;
 }
 
-/// Legacy-compatible provider that returns List<TransactionItem> so
-/// existing consumers (drink_drawer, analytics, cross-module tests)
-/// keep working without rewrite.
-///
-/// Usage:
-///   ref.watch(transactionNotifierProvider) → List<TransactionItem>
-///   ref.read(transactionNotifierProvider.notifier).addTransaction(...)
-///
-/// The notifier delegates to TransactionNotifier (Drift-backed).
 class _TransactionItemNotifier extends StateNotifier<List<TransactionItem>> {
   _TransactionItemNotifier(this._ref) : super([]);
 
   final Ref _ref;
 
   void addTransaction(TransactionItem item) {
-    // Find the account ID from the accountName
     final accounts = _ref.read(accountProvider).valueOrNull ?? [];
     String accountId = item.accountName;
     for (final a in accounts) {
@@ -585,7 +743,6 @@ final transactionNotifierProvider =
     StateNotifierProvider<_TransactionItemNotifier, List<TransactionItem>>((ref) {
   final notifier = _TransactionItemNotifier(ref);
 
-  // Mirror the Drift-backed list into the legacy shape.
   ref.listen(transactionProvider, (_, next) {
     final accounts = ref.read(accountProvider).valueOrNull ?? [];
     final accountMap = {for (final a in accounts) a.accountId: a.accountName};
@@ -640,6 +797,3 @@ final subscriptionListProvider = Provider<List<SubscriptionItem>>((ref) {
         isActive: s.isActive,
       )).toList()) ?? [];
 });
-
-// Legacy compatibility: todayTransactionsProvider already defined above as Drift-backed.
-// The name is the same so existing consumers still work.

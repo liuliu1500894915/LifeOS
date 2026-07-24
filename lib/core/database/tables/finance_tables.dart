@@ -109,6 +109,22 @@ class BudgetSettings extends Table {
       ['UNIQUE(user_id, category_id, month_key)'];
 }
 
+class ExpenseCategories extends Table {
+  TextColumn get categoryId => text().withLength(min: 1, max: 36)();
+  TextColumn get userId =>
+      text()
+          .withLength(min: 1, max: 36)
+          .references(UserAccounts, #userId)();
+  TextColumn get categoryName => text().withLength(max: 50)();
+  TextColumn get categoryIcon => text().withLength(max: 10)();
+  BoolColumn get isIncome => boolean().withDefault(const Constant(false))();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+  BoolColumn get isActive => boolean().withDefault(const Constant(true))();
+
+  @override
+  Set<Column> get primaryKey => {categoryId};
+}
+
 class AssetValueSnapshots extends Table {
   TextColumn get snapshotId => text().withLength(min: 1, max: 36)();
   TextColumn get userId =>

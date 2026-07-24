@@ -38,6 +38,16 @@ class FinancePage extends ConsumerWidget {
               _buildSpendingRow(context, todayExpense, todayTxCount, monthExpense, budgetPercent),
               _buildQuickRecordButton(context),
               const SizedBox(height: 16),
+              _buildSectionLabel('账户管理'),
+              const SizedBox(height: 8),
+              _buildEntryCard(
+                context,
+                icon: Icons.account_balance_wallet,
+                title: '钱包账户',
+                subtitle: '管理微信、支付宝、银行卡等钱包',
+                onTap: () => context.push(AppRoutes.accounts),
+              ),
+              const SizedBox(height: 16),
               _buildSectionLabel('资产与固定账单管理'),
               const SizedBox(height: 8),
               _buildEntryCard(

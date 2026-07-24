@@ -24,6 +24,7 @@ part 'app_database.g.dart';
     SubscriptionServices,
     BudgetSettings,
     AssetValueSnapshots,
+    ExpenseCategories,
     TodoExecutionList,
     HabitDefinitions,
     HabitCheckLog,
@@ -47,12 +48,25 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(QueryExecutor executor) : super(executor);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (Migrator m) async {
           await m.createAll();
+        },
+        onUpgrade: (Migrator m, int from, int to) async {
+          if (from < 2) {
+            // v1→v2: all finance tables + expenseCategories added
+            await m.createTable(userAccounts);
+            await m.createTable(paymentAccounts);
+            await m.createTable(financialTransaction);
+            await m.createTable(assetInventory);
+            await m.createTable(subscriptionServices);
+            await m.createTable(budgetSettings);
+            await m.createTable(assetValueSnapshots);
+            await m.createTable(expenseCategories);
+          }
         },
       );
 }

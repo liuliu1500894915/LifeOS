@@ -39,28 +39,43 @@ class _AddAssetPageState extends ConsumerState<AddAssetPage> {
   Future<void> _save() async {
     final name = _nameController.text.trim();
     final price = double.tryParse(_priceController.text);
-    if (name.isEmpty || price == null || price <= 0) return;
-
-    if (_isEdit) {
-      await ref.read(assetProvider.notifier).updateAsset(
-            widget.editAsset!.id,
-            name: name,
-            price: price,
-            purchaseDate: _purchaseDate,
-            iconId: _selectedIcon,
-            projectToRoom: _projectToRoom,
-          );
-    } else {
-      await ref.read(assetProvider.notifier).addAsset(
-            name: name,
-            price: price,
-            purchaseDate: _purchaseDate,
-            iconId: _selectedIcon,
-            projectToRoom: _projectToRoom,
-          );
+    if (name.isEmpty || price == null || price <= 0) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('请填写资产名称和有效价格'), behavior: SnackBarBehavior.floating),
+        );
+      }
+      return;
     }
 
-    if (mounted) Navigator.of(context).pop();
+    try {
+      if (_isEdit) {
+        await ref.read(assetProvider.notifier).updateAsset(
+              widget.editAsset!.id,
+              name: name,
+              price: price,
+              purchaseDate: _purchaseDate,
+              iconId: _selectedIcon,
+              projectToRoom: _projectToRoom,
+            );
+      } else {
+        await ref.read(assetProvider.notifier).addAsset(
+              name: name,
+              price: price,
+              purchaseDate: _purchaseDate,
+              iconId: _selectedIcon,
+              projectToRoom: _projectToRoom,
+            );
+      }
+
+      if (mounted) Navigator.of(context).pop();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('保存失败: $e'), behavior: SnackBarBehavior.floating),
+        );
+      }
+    }
   }
 
   @override

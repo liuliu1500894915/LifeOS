@@ -33,20 +33,58 @@ class _TransactionDrawerState extends ConsumerState<TransactionDrawer> {
   }
 
   Future<void> _save() async {
-    if (_amount.isEmpty || _categoryId == null || _selectedAccountId == null) return;
-    final amount = double.tryParse(_amount);
-    if (amount == null || amount <= 0) return;
-
-    await ref.read(transactionProvider.notifier).addTransaction(
-          flowType: 'EXPENSE',
-          amount: amount,
-          categoryId: _categoryId!,
-          accountId: _selectedAccountId!,
-          remark: _remarkController.text.isEmpty ? null : _remarkController.text,
-          loggedAt: _date,
+    if (_amount.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('请输入金额'), behavior: SnackBarBehavior.floating),
         );
+      }
+      return;
+    }
+    if (_categoryId == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('请选择支出类别'), behavior: SnackBarBehavior.floating),
+        );
+      }
+      return;
+    }
+    if (_selectedAccountId == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('请先添加一个钱包账户'), behavior: SnackBarBehavior.floating),
+        );
+      }
+      return;
+    }
+    final amount = double.tryParse(_amount);
+    if (amount == null || amount <= 0) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('请输入有效金额'), behavior: SnackBarBehavior.floating),
+        );
+      }
+      return;
+    }
 
-    if (mounted) Navigator.of(context).pop();
+    try {
+      await ref.read(transactionProvider.notifier).addTransaction(
+            flowType: 'EXPENSE',
+            amount: amount,
+            categoryId: _categoryId!,
+            accountId: _selectedAccountId!,
+            remark: _remarkController.text.isEmpty ? null : _remarkController.text,
+            loggedAt: _date,
+          );
+
+      if (mounted) Navigator.of(context).pop();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('保存失败: $e'), behavior: SnackBarBehavior.floating),
+        );
+      }
+    }
   }
 
   @override
@@ -100,6 +138,21 @@ class _TransactionDrawerState extends ConsumerState<TransactionDrawer> {
               ),
             ),
             const SizedBox(height: 8),
+            if (accounts.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Center(
+                    child: Text('暂无钱包，请先在财务页添加', style: TextStyle(fontSize: 13, color: Color(0xFF9E9E9E))),
+                  ),
+                ),
+              )
+            else
             SizedBox(
               height: 40,
               child: ListView.separated(

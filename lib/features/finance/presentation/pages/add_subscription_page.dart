@@ -31,33 +31,55 @@ class _AddSubscriptionPageState extends ConsumerState<AddSubscriptionPage> {
   Future<void> _save() async {
     final name = _nameController.text.trim();
     final amount = double.tryParse(_amountController.text);
-    if (name.isEmpty || amount == null || amount <= 0) return;
-
-    final accountId = _selectedAccountId ?? widget.editSub?.accountId ?? '';
-    if (accountId.isEmpty) return;
-
-    if (_isEdit) {
-      await ref.read(subscriptionProvider.notifier).updateSubscription(
-            widget.editSub!.id,
-            serviceName: name,
-            amount: amount,
-            billingCycle: _billingCycle,
-            nextBillingDate: _nextBillingDate,
-            accountId: accountId,
-            alertEnabled: _alertEnabled,
-          );
-    } else {
-      await ref.read(subscriptionProvider.notifier).addSubscription(
-            serviceName: name,
-            amount: amount,
-            billingCycle: _billingCycle,
-            nextBillingDate: _nextBillingDate,
-            accountId: accountId,
-            alertEnabled: _alertEnabled,
-          );
+    if (name.isEmpty || amount == null || amount <= 0) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('请填写服务名称和有效金额'), behavior: SnackBarBehavior.floating),
+        );
+      }
+      return;
     }
 
-    if (mounted) Navigator.of(context).pop();
+    final accountId = _selectedAccountId ?? widget.editSub?.accountId ?? '';
+    if (accountId.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('请先添加一个钱包账户'), behavior: SnackBarBehavior.floating),
+        );
+      }
+      return;
+    }
+
+    try {
+      if (_isEdit) {
+        await ref.read(subscriptionProvider.notifier).updateSubscription(
+              widget.editSub!.id,
+              serviceName: name,
+              amount: amount,
+              billingCycle: _billingCycle,
+              nextBillingDate: _nextBillingDate,
+              accountId: accountId,
+              alertEnabled: _alertEnabled,
+            );
+      } else {
+        await ref.read(subscriptionProvider.notifier).addSubscription(
+              serviceName: name,
+              amount: amount,
+              billingCycle: _billingCycle,
+              nextBillingDate: _nextBillingDate,
+              accountId: accountId,
+              alertEnabled: _alertEnabled,
+            );
+      }
+
+      if (mounted) Navigator.of(context).pop();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('保存失败: $e'), behavior: SnackBarBehavior.floating),
+        );
+      }
+    }
   }
 
   @override
