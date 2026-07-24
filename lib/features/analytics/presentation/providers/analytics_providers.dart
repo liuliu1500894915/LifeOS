@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../features/daily/presentation/providers/daily_providers.dart';
 import '../../../../features/finance/presentation/providers/finance_providers.dart';
-import '../../../../features/finance/data/category_seeds.dart';
 import '../../../../features/home/presentation/providers/home_providers.dart';
 import '../../domain/correlation_engine.dart';
 
@@ -41,12 +40,13 @@ class DailyAnalyticsSummary {
 }
 
 final financeAnalyticsProvider = Provider<FinanceAnalyticsSummary>((ref) {
-  final txs = ref.watch(todayTransactionsProvider);
+  // P0-5:用 join 流取交易(分类名来自 DB),categoryExpenses 的 key 即 DB 分类名。
+  final txs = ref.watch(todayTransactionsWithCategoryProvider);
   final income = txs.where((t) => t.flowType == 'INCOME').fold<double>(0, (s, t) => s + t.amount);
   final expense = txs.where((t) => t.flowType == 'EXPENSE').fold<double>(0, (s, t) => s + t.amount);
   final byCategory = <String, double>{};
   for (final tx in txs.where((t) => t.flowType == 'EXPENSE')) {
-    byCategory.update(categoryForId(tx.categoryId).name, (v) => v + tx.amount, ifAbsent: () => tx.amount);
+    byCategory.update(tx.categoryName, (v) => v + tx.amount, ifAbsent: () => tx.amount);
   }
   return FinanceAnalyticsSummary(
     income: income,

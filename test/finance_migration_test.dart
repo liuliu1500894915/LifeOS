@@ -1,4 +1,3 @@
-import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -24,6 +23,16 @@ void main() {
         );
     expect((await db.select(db.paymentAccounts).get()).length, 1);
 
+    // ExpenseCategories(P0-5:FinancialTransaction.categoryId 现为 FK,
+    // 插交易前必须先有对应分类,否则 FK 违规)。
+    await db.into(db.expenseCategories).insert(
+          ExpenseCategoriesCompanion.insert(
+            categoryId: 'food', userId: 'user-001',
+            categoryName: '三餐', categoryIcon: '🍱',
+          ),
+        );
+    expect((await db.select(db.expenseCategories).get()).length, 1);
+
     // FinancialTransaction
     await db.into(db.financialTransaction).insert(
           FinancialTransactionCompanion.insert(
@@ -45,14 +54,14 @@ void main() {
         );
     expect((await db.select(db.assetInventory).get()).length, 1);
 
-    // ExpenseCategories
+    // ExpenseCategories(注:上文已为交易 FK 插入 'food',故此处共 2 条)
     await db.into(db.expenseCategories).insert(
           ExpenseCategoriesCompanion.insert(
             categoryId: 'cat-001', userId: 'user-001',
             categoryName: '三餐', categoryIcon: '🍱',
           ),
         );
-    expect((await db.select(db.expenseCategories).get()).length, 1);
+    expect((await db.select(db.expenseCategories).get()).length, 2);
 
     // BudgetSettings
     await db.into(db.budgetSettings).insert(

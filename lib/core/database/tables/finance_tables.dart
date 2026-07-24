@@ -15,8 +15,12 @@ class FinancialTransaction extends Table {
         flowType.equals('TRANSFER'),
       )();
   RealColumn get amount => real()();
-  TextColumn get categoryId => text().withLength(max: 50)();
-  TextColumn get accountId => text().withLength(max: 50)();
+  // P0-5: categoryId/accountId 补外键,引用完整性由 DB 保证(删被引用的分类/账户
+  // 会被 RESTRICT 拦截)。写法对称于 SubscriptionServices.accountId。
+  TextColumn get categoryId =>
+      text().withLength(min: 1, max: 36).references(ExpenseCategories, #categoryId)();
+  TextColumn get accountId =>
+      text().withLength(min: 1, max: 36).references(PaymentAccounts, #accountId)();
   TextColumn get remark => text().withLength(max: 150).nullable()();
   DateTimeColumn get loggedAt => dateTime()();
 

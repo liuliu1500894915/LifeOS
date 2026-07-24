@@ -2,8 +2,30 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/database/app_database.dart';
 import '../../../../core/database/system_bootstrap.dart';
-import '../../data/category_seeds.dart';
+import '../../data/repositories/finance_repository.dart';
 import '../../data/repositories/finance_repository_drift.dart';
+
+// 导出 join 读投影 DTO(TransactionWithCategory)供消费层引用。
+export '../../data/repositories/finance_repository.dart';
+
+// ── Finance 启动种子 ──
+//
+// 加 FK 后(P0-5),交易必须引用已存在的账户/分类,否则 FK 违规。但旧设计里
+// 默认账户/分类是「惰性」seed(仅在 AccountNotifier/CategoryNotifier 被 watch
+// 时跑)——若先经 drink_drawer 等非 finance UI 写交易(它不 watch 分类流),
+// 目标分类尚未入库即插入,FK 必败。本 Provider 收敛为单一启动种子:系统用户 →
+// 默认账户 → 默认分类(均幂等,仅空时补)。所有 finance 读/写 notifier 在
+// build/写前 await 它,保证目标行先于任何交易存在。
+final financeBootstrapProvider = FutureProvider<void>((ref) async {
+  await ref.read(systemBootstrapProvider.future);
+  final repo = ref.read(financeRepositoryProvider);
+  if ((await repo.getAccounts()).isEmpty) {
+    await repo.ensureAccountsSeeded();
+  }
+  if ((await repo.getCategories()).isEmpty) {
+    await repo.ensureCategoriesSeeded();
+  }
+});
 
 // ── Stream-backed notifiers ──
 //
@@ -52,7 +74,7 @@ class AccountNotifier extends StreamNotifier<List<PaymentAccount>> {
 class TransactionNotifier extends StreamNotifier<List<FinancialTransactionData>> {
   @override
   Stream<List<FinancialTransactionData>> build() async* {
-    await ref.read(systemBootstrapProvider.future);
+    await ref.read(financeBootstrapProvider.future);
     yield* ref.watch(financeRepositoryProvider).watchTransactions();
   }
 
@@ -64,7 +86,7 @@ class TransactionNotifier extends StreamNotifier<List<FinancialTransactionData>>
     String? remark,
     DateTime? loggedAt,
   }) async {
-    await ref.read(systemBootstrapProvider.future);
+    await ref.read(financeBootstrapProvider.future);
     await ref.read(financeRepositoryProvider).addTransaction(
           flowType: flowType,
           amount: amount,
@@ -76,7 +98,7 @@ class TransactionNotifier extends StreamNotifier<List<FinancialTransactionData>>
   }
 
   Future<void> deleteTransaction(String transactionId) async {
-    await ref.read(systemBootstrapProvider.future);
+    await ref.read(financeBootstrapProvider.future);
     await ref.read(financeRepositoryProvider).deleteTransaction(transactionId);
   }
 }
@@ -244,6 +266,17 @@ final transactionProvider =
   TransactionNotifier.new,
 );
 
+/// 交易 + 分类名/账户名 join 流(P0-5:分类名来自 DB,非硬编码)。
+///
+/// watch [financeBootstrapProvider] 注册依赖:它从 loading→data 时本 Provider
+/// 重建,确保分类/账户种子完成后再取首帧。join 流本身也监听
+/// expense_categories/payment_accounts,种子写入后自动重发。
+final transactionsWithCategoryProvider =
+    StreamProvider<List<TransactionWithCategory>>((ref) {
+  ref.watch(financeBootstrapProvider);
+  return ref.watch(financeRepositoryProvider).watchTransactionsWithCategory();
+});
+
 final assetProvider = StreamNotifierProvider<AssetNotifier, List<AssetInventoryData>>(
   AssetNotifier.new,
 );
@@ -295,6 +328,34 @@ final monthTransactionsProvider = Provider<List<FinancialTransactionData>>((ref)
   final start = _monthStart();
   final end = DateTime(start.year, start.month + 1, 1);
   return asyncTxs.whenOrNull(data: (txs) => txs.where((t) => !t.loggedAt.isBefore(start) && t.loggedAt.isBefore(end)).toList()) ?? [];
+});
+
+// 带 DB 分类名/账户名的今日/本月交易子集(P0-5)。供展示分类名/icon 的列表页
+// (今日明细 / 月度消费)直接消费,无需再 categoryForId + 查 accountProvider。
+final todayTransactionsWithCategoryProvider =
+    Provider<List<TransactionWithCategory>>((ref) {
+  final async = ref.watch(transactionsWithCategoryProvider);
+  final start = _todayStart();
+  final end = start.add(const Duration(days: 1));
+  return async.whenOrNull(
+        data: (txs) => txs
+            .where((t) => !t.loggedAt.isBefore(start) && t.loggedAt.isBefore(end))
+            .toList(),
+      ) ??
+      [];
+});
+
+final monthTransactionsWithCategoryProvider =
+    Provider<List<TransactionWithCategory>>((ref) {
+  final async = ref.watch(transactionsWithCategoryProvider);
+  final start = _monthStart();
+  final end = DateTime(start.year, start.month + 1, 1);
+  return async.whenOrNull(
+        data: (txs) => txs
+            .where((t) => !t.loggedAt.isBefore(start) && t.loggedAt.isBefore(end))
+            .toList(),
+      ) ??
+      [];
 });
 
 final todayExpenseProvider = Provider<double>((ref) {
@@ -416,41 +477,53 @@ class SubscriptionItem {
 class TransactionItemListNotifier extends Notifier<List<TransactionItem>> {
   @override
   List<TransactionItem> build() {
-    final txs = ref.watch(transactionProvider).valueOrNull ?? const <FinancialTransactionData>[];
-    final accounts = ref.watch(accountProvider).valueOrNull ?? const <PaymentAccount>[];
-    final accountMap = {for (final a in accounts) a.accountId: a.accountName};
-    return txs.map((t) {
-      final cat = categoryForId(t.categoryId);
-      return TransactionItem(
-        id: t.transactionId,
-        flowType: t.flowType,
-        amount: t.amount,
-        categoryId: t.categoryId,
-        categoryName: cat.name,
-        accountName: accountMap[t.accountId] ?? t.accountId,
-        remark: t.remark,
-        loggedAt: t.loggedAt,
-      );
-    }).toList();
+    // P0-5:分类名/账户名来自 DB join(transactionsWithCategoryProvider),
+    // 不再 categoryForId + 内存 accountMap。
+    final txs = ref.watch(transactionsWithCategoryProvider).valueOrNull ??
+        const <TransactionWithCategory>[];
+    return txs
+        .map((t) => TransactionItem(
+              id: t.transactionId,
+              flowType: t.flowType,
+              amount: t.amount,
+              categoryId: t.categoryId,
+              categoryName: t.categoryName,
+              accountName: t.accountName,
+              remark: t.remark,
+              loggedAt: t.loggedAt,
+            ))
+        .toList();
   }
 
-  void addTransaction(TransactionItem item) {
-    final accounts = ref.read(accountProvider).valueOrNull ?? const <PaymentAccount>[];
-    var accountId = item.accountName;
+  Future<void> addTransaction(TransactionItem item) async {
+    // accountName→accountId 解析需账户流就绪:旧实现同步读 valueOrNull,若
+    // accountProvider 尚未 build(如 drink_drawer 经此路径、且未先 watch 账户流)
+    // 会拿不到账户、回退成「账户名」当 id —— P0-5 加 accountId FK 后必触发违规。
+    //
+    // 注意:await 后**不可再用 ref** —— Riverpod 在依赖变更未重建期间会断言。
+    // 故把所有 ref.read 前置同步捕获,await 后只用捕获到的对象。
+    final accountsFuture = ref.read(accountProvider.future);
+    final txnNotifier = ref.read(transactionProvider.notifier);
+    final accounts = await accountsFuture;
+    PaymentAccount? match;
     for (final a in accounts) {
       if (a.accountName == item.accountName) {
-        accountId = a.accountId;
+        match = a;
         break;
       }
     }
-    ref.read(transactionProvider.notifier).addTransaction(
-          flowType: item.flowType,
-          amount: item.amount,
-          categoryId: item.categoryId,
-          accountId: accountId,
-          remark: item.remark,
-          loggedAt: item.loggedAt,
-        );
+    if (match == null) {
+      // 无对应账户:不写入(否则 FK 违规)。调用方应确保 accountName 真实存在。
+      return;
+    }
+    txnNotifier.addTransaction(
+      flowType: item.flowType,
+      amount: item.amount,
+      categoryId: item.categoryId,
+      accountId: match.accountId,
+      remark: item.remark,
+      loggedAt: item.loggedAt,
+    );
   }
 }
 

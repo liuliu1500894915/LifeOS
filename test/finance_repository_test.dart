@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:life_os/core/database/app_database.dart';
 import 'package:life_os/core/database/system_bootstrap.dart';
+import 'package:life_os/features/finance/data/repositories/finance_repository.dart';
 import 'package:life_os/features/finance/data/repositories/finance_repository_drift.dart';
 
 /// FinanceRepository (Drift 实现) 集成测 —— 在 NativeDatabase.memory() 上验证
@@ -58,9 +59,35 @@ void main() {
       await repo.deleteAccount(id);
       expect(await repo.getAccounts(), isEmpty);
     });
+
+    test('deleteAccount with transactions is blocked (P0-5 FK guard)', () async {
+      await repo.addAccount('卡', 'CASH', false, 0);
+      final id = (await singleAccount()).accountId;
+      await repo.ensureCategoriesSeeded();
+      await repo.addTransaction(
+        flowType: 'EXPENSE',
+        amount: 10,
+        categoryId: 'food',
+        accountId: id,
+      );
+      // 有关联交易 → 应用层前置校验抛 EntityInUseException(友好提示),
+      // 不让裸 FK 错误冒到 UI。
+      await expectLater(
+        repo.deleteAccount(id),
+        throwsA(isA<EntityInUseException>()),
+      );
+      // 账户与交易均仍在,未成孤儿。
+      expect(await repo.getAccounts(), hasLength(1));
+      expect(await repo.getTransactions(), hasLength(1));
+    });
   });
 
   group('transactions', () {
+    // P0-5:addTransaction 的 categoryId 现 FK,需先 seed 默认分类('food'/'salary' 等)。
+    setUp(() async {
+      await repo.ensureCategoriesSeeded();
+    });
+
     test('EXPENSE decrements account balance, INCOME increments', () async {
       await repo.addAccount('卡', 'CASH', false, 100);
       final accountId = (await singleAccount()).accountId;
@@ -104,6 +131,50 @@ void main() {
     test('deleteTransaction on unknown id is a no-op', () async {
       await repo.deleteTransaction('does-not-exist'); // must not throw
     });
+
+    test('watchTransactionsWithCategory joins DB category/account name (P0-5)',
+        () async {
+      await repo.addAccount('卡', 'CASH', false, 0);
+      final accountId = (await singleAccount()).accountId;
+      await repo.addTransaction(
+        flowType: 'EXPENSE',
+        amount: 25,
+        categoryId: 'food',
+        accountId: accountId,
+      );
+      final rows = await repo.watchTransactionsWithCategory().first;
+      expect(rows, hasLength(1));
+      // 分类名/图标来自 DB join(expense_categories),非硬编码 categoryForId。
+      expect(rows.single.categoryName, '三餐');
+      expect(rows.single.categoryIcon, '🍱');
+      expect(rows.single.accountName, '卡');
+    });
+
+    test('addTransaction with dangling accountId/categoryId violates FK (P0-5)',
+        () async {
+      // 'food' 已 seed;但 accountId 不存在 → FK 违规。
+      await expectLater(
+        repo.addTransaction(
+          flowType: 'EXPENSE',
+          amount: 10,
+          categoryId: 'food',
+          accountId: 'no-such-account',
+        ),
+        throwsA(anything),
+      );
+      // 账户存在但 categoryId 不存在 → FK 违规。
+      await repo.addAccount('卡', 'CASH', false, 0);
+      final accountId = (await singleAccount()).accountId;
+      await expectLater(
+        repo.addTransaction(
+          flowType: 'EXPENSE',
+          amount: 10,
+          categoryId: 'no-such-category',
+          accountId: accountId,
+        ),
+        throwsA(anything),
+      );
+    });
   });
 
   group('categories', () {
@@ -123,6 +194,25 @@ void main() {
       expect((await repo.getCategories()).single.categoryName, '咖啡豆');
       await repo.deleteCategory(id);
       expect(await repo.getCategories(), isEmpty);
+    });
+
+    test('deleteCategory with transactions is blocked (P0-5 FK guard)', () async {
+      await repo.addAccount('卡', 'CASH', false, 0);
+      final accountId = (await repo.getAccounts()).single.accountId;
+      await repo.addCategory('咖啡', '☕');
+      final categoryId = (await repo.getCategories()).single.categoryId;
+      await repo.addTransaction(
+        flowType: 'EXPENSE',
+        amount: 10,
+        categoryId: categoryId,
+        accountId: accountId,
+      );
+      // 被引用的分类不可删(与 FK RESTRICT 一致),抛 EntityInUseException。
+      await expectLater(
+        repo.deleteCategory(categoryId),
+        throwsA(isA<EntityInUseException>()),
+      );
+      expect(await repo.getCategories(), hasLength(1));
     });
   });
 

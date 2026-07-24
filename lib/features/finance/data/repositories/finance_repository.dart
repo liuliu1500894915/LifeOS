@@ -1,6 +1,48 @@
 
 import '../../../../core/database/app_database.dart';
 
+/// 交易 + 关联分类名/账户名的读投影(P0-5:分类名来自 DB join,不再硬编码)。
+///
+/// 由 [FinanceRepository.watchTransactionsWithCategory] 产出 —— 一次 join
+/// `expense_categories` + `payment_accounts` 取名,避免 UI 层再维护内存映射或
+/// 硬编码兜底。
+class TransactionWithCategory {
+  final String transactionId;
+  final String flowType;
+  final double amount;
+  final String categoryId;
+  final String categoryName;
+  final String categoryIcon;
+  final String accountId;
+  final String accountName;
+  final String? remark;
+  final DateTime loggedAt;
+
+  const TransactionWithCategory({
+    required this.transactionId,
+    required this.flowType,
+    required this.amount,
+    required this.categoryId,
+    required this.categoryName,
+    required this.categoryIcon,
+    required this.accountId,
+    required this.accountName,
+    this.remark,
+    required this.loggedAt,
+  });
+}
+
+/// 删除被引用的账户/分类时抛出(P0-5:删账户/分类前校验关联交易)。
+///
+/// `toString` 只返回人类可读的原因(UI 可直接 SnackBar 展示),不带 "Bad state"。
+class EntityInUseException implements Exception {
+  const EntityInUseException(this.message);
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
 /// 数据访问抽象层 —— presentation 只依赖此接口,不碰 `AppDatabase`。
 ///
 /// 读暴露 `watchXxx()`(Drift `.watch()` 流,P0-4 起 Provider 改用它)与一次性
@@ -19,6 +61,7 @@ abstract interface class FinanceRepository {
 
   // ── 交易 ──
   Stream<List<FinancialTransactionData>> watchTransactions();
+  Stream<List<TransactionWithCategory>> watchTransactionsWithCategory();
   Future<List<FinancialTransactionData>> getTransactions();
   Future<void> addTransaction({
     required String flowType,

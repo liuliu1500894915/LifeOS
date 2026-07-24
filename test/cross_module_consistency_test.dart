@@ -9,7 +9,6 @@ import 'package:life_os/core/widgets/number_keyboard.dart';
 import 'package:life_os/features/analytics/presentation/providers/analytics_providers.dart';
 import 'package:life_os/features/daily/presentation/providers/daily_providers.dart';
 import 'package:life_os/features/finance/presentation/providers/finance_providers.dart';
-import 'package:life_os/features/finance/data/category_seeds.dart';
 import 'package:life_os/features/home/presentation/providers/home_providers.dart';
 import 'package:life_os/features/home/presentation/providers/room_providers.dart';
 import 'package:life_os/features/home/presentation/widgets/drink_drawer.dart';
@@ -113,10 +112,12 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // drink_drawer 的 _save 触发 Drift 写;P0-4 起 finance 读走 .watch() 流,
-      // 写后异步重发,泵送直到新交易(¥12.5)出现在 transactionProvider。
+      // drink_drawer 的 _save 触发 Drift 写;P0-5 起 finance 分析/列表读 join 流
+      // (todayTransactionsWithCategoryProvider),写后异步重发,泵送直到新交易
+      // (¥12.5)出现在 join 派生 provider(断言依赖它)。
       await _pumpUntil(
-        () => (container.read(transactionProvider).valueOrNull ?? const [])
+        () => container
+            .read(todayTransactionsWithCategoryProvider)
             .any((t) => t.amount == 12.5),
       );
 
@@ -131,7 +132,12 @@ void main() {
       final transactions = container.read(todayTransactionsProvider);
       final lastTransaction = transactions.last;
       expect(lastTransaction.categoryId, 'drink');
-      expect(categoryForId(lastTransaction.categoryId).name, '饮品');
+      // P0-5:分类名来自 DB(单一真相),不再用硬编码 categoryForId。
+      final db = container.read(databaseProvider);
+      final drinkCat = await (db.select(db.expenseCategories)
+            ..where((c) => c.categoryId.equals('drink')))
+          .getSingle();
+      expect(drinkCat.categoryName, '饮品');
       expect(lastTransaction.amount, 12.5);
       expect(lastTransaction.remark, '含糖饮料');
 
@@ -169,10 +175,11 @@ void main() {
             accountId: wechatAccount.accountId,
             loggedAt: DateTime.now(),
           );
-      // P0-4:写后流异步重发,泵送直到这笔 ¥30 进入 transactionProvider,
-      // 其后 weeklyReportProvider 等派生 provider 才能读到。
+      // P0-5:写后流异步重发,泵送直到这笔 ¥30 进入 join 派生 provider
+      // (weeklyReportProvider 经 financeAnalyticsProvider 读它)。
       await _pumpUntil(
-        () => (container.read(transactionProvider).valueOrNull ?? const [])
+        () => container
+            .read(todayTransactionsWithCategoryProvider)
             .any((t) => t.amount == 30),
       );
 

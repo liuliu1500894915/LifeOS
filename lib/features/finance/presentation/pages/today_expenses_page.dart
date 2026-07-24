@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/database/app_database.dart';
 import '../providers/finance_providers.dart';
-import '../../data/category_seeds.dart';
 import '../widgets/transaction_drawer.dart';
 
 class TodayExpensesPage extends ConsumerWidget {
@@ -11,7 +9,7 @@ class TodayExpensesPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final transactions = ref.watch(todayTransactionsProvider);
+    final transactions = ref.watch(todayTransactionsWithCategoryProvider);
     final expenses = transactions.where((t) => t.flowType == 'EXPENSE').toList();
     final total = expenses.fold<double>(0, (sum, t) => sum + t.amount);
 
@@ -109,14 +107,12 @@ class TodayExpensesPage extends ConsumerWidget {
 
 class _TransactionCard extends ConsumerWidget {
   const _TransactionCard({required this.tx, required this.onDelete});
-  final FinancialTransactionData tx;
+  final TransactionWithCategory tx;
   final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cat = categoryForId(tx.categoryId);
-    final accounts = ref.watch(accountProvider).valueOrNull ?? [];
-    final accountName = accounts.where((a) => a.accountId == tx.accountId).firstOrNull?.accountName ?? tx.accountId;
+    final accountName = tx.accountName;
 
     return Dismissible(
       key: ValueKey(tx.transactionId),
@@ -162,7 +158,7 @@ class _TransactionCard extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Center(
-                child: Text(cat.icon, style: const TextStyle(fontSize: 18)),
+                child: Text(tx.categoryIcon, style: const TextStyle(fontSize: 18)),
               ),
             ),
             const SizedBox(width: 12),
@@ -175,7 +171,7 @@ class _TransactionCard extends ConsumerWidget {
                       Text('${tx.loggedAt.hour}:${tx.loggedAt.minute.toString().padLeft(2, '0')}',
                           style: const TextStyle(fontSize: 12, color: Color(0xFF9E9E9E))),
                       const SizedBox(width: 8),
-                      Text(cat.name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+                      Text(tx.categoryName, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
                     ],
                   ),
                   if (tx.remark != null && tx.remark!.isNotEmpty) ...[

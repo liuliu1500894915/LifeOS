@@ -53,15 +53,16 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(QueryExecutor executor) : super(executor);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (Migrator m) async {
           await m.createAll();
-          // 索引不随 createAll 生成，需在 fresh install 时一并补（与 from2To3
+          // 索引不随 createAll 生成，需在 fresh install 时一并补（与升级路径
           // 对称，保证新旧安装 schema 一致）。
           await _createHealthIndexes(m);
+          await _createFinanceIndexes(m);
         },
         onUpgrade: stepByStep(
           from1To2: (m, schema) async {
@@ -79,6 +80,27 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(schema.nutritionGoal);
             await m.createTable(schema.exerciseLog);
             await _createHealthIndexes(m);
+          },
+          from3To4: (m, schema) async {
+            // v3→v4: FinancialTransaction.categoryId/accountId 补外键（P0-5）。
+            // SQLite 无法直接 ALTER ADD FOREIGN KEY，需重建表。重建前先清洗孤儿
+            // 交易（categoryId/accountId 悬空）以免数据与新约束冲突——实际用户库
+            // 几乎无孤儿，此为防御性清洗（决策：删除孤儿交易）。
+            await m.database.customStatement(
+              'DELETE FROM financial_transaction WHERE category_id NOT IN '
+              '(SELECT category_id FROM expense_categories)',
+            );
+            await m.database.customStatement(
+              'DELETE FROM financial_transaction WHERE account_id NOT IN '
+              '(SELECT account_id FROM payment_accounts)',
+            );
+            // 重建表以附加新 FK 约束（列集不变，TableMigration 按 1:1 列名复制）。
+            await m.alterTable(
+              // ignore: experimental_member_use, 给既有表加 FK 必须重建表,drift 的 TableMigration 是标准写法(无稳定替代)
+              TableMigration(schema.financialTransaction),
+            );
+            // finance 交易索引（fresh install 走 onCreate，旧库走这里补）。
+            await _createFinanceIndexes(m);
           },
         ),
         beforeOpen: (details) async {
@@ -103,6 +125,21 @@ class AppDatabase extends _$AppDatabase {
     await m.database.customStatement(
       'CREATE INDEX IF NOT EXISTS idx_exercise_user_date '
       'ON exercise_log(user_id, logged_at)',
+    );
+  }
+
+  /// FinancialTransaction 索引（P0-5）：loggedAt 支撑今日/本月明细按时间过滤与
+  /// 排序；accountId 支撑按账户过滤的交易列表（及删账户前的引用计数查询）。
+  /// 与健康索引对称：onCreate（fresh）与 from3To4（升级）都调一次，IF NOT EXISTS
+  /// 幂等。
+  Future<void> _createFinanceIndexes(Migrator m) async {
+    await m.database.customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_ftx_logged_at '
+      'ON financial_transaction(logged_at)',
+    );
+    await m.database.customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_ftx_account '
+      'ON financial_transaction(account_id)',
     );
   }
 }
