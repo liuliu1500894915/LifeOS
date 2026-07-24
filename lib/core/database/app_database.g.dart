@@ -10147,6 +10147,39 @@ class $DailyReviewLogTable extends DailyReviewLog
         type: DriftSqlType.string,
         requiredDuringInsert: true,
       );
+  static const VerificationMeta _highlightTextMeta = const VerificationMeta(
+    'highlightText',
+  );
+  @override
+  late final GeneratedColumn<String> highlightText = GeneratedColumn<String>(
+    'highlight_text',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _improveTextMeta = const VerificationMeta(
+    'improveText',
+  );
+  @override
+  late final GeneratedColumn<String> improveText = GeneratedColumn<String>(
+    'improve_text',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _tomorrowPlanTextMeta = const VerificationMeta(
+    'tomorrowPlanText',
+  );
+  @override
+  late final GeneratedColumn<String> tomorrowPlanText = GeneratedColumn<String>(
+    'tomorrow_plan_text',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     reviewDate,
@@ -10154,6 +10187,9 @@ class $DailyReviewLogTable extends DailyReviewLog
     moodTag,
     insightsContent,
     summarySnapshotJson,
+    highlightText,
+    improveText,
+    tomorrowPlanText,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -10211,6 +10247,33 @@ class $DailyReviewLogTable extends DailyReviewLog
     } else if (isInserting) {
       context.missing(_summarySnapshotJsonMeta);
     }
+    if (data.containsKey('highlight_text')) {
+      context.handle(
+        _highlightTextMeta,
+        highlightText.isAcceptableOrUnknown(
+          data['highlight_text']!,
+          _highlightTextMeta,
+        ),
+      );
+    }
+    if (data.containsKey('improve_text')) {
+      context.handle(
+        _improveTextMeta,
+        improveText.isAcceptableOrUnknown(
+          data['improve_text']!,
+          _improveTextMeta,
+        ),
+      );
+    }
+    if (data.containsKey('tomorrow_plan_text')) {
+      context.handle(
+        _tomorrowPlanTextMeta,
+        tomorrowPlanText.isAcceptableOrUnknown(
+          data['tomorrow_plan_text']!,
+          _tomorrowPlanTextMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -10240,6 +10303,18 @@ class $DailyReviewLogTable extends DailyReviewLog
         DriftSqlType.string,
         data['${effectivePrefix}summary_snapshot_json'],
       )!,
+      highlightText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}highlight_text'],
+      ),
+      improveText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}improve_text'],
+      ),
+      tomorrowPlanText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tomorrow_plan_text'],
+      ),
     );
   }
 
@@ -10256,12 +10331,18 @@ class DailyReviewLogData extends DataClass
   final String moodTag;
   final String? insightsContent;
   final String summarySnapshotJson;
+  final String? highlightText;
+  final String? improveText;
+  final String? tomorrowPlanText;
   const DailyReviewLogData({
     required this.reviewDate,
     required this.userId,
     required this.moodTag,
     this.insightsContent,
     required this.summarySnapshotJson,
+    this.highlightText,
+    this.improveText,
+    this.tomorrowPlanText,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -10273,6 +10354,15 @@ class DailyReviewLogData extends DataClass
       map['insights_content'] = Variable<String>(insightsContent);
     }
     map['summary_snapshot_json'] = Variable<String>(summarySnapshotJson);
+    if (!nullToAbsent || highlightText != null) {
+      map['highlight_text'] = Variable<String>(highlightText);
+    }
+    if (!nullToAbsent || improveText != null) {
+      map['improve_text'] = Variable<String>(improveText);
+    }
+    if (!nullToAbsent || tomorrowPlanText != null) {
+      map['tomorrow_plan_text'] = Variable<String>(tomorrowPlanText);
+    }
     return map;
   }
 
@@ -10285,6 +10375,15 @@ class DailyReviewLogData extends DataClass
           ? const Value.absent()
           : Value(insightsContent),
       summarySnapshotJson: Value(summarySnapshotJson),
+      highlightText: highlightText == null && nullToAbsent
+          ? const Value.absent()
+          : Value(highlightText),
+      improveText: improveText == null && nullToAbsent
+          ? const Value.absent()
+          : Value(improveText),
+      tomorrowPlanText: tomorrowPlanText == null && nullToAbsent
+          ? const Value.absent()
+          : Value(tomorrowPlanText),
     );
   }
 
@@ -10301,6 +10400,9 @@ class DailyReviewLogData extends DataClass
       summarySnapshotJson: serializer.fromJson<String>(
         json['summarySnapshotJson'],
       ),
+      highlightText: serializer.fromJson<String?>(json['highlightText']),
+      improveText: serializer.fromJson<String?>(json['improveText']),
+      tomorrowPlanText: serializer.fromJson<String?>(json['tomorrowPlanText']),
     );
   }
   @override
@@ -10312,6 +10414,9 @@ class DailyReviewLogData extends DataClass
       'moodTag': serializer.toJson<String>(moodTag),
       'insightsContent': serializer.toJson<String?>(insightsContent),
       'summarySnapshotJson': serializer.toJson<String>(summarySnapshotJson),
+      'highlightText': serializer.toJson<String?>(highlightText),
+      'improveText': serializer.toJson<String?>(improveText),
+      'tomorrowPlanText': serializer.toJson<String?>(tomorrowPlanText),
     };
   }
 
@@ -10321,6 +10426,9 @@ class DailyReviewLogData extends DataClass
     String? moodTag,
     Value<String?> insightsContent = const Value.absent(),
     String? summarySnapshotJson,
+    Value<String?> highlightText = const Value.absent(),
+    Value<String?> improveText = const Value.absent(),
+    Value<String?> tomorrowPlanText = const Value.absent(),
   }) => DailyReviewLogData(
     reviewDate: reviewDate ?? this.reviewDate,
     userId: userId ?? this.userId,
@@ -10329,6 +10437,13 @@ class DailyReviewLogData extends DataClass
         ? insightsContent.value
         : this.insightsContent,
     summarySnapshotJson: summarySnapshotJson ?? this.summarySnapshotJson,
+    highlightText: highlightText.present
+        ? highlightText.value
+        : this.highlightText,
+    improveText: improveText.present ? improveText.value : this.improveText,
+    tomorrowPlanText: tomorrowPlanText.present
+        ? tomorrowPlanText.value
+        : this.tomorrowPlanText,
   );
   DailyReviewLogData copyWithCompanion(DailyReviewLogCompanion data) {
     return DailyReviewLogData(
@@ -10343,6 +10458,15 @@ class DailyReviewLogData extends DataClass
       summarySnapshotJson: data.summarySnapshotJson.present
           ? data.summarySnapshotJson.value
           : this.summarySnapshotJson,
+      highlightText: data.highlightText.present
+          ? data.highlightText.value
+          : this.highlightText,
+      improveText: data.improveText.present
+          ? data.improveText.value
+          : this.improveText,
+      tomorrowPlanText: data.tomorrowPlanText.present
+          ? data.tomorrowPlanText.value
+          : this.tomorrowPlanText,
     );
   }
 
@@ -10353,7 +10477,10 @@ class DailyReviewLogData extends DataClass
           ..write('userId: $userId, ')
           ..write('moodTag: $moodTag, ')
           ..write('insightsContent: $insightsContent, ')
-          ..write('summarySnapshotJson: $summarySnapshotJson')
+          ..write('summarySnapshotJson: $summarySnapshotJson, ')
+          ..write('highlightText: $highlightText, ')
+          ..write('improveText: $improveText, ')
+          ..write('tomorrowPlanText: $tomorrowPlanText')
           ..write(')'))
         .toString();
   }
@@ -10365,6 +10492,9 @@ class DailyReviewLogData extends DataClass
     moodTag,
     insightsContent,
     summarySnapshotJson,
+    highlightText,
+    improveText,
+    tomorrowPlanText,
   );
   @override
   bool operator ==(Object other) =>
@@ -10374,7 +10504,10 @@ class DailyReviewLogData extends DataClass
           other.userId == this.userId &&
           other.moodTag == this.moodTag &&
           other.insightsContent == this.insightsContent &&
-          other.summarySnapshotJson == this.summarySnapshotJson);
+          other.summarySnapshotJson == this.summarySnapshotJson &&
+          other.highlightText == this.highlightText &&
+          other.improveText == this.improveText &&
+          other.tomorrowPlanText == this.tomorrowPlanText);
 }
 
 class DailyReviewLogCompanion extends UpdateCompanion<DailyReviewLogData> {
@@ -10383,6 +10516,9 @@ class DailyReviewLogCompanion extends UpdateCompanion<DailyReviewLogData> {
   final Value<String> moodTag;
   final Value<String?> insightsContent;
   final Value<String> summarySnapshotJson;
+  final Value<String?> highlightText;
+  final Value<String?> improveText;
+  final Value<String?> tomorrowPlanText;
   final Value<int> rowid;
   const DailyReviewLogCompanion({
     this.reviewDate = const Value.absent(),
@@ -10390,6 +10526,9 @@ class DailyReviewLogCompanion extends UpdateCompanion<DailyReviewLogData> {
     this.moodTag = const Value.absent(),
     this.insightsContent = const Value.absent(),
     this.summarySnapshotJson = const Value.absent(),
+    this.highlightText = const Value.absent(),
+    this.improveText = const Value.absent(),
+    this.tomorrowPlanText = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   DailyReviewLogCompanion.insert({
@@ -10398,6 +10537,9 @@ class DailyReviewLogCompanion extends UpdateCompanion<DailyReviewLogData> {
     required String moodTag,
     this.insightsContent = const Value.absent(),
     required String summarySnapshotJson,
+    this.highlightText = const Value.absent(),
+    this.improveText = const Value.absent(),
+    this.tomorrowPlanText = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : reviewDate = Value(reviewDate),
        userId = Value(userId),
@@ -10409,6 +10551,9 @@ class DailyReviewLogCompanion extends UpdateCompanion<DailyReviewLogData> {
     Expression<String>? moodTag,
     Expression<String>? insightsContent,
     Expression<String>? summarySnapshotJson,
+    Expression<String>? highlightText,
+    Expression<String>? improveText,
+    Expression<String>? tomorrowPlanText,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -10418,6 +10563,9 @@ class DailyReviewLogCompanion extends UpdateCompanion<DailyReviewLogData> {
       if (insightsContent != null) 'insights_content': insightsContent,
       if (summarySnapshotJson != null)
         'summary_snapshot_json': summarySnapshotJson,
+      if (highlightText != null) 'highlight_text': highlightText,
+      if (improveText != null) 'improve_text': improveText,
+      if (tomorrowPlanText != null) 'tomorrow_plan_text': tomorrowPlanText,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -10428,6 +10576,9 @@ class DailyReviewLogCompanion extends UpdateCompanion<DailyReviewLogData> {
     Value<String>? moodTag,
     Value<String?>? insightsContent,
     Value<String>? summarySnapshotJson,
+    Value<String?>? highlightText,
+    Value<String?>? improveText,
+    Value<String?>? tomorrowPlanText,
     Value<int>? rowid,
   }) {
     return DailyReviewLogCompanion(
@@ -10436,6 +10587,9 @@ class DailyReviewLogCompanion extends UpdateCompanion<DailyReviewLogData> {
       moodTag: moodTag ?? this.moodTag,
       insightsContent: insightsContent ?? this.insightsContent,
       summarySnapshotJson: summarySnapshotJson ?? this.summarySnapshotJson,
+      highlightText: highlightText ?? this.highlightText,
+      improveText: improveText ?? this.improveText,
+      tomorrowPlanText: tomorrowPlanText ?? this.tomorrowPlanText,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -10460,6 +10614,15 @@ class DailyReviewLogCompanion extends UpdateCompanion<DailyReviewLogData> {
         summarySnapshotJson.value,
       );
     }
+    if (highlightText.present) {
+      map['highlight_text'] = Variable<String>(highlightText.value);
+    }
+    if (improveText.present) {
+      map['improve_text'] = Variable<String>(improveText.value);
+    }
+    if (tomorrowPlanText.present) {
+      map['tomorrow_plan_text'] = Variable<String>(tomorrowPlanText.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -10474,6 +10637,9 @@ class DailyReviewLogCompanion extends UpdateCompanion<DailyReviewLogData> {
           ..write('moodTag: $moodTag, ')
           ..write('insightsContent: $insightsContent, ')
           ..write('summarySnapshotJson: $summarySnapshotJson, ')
+          ..write('highlightText: $highlightText, ')
+          ..write('improveText: $improveText, ')
+          ..write('tomorrowPlanText: $tomorrowPlanText, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -30128,6 +30294,9 @@ typedef $$DailyReviewLogTableCreateCompanionBuilder =
       required String moodTag,
       Value<String?> insightsContent,
       required String summarySnapshotJson,
+      Value<String?> highlightText,
+      Value<String?> improveText,
+      Value<String?> tomorrowPlanText,
       Value<int> rowid,
     });
 typedef $$DailyReviewLogTableUpdateCompanionBuilder =
@@ -30137,6 +30306,9 @@ typedef $$DailyReviewLogTableUpdateCompanionBuilder =
       Value<String> moodTag,
       Value<String?> insightsContent,
       Value<String> summarySnapshotJson,
+      Value<String?> highlightText,
+      Value<String?> improveText,
+      Value<String?> tomorrowPlanText,
       Value<int> rowid,
     });
 
@@ -30202,6 +30374,21 @@ class $$DailyReviewLogTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get highlightText => $composableBuilder(
+    column: $table.highlightText,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get improveText => $composableBuilder(
+    column: $table.improveText,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tomorrowPlanText => $composableBuilder(
+    column: $table.tomorrowPlanText,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$UserAccountsTableFilterComposer get userId {
     final $$UserAccountsTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -30255,6 +30442,21 @@ class $$DailyReviewLogTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get highlightText => $composableBuilder(
+    column: $table.highlightText,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get improveText => $composableBuilder(
+    column: $table.improveText,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get tomorrowPlanText => $composableBuilder(
+    column: $table.tomorrowPlanText,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$UserAccountsTableOrderingComposer get userId {
     final $$UserAccountsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -30303,6 +30505,21 @@ class $$DailyReviewLogTableAnnotationComposer
 
   GeneratedColumn<String> get summarySnapshotJson => $composableBuilder(
     column: $table.summarySnapshotJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get highlightText => $composableBuilder(
+    column: $table.highlightText,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get improveText => $composableBuilder(
+    column: $table.improveText,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get tomorrowPlanText => $composableBuilder(
+    column: $table.tomorrowPlanText,
     builder: (column) => column,
   );
 
@@ -30365,6 +30582,9 @@ class $$DailyReviewLogTableTableManager
                 Value<String> moodTag = const Value.absent(),
                 Value<String?> insightsContent = const Value.absent(),
                 Value<String> summarySnapshotJson = const Value.absent(),
+                Value<String?> highlightText = const Value.absent(),
+                Value<String?> improveText = const Value.absent(),
+                Value<String?> tomorrowPlanText = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DailyReviewLogCompanion(
                 reviewDate: reviewDate,
@@ -30372,6 +30592,9 @@ class $$DailyReviewLogTableTableManager
                 moodTag: moodTag,
                 insightsContent: insightsContent,
                 summarySnapshotJson: summarySnapshotJson,
+                highlightText: highlightText,
+                improveText: improveText,
+                tomorrowPlanText: tomorrowPlanText,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -30381,6 +30604,9 @@ class $$DailyReviewLogTableTableManager
                 required String moodTag,
                 Value<String?> insightsContent = const Value.absent(),
                 required String summarySnapshotJson,
+                Value<String?> highlightText = const Value.absent(),
+                Value<String?> improveText = const Value.absent(),
+                Value<String?> tomorrowPlanText = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DailyReviewLogCompanion.insert(
                 reviewDate: reviewDate,
@@ -30388,6 +30614,9 @@ class $$DailyReviewLogTableTableManager
                 moodTag: moodTag,
                 insightsContent: insightsContent,
                 summarySnapshotJson: summarySnapshotJson,
+                highlightText: highlightText,
+                improveText: improveText,
+                tomorrowPlanText: tomorrowPlanText,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

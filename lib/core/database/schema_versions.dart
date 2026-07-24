@@ -5828,12 +5828,761 @@ i1.GeneratedColumn<String> _column_202(String aliasedName) =>
       false,
       type: i1.DriftSqlType.string,
     );
+
+final class Schema7 extends i0.VersionedSchema {
+  Schema7({required super.database}) : super(version: 7);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    userAccounts,
+    petStatusCore,
+    petActionQuickLog,
+    assetInventory,
+    roomFurniturePlacement,
+    userProfile,
+    weightHistory,
+    expenseCategories,
+    paymentAccounts,
+    subscriptionServices,
+    financialTransaction,
+    budgetSettings,
+    assetValueSnapshots,
+    flagGoals,
+    todoExecutionList,
+    habitDefinitions,
+    habitCheckLog,
+    flagMilestones,
+    dailyReviewLog,
+    lifeMoment,
+    momentPhoto,
+    secureDocumentsVault,
+    memorialDays,
+    relationshipNetwork,
+    relationshipInteractionLog,
+    analyticalInsights,
+    dailyAggregationCache,
+    backgroundWorkerLog,
+    foodCategory,
+    foodLibrary,
+    mealLog,
+    nutritionGoal,
+    exerciseLog,
+  ];
+  late final Shape0 userAccounts = Shape0(
+    source: i0.VersionedTable(
+      entityName: 'user_accounts',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(user_id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_4,
+        _column_5,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape1 petStatusCore = Shape1(
+    source: i0.VersionedTable(
+      entityName: 'pet_status_core',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(pet_id)'],
+      columns: [
+        _column_6,
+        _column_7,
+        _column_8,
+        _column_9,
+        _column_10,
+        _column_11,
+        _column_12,
+        _column_13,
+        _column_14,
+        _column_15,
+        _column_16,
+        _column_17,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape2 petActionQuickLog = Shape2(
+    source: i0.VersionedTable(
+      entityName: 'pet_action_quick_log',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(log_id)'],
+      columns: [
+        _column_18,
+        _column_7,
+        _column_19,
+        _column_20,
+        _column_21,
+        _column_22,
+        _column_23,
+        _column_24,
+        _column_5,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape3 assetInventory = Shape3(
+    source: i0.VersionedTable(
+      entityName: 'asset_inventory',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(asset_id)'],
+      columns: [
+        _column_25,
+        _column_7,
+        _column_26,
+        _column_27,
+        _column_28,
+        _column_29,
+        _column_30,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape4 roomFurniturePlacement = Shape4(
+    source: i0.VersionedTable(
+      entityName: 'room_furniture_placement',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(placement_id)'],
+      columns: [
+        _column_31,
+        _column_7,
+        _column_32,
+        _column_33,
+        _column_34,
+        _column_35,
+        _column_36,
+        _column_37,
+        _column_17,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape5 userProfile = Shape5(
+    source: i0.VersionedTable(
+      entityName: 'user_profile',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(user_id)'],
+      columns: [
+        _column_7,
+        _column_38,
+        _column_39,
+        _column_40,
+        _column_41,
+        _column_42,
+        _column_43,
+        _column_44,
+        _column_17,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape6 weightHistory = Shape6(
+    source: i0.VersionedTable(
+      entityName: 'weight_history',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'PRIMARY KEY(record_id)',
+        'UNIQUE(user_id, recorded_date)',
+      ],
+      columns: [
+        _column_45,
+        _column_7,
+        _column_46,
+        _column_47,
+        _column_48,
+        _column_49,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape12 expenseCategories = Shape12(
+    source: i0.VersionedTable(
+      entityName: 'expense_categories',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(category_id)'],
+      columns: [
+        _column_78,
+        _column_7,
+        _column_79,
+        _column_80,
+        _column_81,
+        _column_62,
+        _column_4,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape8 paymentAccounts = Shape8(
+    source: i0.VersionedTable(
+      entityName: 'payment_accounts',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(account_id)'],
+      columns: [
+        _column_57,
+        _column_7,
+        _column_58,
+        _column_59,
+        _column_60,
+        _column_61,
+        _column_62,
+        _column_5,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape9 subscriptionServices = Shape9(
+    source: i0.VersionedTable(
+      entityName: 'subscription_services',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(subscription_id)'],
+      columns: [
+        _column_63,
+        _column_7,
+        _column_64,
+        _column_52,
+        _column_65,
+        _column_66,
+        _column_67,
+        _column_68,
+        _column_4,
+        _column_5,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape31 financialTransaction = Shape31(
+    source: i0.VersionedTable(
+      entityName: 'financial_transaction',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(transaction_id)'],
+      columns: [
+        _column_50,
+        _column_7,
+        _column_51,
+        _column_52,
+        _column_192,
+        _column_67,
+        _column_55,
+        _column_56,
+        _column_193,
+        _column_194,
+        _column_195,
+        _column_196,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape10 budgetSettings = Shape10(
+    source: i0.VersionedTable(
+      entityName: 'budget_settings',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'PRIMARY KEY(budget_id)',
+        'UNIQUE(user_id, category_id, month_key)',
+      ],
+      columns: [
+        _column_69,
+        _column_7,
+        _column_53,
+        _column_70,
+        _column_71,
+        _column_72,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape11 assetValueSnapshots = Shape11(
+    source: i0.VersionedTable(
+      entityName: 'asset_value_snapshots',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'PRIMARY KEY(snapshot_id)',
+        'UNIQUE(user_id, snapshot_date)',
+      ],
+      columns: [
+        _column_73,
+        _column_7,
+        _column_74,
+        _column_75,
+        _column_76,
+        _column_77,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape13 flagGoals = Shape13(
+    source: i0.VersionedTable(
+      entityName: 'flag_goals',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(flag_id)'],
+      columns: [
+        _column_82,
+        _column_7,
+        _column_83,
+        _column_84,
+        _column_85,
+        _column_86,
+        _column_87,
+        _column_88,
+        _column_89,
+        _column_5,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape14 todoExecutionList = Shape14(
+    source: i0.VersionedTable(
+      entityName: 'todo_execution_list',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(todo_id)'],
+      columns: [
+        _column_90,
+        _column_7,
+        _column_83,
+        _column_91,
+        _column_92,
+        _column_93,
+        _column_89,
+        _column_94,
+        _column_95,
+        _column_96,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape15 habitDefinitions = Shape15(
+    source: i0.VersionedTable(
+      entityName: 'habit_definitions',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(habit_id)'],
+      columns: [
+        _column_97,
+        _column_7,
+        _column_98,
+        _column_99,
+        _column_100,
+        _column_85,
+        _column_101,
+        _column_4,
+        _column_5,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape16 habitCheckLog = Shape16(
+    source: i0.VersionedTable(
+      entityName: 'habit_check_log',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(log_id)', 'UNIQUE(habit_id, check_date)'],
+      columns: [
+        _column_18,
+        _column_7,
+        _column_102,
+        _column_103,
+        _column_104,
+        _column_105,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape17 flagMilestones = Shape17(
+    source: i0.VersionedTable(
+      entityName: 'flag_milestones',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(milestone_id)'],
+      columns: [
+        _column_106,
+        _column_7,
+        _column_107,
+        _column_83,
+        _column_85,
+        _column_108,
+        _column_109,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape34 dailyReviewLog = Shape34(
+    source: i0.VersionedTable(
+      entityName: 'daily_review_log',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(review_date, user_id)'],
+      columns: [
+        _column_110,
+        _column_7,
+        _column_111,
+        _column_112,
+        _column_113,
+        _column_203,
+        _column_204,
+        _column_205,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape32 lifeMoment = Shape32(
+    source: i0.VersionedTable(
+      entityName: 'life_moment',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(moment_id)'],
+      columns: [_column_197, _column_7, _column_198, _column_199, _column_56],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape33 momentPhoto = Shape33(
+    source: i0.VersionedTable(
+      entityName: 'moment_photo',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(photo_id)'],
+      columns: [_column_200, _column_201, _column_202, _column_62],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape19 secureDocumentsVault = Shape19(
+    source: i0.VersionedTable(
+      entityName: 'secure_documents_vault',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(doc_id)'],
+      columns: [
+        _column_114,
+        _column_7,
+        _column_115,
+        _column_116,
+        _column_117,
+        _column_118,
+        _column_119,
+        _column_120,
+        _column_17,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape20 memorialDays = Shape20(
+    source: i0.VersionedTable(
+      entityName: 'memorial_days',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(memorial_id)'],
+      columns: [
+        _column_121,
+        _column_7,
+        _column_122,
+        _column_123,
+        _column_124,
+        _column_125,
+        _column_126,
+        _column_127,
+        _column_128,
+        _column_4,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape21 relationshipNetwork = Shape21(
+    source: i0.VersionedTable(
+      entityName: 'relationship_network',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(contact_id)'],
+      columns: [
+        _column_129,
+        _column_7,
+        _column_130,
+        _column_131,
+        _column_132,
+        _column_133,
+        _column_134,
+        _column_135,
+        _column_5,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape22 relationshipInteractionLog = Shape22(
+    source: i0.VersionedTable(
+      entityName: 'relationship_interaction_log',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(interaction_id)'],
+      columns: [
+        _column_136,
+        _column_7,
+        _column_137,
+        _column_138,
+        _column_139,
+        _column_140,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape23 analyticalInsights = Shape23(
+    source: i0.VersionedTable(
+      entityName: 'analytical_insights',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(insight_id)'],
+      columns: [
+        _column_141,
+        _column_7,
+        _column_142,
+        _column_143,
+        _column_144,
+        _column_145,
+        _column_146,
+        _column_147,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape24 dailyAggregationCache = Shape24(
+    source: i0.VersionedTable(
+      entityName: 'daily_aggregation_cache',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(cache_date, user_id)'],
+      columns: [
+        _column_148,
+        _column_7,
+        _column_149,
+        _column_150,
+        _column_151,
+        _column_152,
+        _column_153,
+        _column_154,
+        _column_155,
+        _column_156,
+        _column_157,
+        _column_158,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape25 backgroundWorkerLog = Shape25(
+    source: i0.VersionedTable(
+      entityName: 'background_worker_log',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'PRIMARY KEY(worker_id)',
+        'UNIQUE(worker_type, target_date)',
+      ],
+      columns: [
+        _column_159,
+        _column_7,
+        _column_160,
+        _column_161,
+        _column_92,
+        _column_162,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape26 foodCategory = Shape26(
+    source: i0.VersionedTable(
+      entityName: 'food_category',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(category_id)'],
+      columns: [
+        _column_78,
+        _column_7,
+        _column_163,
+        _column_80,
+        _column_62,
+        _column_164,
+        _column_4,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape27 foodLibrary = Shape27(
+    source: i0.VersionedTable(
+      entityName: 'food_library',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(food_id)'],
+      columns: [
+        _column_165,
+        _column_7,
+        _column_166,
+        _column_167,
+        _column_168,
+        _column_169,
+        _column_170,
+        _column_171,
+        _column_172,
+        _column_173,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape28 mealLog = Shape28(
+    source: i0.VersionedTable(
+      entityName: 'meal_log',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(log_id)'],
+      columns: [
+        _column_18,
+        _column_7,
+        _column_174,
+        _column_175,
+        _column_176,
+        _column_177,
+        _column_178,
+        _column_179,
+        _column_180,
+        _column_56,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape29 nutritionGoal = Shape29(
+    source: i0.VersionedTable(
+      entityName: 'nutrition_goal',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(user_id)'],
+      columns: [
+        _column_7,
+        _column_181,
+        _column_182,
+        _column_183,
+        _column_184,
+        _column_185,
+        _column_186,
+        _column_187,
+        _column_17,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape30 exerciseLog = Shape30(
+    source: i0.VersionedTable(
+      entityName: 'exercise_log',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(log_id)'],
+      columns: [
+        _column_18,
+        _column_7,
+        _column_188,
+        _column_189,
+        _column_190,
+        _column_191,
+        _column_56,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+}
+
+class Shape34 extends i0.VersionedTable {
+  Shape34({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<DateTime> get reviewDate =>
+      columnsByName['review_date']! as i1.GeneratedColumn<DateTime>;
+  i1.GeneratedColumn<String> get userId =>
+      columnsByName['user_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get moodTag =>
+      columnsByName['mood_tag']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get insightsContent =>
+      columnsByName['insights_content']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get summarySnapshotJson =>
+      columnsByName['summary_snapshot_json']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get highlightText =>
+      columnsByName['highlight_text']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get improveText =>
+      columnsByName['improve_text']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get tomorrowPlanText =>
+      columnsByName['tomorrow_plan_text']! as i1.GeneratedColumn<String>;
+}
+
+i1.GeneratedColumn<String> _column_203(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'highlight_text',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+    );
+i1.GeneratedColumn<String> _column_204(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'improve_text',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+    );
+i1.GeneratedColumn<String> _column_205(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'tomorrow_plan_text',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+    );
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
   required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
   required Future<void> Function(i1.Migrator m, Schema5 schema) from4To5,
   required Future<void> Function(i1.Migrator m, Schema6 schema) from5To6,
+  required Future<void> Function(i1.Migrator m, Schema7 schema) from6To7,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -5862,6 +6611,11 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from5To6(migrator, schema);
         return 6;
+      case 6:
+        final schema = Schema7(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from6To7(migrator, schema);
+        return 7;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -5874,6 +6628,7 @@ i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
   required Future<void> Function(i1.Migrator m, Schema5 schema) from4To5,
   required Future<void> Function(i1.Migrator m, Schema6 schema) from5To6,
+  required Future<void> Function(i1.Migrator m, Schema7 schema) from6To7,
 }) => i0.VersionedSchema.stepByStepHelper(
   step: migrationSteps(
     from1To2: from1To2,
@@ -5881,5 +6636,6 @@ i1.OnUpgrade stepByStep({
     from3To4: from3To4,
     from4To5: from4To5,
     from5To6: from5To6,
+    from6To7: from6To7,
   ),
 );
