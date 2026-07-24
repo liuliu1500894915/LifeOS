@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/database/system_bootstrap.dart';
 import '../../data/repositories/goal_repository_drift.dart';
+import '../../domain/energy_ledger.dart';
 import '../../domain/nutrition_goal.dart';
+import 'exercise_providers.dart' show todayCaloriesBurnedProvider;
 import 'meal_providers.dart' show todayNutritionProvider;
 
 // ── Stream-backed notifier ──
@@ -83,4 +85,21 @@ final nutritionProgressProvider = Provider<NutritionProgress?>((ref) {
   if (target == null) return null;
   final intake = ref.watch(todayNutritionProvider);
   return computeNutritionProgress(target, intake);
+});
+
+/// 当日能量账本（P3-3）：合并「摄入」([todayNutritionProvider]) 与「消耗」
+/// ([todayCaloriesBurnedProvider])，对比固定目标（[nutritionTargetsProvider]）。
+///
+/// 三个皆流式源数据，任一变化自动重算，UI 无需手动刷新（执行计划铁律 §1.3：
+/// 派生数据用 Provider 组合流式源数据）。计算在 domain 纯函数
+/// [computeEnergyLedger]（「吃 − 动 = 净」，消耗不加回额度）。
+final energyLedgerProvider = Provider<EnergyLedger>((ref) {
+  final intake = ref.watch(todayNutritionProvider).calories;
+  final burned = ref.watch(todayCaloriesBurnedProvider);
+  final target = ref.watch(nutritionTargetsProvider)?.calorieTarget;
+  return computeEnergyLedger(
+    intakeCalories: intake,
+    burnedCalories: burned,
+    calorieTarget: target,
+  );
 });
