@@ -29,14 +29,16 @@ void main() {
   tearDown(() async => db.close());
 
   DailyReviewSnapshot snapshot({
-    double expense = 100,
+    double spot = 100,
+    double amortized = 0,
     double intake = 1500,
     double burned = 300,
     int total = 3,
     int completed = 1,
   }) =>
       DailyReviewSnapshot(
-        expense: expense,
+        spotExpense: spot,
+        amortizedExpense: amortized,
         intakeCalories: intake,
         burnedCalories: burned,
         todoTotal: total,
@@ -51,7 +53,7 @@ void main() {
       improveText: '熬夜了',
       tomorrowPlanText: '早起跑步',
       summarySnapshotJson:
-          DailyReviewSnapshot.encode(snapshot(expense: 88, intake: 1600)),
+          DailyReviewSnapshot.encode(snapshot(spot: 88, intake: 1600)),
     );
 
     final row = await repo.watchReviewByDate(DateTime(2026, 7, 24)).first;
@@ -63,7 +65,10 @@ void main() {
 
     final decoded = DailyReviewSnapshot.decode(row.summarySnapshotJson);
     expect(decoded, isNotNull);
-    expect(decoded!.expense, 88);
+    expect(decoded!.spotExpense, 88);
+    expect(decoded.amortizedExpense, 0);
+    // 真实成本 = 日常 + 摊销（三层自洽）。
+    expect(decoded.trueExpense, 88);
     expect(decoded.intakeCalories, 1600);
   });
 
@@ -85,15 +90,15 @@ void main() {
       date: DateTime(2026, 7, 24),
       moodTag: '😐',
       highlightText: '旧高光',
-      summarySnapshotJson:
-          DailyReviewSnapshot.encode(snapshot(expense: 50)),
+      summarySnapshotJson: DailyReviewSnapshot.encode(snapshot(spot: 50)),
     );
     await repo.upsertReview(
       date: DateTime(2026, 7, 24, 23, 59), // 同一天，不同时刻
       moodTag: '😊',
       highlightText: '新高光',
+      // 覆盖写入带摊销的三层快照：日常 120 + 摊销 80 = 真实 200。
       summarySnapshotJson:
-          DailyReviewSnapshot.encode(snapshot(expense: 200)),
+          DailyReviewSnapshot.encode(snapshot(spot: 120, amortized: 80)),
     );
 
     final rows = await db.select(db.dailyReviewLog).get();
@@ -102,31 +107,29 @@ void main() {
     final row = await repo.watchReviewByDate(DateTime(2026, 7, 24)).first;
     expect(row!.moodTag, '😊');
     expect(row.highlightText, '新高光');
-    expect(
-      DailyReviewSnapshot.decode(row.summarySnapshotJson)!.expense,
-      200,
-    );
+    final decoded = DailyReviewSnapshot.decode(row.summarySnapshotJson)!;
+    expect(decoded.spotExpense, 120);
+    expect(decoded.amortizedExpense, 80);
+    expect(decoded.trueExpense, 200);
   });
 
   test('快照冻结：写完 A 日复盘后，再写 B 日，A 日快照不变', () async {
-    // A 日（7-24）冻结 expense=88。
+    // A 日（7-24）冻结 spot=88。
     await repo.upsertReview(
       date: DateTime(2026, 7, 24),
       moodTag: '😊',
-      summarySnapshotJson:
-          DailyReviewSnapshot.encode(snapshot(expense: 88)),
+      summarySnapshotJson: DailyReviewSnapshot.encode(snapshot(spot: 88)),
     );
     // 模拟「后续数据变化」：B 日（7-25）以不同快照写入。
     await repo.upsertReview(
       date: DateTime(2026, 7, 25),
       moodTag: '😌',
-      summarySnapshotJson:
-          DailyReviewSnapshot.encode(snapshot(expense: 999)),
+      summarySnapshotJson: DailyReviewSnapshot.encode(snapshot(spot: 999)),
     );
 
     // A 日快照仍为冻结时的 88，不被 B 日写入影响。
     final a = await repo.watchReviewByDate(DateTime(2026, 7, 24)).first;
-    expect(DailyReviewSnapshot.decode(a!.summarySnapshotJson)!.expense, 88);
+    expect(DailyReviewSnapshot.decode(a!.summarySnapshotJson)!.spotExpense, 88);
     // 两日各自独立成行。
     expect(await db.select(db.dailyReviewLog).get(), hasLength(2));
   });
