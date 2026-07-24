@@ -5,6 +5,7 @@ import '../../../../core/database/app_database.dart';
 import '../../domain/nutrition.dart';
 import '../providers/meal_providers.dart';
 import '../widgets/food_picker_sheet.dart';
+import '../widgets/nutrition_progress_card.dart';
 
 /// 健康模块首页壳（P2-3）。
 ///
@@ -16,7 +17,6 @@ class HealthPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final nutrition = ref.watch(todayNutritionProvider);
     final byType = ref.watch(mealLogsByTypeProvider);
     final nutritionByType = ref.watch(nutritionByTypeProvider);
 
@@ -37,7 +37,7 @@ class HealthPage extends ConsumerWidget {
             children: [
               const _Header(),
               const SizedBox(height: 12),
-              _TodaySummary(nutrition: nutrition),
+              const NutritionOverview(),
               const SizedBox(height: 16),
               for (final type in MealType.values) ...[
                 _MealSection(
@@ -67,89 +67,6 @@ class _Header extends StatelessWidget {
         SizedBox(width: 8),
         Text('健康饮食', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
       ],
-    );
-  }
-}
-
-class _TodaySummary extends StatelessWidget {
-  const _TodaySummary({required this.nutrition});
-  final NutritionSnapshot nutrition;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            const Color(0xFFFF7043).withAlpha(20),
-            const Color(0xFFFF7043).withAlpha(50),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('今日摄入', style: TextStyle(fontSize: 13, color: Color(0xFF616161))),
-          const SizedBox(height: 4),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                nutrition.calories.toStringAsFixed(0),
-                style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w700, color: Color(0xFFFF7043)),
-              ),
-              const SizedBox(width: 4),
-              const Text('kcal', style: TextStyle(fontSize: 14, color: Color(0xFF9E9E9E))),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              _MacroChip(label: '蛋白', value: nutrition.protein, color: const Color(0xFF42A5F5)),
-              const SizedBox(width: 8),
-              _MacroChip(label: '脂肪', value: nutrition.fat, color: const Color(0xFFFFB300)),
-              const SizedBox(width: 8),
-              _MacroChip(label: '碳水', value: nutrition.carbs, color: const Color(0xFF66BB6A)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MacroChip extends StatelessWidget {
-  const _MacroChip({required this.label, required this.value, required this.color});
-  final String label;
-  final double value;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        decoration: BoxDecoration(
-          color: Colors.white.withAlpha(140),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Column(
-          children: [
-            Text(label, style: TextStyle(fontSize: 11, color: color.withAlpha(180))),
-            const SizedBox(height: 2),
-            Text(
-              '${value.toStringAsFixed(1)}g',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: color),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
