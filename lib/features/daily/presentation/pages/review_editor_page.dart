@@ -11,8 +11,9 @@ import '../providers/review_providers.dart';
 
 /// 复盘编辑页（P4-2）。
 ///
-/// 结构化引导：心情 + 高光 / 待改进 / 明日计划。打开即聚合当日全景（支出/摄入/
-/// 运动/待办）展示为「当前全景」，保存时把该快照**冻结**进 `summarySnapshotJson`
+/// 结构化引导：心情 + 高光 / 待改进 / 明日计划。打开即聚合当日全景（财务
+/// 日常/摊销/真实成本 · 摄入/消耗/净热量 · 待办完成率）展示为「当前全景」，
+/// 保存时把该快照**冻结**进 `summarySnapshotJson`
 /// （[ReviewNotifier.saveReview]）。若当日已有复盘，则另展示其冻结快照（历史不随
 /// 后续数据变化）。页底部关联展示当日 [LifeMoment]（瞬间）。
 ///
@@ -266,18 +267,25 @@ class _ReviewEditorPageState extends ConsumerState<ReviewEditorPage> {
           const SizedBox(height: 12),
           Row(
             children: [
-              _snapshotTile('支出', '¥${snapshot.expense.toStringAsFixed(0)}'),
-              _snapshotTile('摄入', '${snapshot.intakeCalories.toStringAsFixed(0)} kcal'),
-              _snapshotTile('消耗', '${snapshot.burnedCalories.toStringAsFixed(0)} kcal'),
+              _snapshotTile('日常', '¥${snapshot.spotExpense.toStringAsFixed(0)}'),
+              _snapshotTile('摊销', '¥${snapshot.amortizedExpense.toStringAsFixed(0)}'),
+              _snapshotTile('真实成本', '¥${snapshot.trueExpense.toStringAsFixed(0)}'),
             ],
           ),
           const SizedBox(height: 8),
           Row(
             children: [
+              _snapshotTile('摄入', '${snapshot.intakeCalories.toStringAsFixed(0)} kcal'),
+              _snapshotTile('消耗', '${snapshot.burnedCalories.toStringAsFixed(0)} kcal'),
               _snapshotTile(
                 '净热量',
                 '${snapshot.netCalories.toStringAsFixed(0)} kcal',
               ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
               _snapshotTile(
                 '待办',
                 '${snapshot.todoCompleted}/${snapshot.todoTotal}',

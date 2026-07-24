@@ -26,20 +26,25 @@ DateTime _dateOnly(DateTime dt) {
   return DateTime(local.year, local.month, local.day);
 }
 
-// ── 当日全景快照聚合（P4-2）──
+// ── 当日全景快照聚合（P4-2 / P5-3）──
 //
 // 派生 Provider：watch 各模块当日 provider → 组装 [DailyReviewSnapshot]。它本身
 // 是「活的」（随各模块写库自动变）；保存复盘时由 [ReviewNotifier.saveReview]
 // 读出当前值并 [DailyReviewSnapshot.encode] 冻结进 `summarySnapshotJson`，从此
 // 脱离这些 provider、不再随后续数据变化（蓝图 §1.2 快照冻结）。
 //
-// P5-3（复盘聚合各模块）将在此扩展：拆 SPOT/摊销、能量净值细分、完成率细分等。
-// 当前 P4-2 聚合支出/摄入/消耗/待办四项。
+// 聚合口径（P5-3 复盘聚合各模块）：
+// - 财务拆 P1-5 三层：日常 SPOT（todaySpotExpenseProvider）+ 长期摊销
+//   （todayAmortizedExpenseProvider），真实成本由模型派生（= 日常 + 摊销），
+//   摊销按覆盖区间平摊、不含一次性全额尖峰；
+// - 健康：摄入（todayNutritionProvider.calories）/ 消耗
+//   （todayCaloriesBurnedProvider），净值由模型派生；
+// - 待办：当日（targetDate == 今天）那批，完成率 = 已完成 / 当日总数。
 final todayReviewSnapshotProvider = Provider<DailyReviewSnapshot>((ref) {
-  final expense = ref.watch(todayExpenseProvider);
+  final spotExpense = ref.watch(todaySpotExpenseProvider);
+  final amortizedExpense = ref.watch(todayAmortizedExpenseProvider);
   final nutrition = ref.watch(todayNutritionProvider);
   final burned = ref.watch(todayCaloriesBurnedProvider);
-  // 待办取当日（targetDate == 今天）那批；完成率 = 已完成 / 当日总数。
   final today = _todayStart();
   final todaysTodos = ref
       .watch(quadrantTodoProvider)
@@ -47,7 +52,8 @@ final todayReviewSnapshotProvider = Provider<DailyReviewSnapshot>((ref) {
       .toList();
 
   return DailyReviewSnapshot(
-    expense: expense,
+    spotExpense: spotExpense,
+    amortizedExpense: amortizedExpense,
     intakeCalories: nutrition.calories,
     burnedCalories: burned,
     todoTotal: todaysTodos.length,
