@@ -1,10 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/event_bus/bus.dart';
+import '../../../../core/event_bus/events.dart';
 import '../../domain/vital_calculator.dart';
 
 // ── Enums ──
 
-enum ActionType { feed, drink, sport, rest }
+// P5-1：运动迁至健康 ExerciseLog（唯一真相），宠物不再记录 SPORT，
+// 故枚举移除 sport，仅保留投喂/喝水/休息。
+enum ActionType { feed, drink, rest }
 
 enum DrinkType { water, beverage }
 
@@ -77,17 +81,9 @@ class TodaySummary {
 }
 
 // ── MET lookup ──
-
-const metValues = <String, double>{
-  '跑步': 9.8, '走路': 3.5, '骑行': 6.8, '游泳': 7.0, '力量': 5.0, '瑜伽': 3.0,
-};
-
-const defaultBodyWeight = 65.0;
-
-double calculateCaloriesBurned(String exerciseName, int minutes) {
-  final met = metValues[exerciseName] ?? 5.0;
-  return met * minutes * defaultBodyWeight / 60;
-}
+//
+// P5-1：运动消耗改由健康模块 `domain/met_table.dart` 计算（单一真相），
+// 宠物侧不再维护重复的 MET 表 / 体重常量 / 消耗公式，已下线。
 
 // ── StateNotifiers ──
 
@@ -103,7 +99,6 @@ class ActionLogNotifier extends StateNotifier<List<PetActionLog>> {
     PetActionLog(logId: 'a1', actionType: ActionType.drink, valueNumeric: 500, subCategory: 'water', createdAt: _now.subtract(const Duration(hours: 3))),
     PetActionLog(logId: 'a2', actionType: ActionType.drink, valueNumeric: 350, subCategory: 'water', createdAt: _now.subtract(const Duration(hours: 1))),
     PetActionLog(logId: 'a3', actionType: ActionType.feed, valueNumeric: 650, subCategory: '午饭', createdAt: _now.subtract(const Duration(hours: 2))),
-    PetActionLog(logId: 'a4', actionType: ActionType.sport, valueNumeric: 30, subCategory: '走路', createdAt: _now.subtract(const Duration(hours: 4))),
   ];
 }
 
@@ -114,10 +109,36 @@ final actionLogNotifierProvider =
   return ActionLogNotifier();
 });
 
+/// 运动 → 宠物能量 事件桥（P5-1）。
+///
+/// 健康模块写 ExerciseLog 后发 [ExerciseLoggedEvent]（运动唯一真相在此），
+/// 本 Notifier 订阅该事件，按运动时长给宠物「能量」维度加分（纯函数
+/// [VitalCalculator.exerciseEnergyGain]）。宠物不再自行记录 SPORT 消耗。
+///
+/// 注：当前宠物状态为内存 mock（与既有 ActionLog 一致），加分累加在内存；
+/// 持久化、改读 ExerciseLog 当日汇总属 P5-2。
+class ExerciseEnergyBonusNotifier extends Notifier<int> {
+  @override
+  int build() {
+    final sub = globalEventBus.on<ExerciseLoggedEvent>().listen((event) {
+      state = state + VitalCalculator.exerciseEnergyGain(event.durationMinutes);
+    });
+    ref.onDispose(sub.cancel);
+    return 0;
+  }
+}
+
+final exerciseEnergyBonusProvider =
+    NotifierProvider<ExerciseEnergyBonusNotifier, int>(
+        ExerciseEnergyBonusNotifier.new);
+
 final petStatusProvider = Provider<PetStatus>((ref) {
   final logs = ref.watch(actionLogNotifierProvider);
+  // 订阅运动事件桥：用户在健康页记录运动 → 发事件 → 能量维度即时变化。
+  final energyBonus = ref.watch(exerciseEnergyBonusProvider);
   final vitals = VitalCalculator.calculate(
     logs.map((l) => _ActionLogAdapter(l)).toList(),
+    exerciseEnergyBonus: energyBonus,
   );
   final levelName = vitals.overallLevel.name.toUpperCase();
   return PetStatus(
@@ -142,25 +163,24 @@ class _ActionLogAdapter {
 
 final todaySummaryProvider = Provider<TodaySummary>((ref) {
   final logs = ref.watch(actionLogNotifierProvider);
-  double waterMl = 0, sportMin = 0, calIn = 0, calOut = 0;
+  double waterMl = 0, calIn = 0;
   for (final log in logs) {
     switch (log.actionType) {
       case ActionType.drink:
         waterMl += log.valueNumeric;
       case ActionType.feed:
         calIn += log.valueNumeric;
-      case ActionType.sport:
-        sportMin += log.valueNumeric;
-        calOut += calculateCaloriesBurned(log.subCategory ?? '走路', log.valueNumeric.toInt());
       case ActionType.rest:
         break;
     }
   }
+  // P5-1：运动消耗改由健康 ExerciseLog 记录（唯一真相），宠物 mock 不再产出
+  // sportMinutes/caloriesOut。这两项汇总改读 ExerciseLog 属 P5-2，在此之前为 0。
   return TodaySummary(
     waterMl: waterMl,
-    sportMinutes: sportMin,
+    sportMinutes: 0,
     caloriesIn: calIn,
-    caloriesOut: calOut,
+    caloriesOut: 0,
     sleepHours: 7.5,
   );
 });

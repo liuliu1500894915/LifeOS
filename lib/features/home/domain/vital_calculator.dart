@@ -76,7 +76,23 @@ class VitalCalculator {
     return VitalLevel.critical;
   }
 
-  static PetVitals calculate(List<dynamic> actionLogs) {
+  /// 运动事件 → 宠物「能量」加分（P5-1）。向上取整，每满 10 分钟 +1 点，
+  /// 不足 10 分钟也按 1 点计；非正时长不加。运动经健康 `ExerciseLog` 入账
+  /// （唯一真相），宠物订阅 [ExerciseLoggedEvent] 调用此函数涨精力，不再
+  /// 在宠物侧独立计消耗/写 SPORT。
+  static int exerciseEnergyGain(int durationMinutes) {
+    if (durationMinutes <= 0) return 0;
+    return (durationMinutes / 10).ceil();
+  }
+
+  /// 计算宠物四维状态。
+  ///
+  /// [actionLogs] 仅含投喂/喝水/休息（P5-1 起运动不再经宠物 action log）。
+  /// [exerciseEnergyBonus] 为运动事件桥累计的能量加分（默认 0）。
+  static PetVitals calculate(
+    List<dynamic> actionLogs, {
+    int exerciseEnergyBonus = 0,
+  }) {
     int hydration = 50, energy = 60, bodyShape = 0, mood = 60;
 
     for (final log in actionLogs) {
@@ -89,14 +105,14 @@ class VitalCalculator {
         case 'feed':
           energy = (energy + (value / 80).round()).clamp(0, 100);
           mood = (mood + 3).clamp(0, 100);
-        case 'sport':
-          bodyShape = (bodyShape + (value / 15).round()).clamp(0, 100);
-          mood = (mood + 5).clamp(0, 100);
         case 'rest':
           mood = (mood + (value * 2).round()).clamp(0, 100);
           energy = (energy + (value * 3).round()).clamp(0, 100);
       }
     }
+
+    // 运动能量来自事件桥（不再经 action log）。
+    energy = (energy + exerciseEnergyBonus).clamp(0, 100);
 
     final dims = [
       DimensionStatus(dimension: PetDimension.hydration, points: hydration, level: levelFromPoints(hydration)),
