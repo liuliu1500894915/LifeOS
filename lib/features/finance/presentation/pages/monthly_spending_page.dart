@@ -5,6 +5,7 @@ import 'package:table_calendar/table_calendar.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../providers/finance_providers.dart';
+import '../../data/category_seeds.dart';
 
 class MonthlySpendingPage extends ConsumerStatefulWidget {
   const MonthlySpendingPage({super.key});

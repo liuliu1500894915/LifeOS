@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../features/daily/presentation/providers/daily_providers.dart';
 import '../../../../features/finance/presentation/providers/finance_providers.dart';
+import '../../../../features/finance/data/category_seeds.dart';
 import '../../../../features/home/presentation/providers/home_providers.dart';
 import '../../domain/correlation_engine.dart';
 

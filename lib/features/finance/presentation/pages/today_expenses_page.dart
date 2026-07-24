@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/database/app_database.dart';
 import '../providers/finance_providers.dart';
+import '../../data/category_seeds.dart';
 import '../widgets/transaction_drawer.dart';
 
 class TodayExpensesPage extends ConsumerWidget {

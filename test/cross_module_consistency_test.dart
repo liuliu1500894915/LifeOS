@@ -9,6 +9,7 @@ import 'package:life_os/core/widgets/number_keyboard.dart';
 import 'package:life_os/features/analytics/presentation/providers/analytics_providers.dart';
 import 'package:life_os/features/daily/presentation/providers/daily_providers.dart';
 import 'package:life_os/features/finance/presentation/providers/finance_providers.dart';
+import 'package:life_os/features/finance/data/category_seeds.dart';
 import 'package:life_os/features/home/presentation/providers/home_providers.dart';
 import 'package:life_os/features/home/presentation/providers/room_providers.dart';
 import 'package:life_os/features/home/presentation/widgets/drink_drawer.dart';
