@@ -70,6 +70,13 @@ abstract interface class FinanceRepository {
     required String accountId,
     String? remark,
     DateTime? loggedAt,
+    // P1-2:摊销参数。默认 SPOT(日常一次性)对现有调用方零影响;
+    // AMORTIZED(长期摊销)时 amortizeStart/End 定义覆盖区间(含头含尾),
+    // 余额照常按全额扣减,摊销只改分析口径(P1-5)。见 §3.6。
+    String expenseNature = 'SPOT',
+    DateTime? amortizeStart,
+    DateTime? amortizeEnd,
+    String? sourceSubscriptionId,
   });
   Future<void> deleteTransaction(String transactionId);
 

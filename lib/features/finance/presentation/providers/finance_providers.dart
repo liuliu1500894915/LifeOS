@@ -85,6 +85,10 @@ class TransactionNotifier extends StreamNotifier<List<FinancialTransactionData>>
     required String accountId,
     String? remark,
     DateTime? loggedAt,
+    String expenseNature = 'SPOT',
+    DateTime? amortizeStart,
+    DateTime? amortizeEnd,
+    String? sourceSubscriptionId,
   }) async {
     await ref.read(financeBootstrapProvider.future);
     await ref.read(financeRepositoryProvider).addTransaction(
@@ -94,6 +98,10 @@ class TransactionNotifier extends StreamNotifier<List<FinancialTransactionData>>
           accountId: accountId,
           remark: remark,
           loggedAt: loggedAt,
+          expenseNature: expenseNature,
+          amortizeStart: amortizeStart,
+          amortizeEnd: amortizeEnd,
+          sourceSubscriptionId: sourceSubscriptionId,
         );
   }
 
