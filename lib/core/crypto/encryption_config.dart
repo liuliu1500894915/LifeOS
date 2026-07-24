@@ -1,15 +1,13 @@
-/// SQLCipher encryption configuration.
+/// Non-secret SQLCipher configuration constants.
+///
+/// The encryption **key** is NOT defined here. It is generated on first launch
+/// and stored in platform secure storage — see `key_store.dart`. This file
+/// holds only parameters that are non-secret and must stay stable across opens
+/// of the same database (page size).
 class EncryptionConfig {
-  const EncryptionConfig._({required this.key});
+  const EncryptionConfig._();
 
-  static const String defaultKey = 'life_os_v1_encryption_key';
+  /// SQLCipher page size in bytes. Non-secret; must match the value used when
+  /// the database was first created.
   static const int pageSize = 4096;
-  static const int kdfIter = 256000;
-
-  final String key;
-
-  factory EncryptionConfig.withDefaultKey() =>
-      const EncryptionConfig._(key: defaultKey);
-  factory EncryptionConfig.withKey(String key) =>
-      EncryptionConfig._(key: key);
 }

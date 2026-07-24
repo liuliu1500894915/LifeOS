@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
 
-import '../crypto/encryption_config.dart';
 import 'database_connection.dart';
 import 'tables/app_defaults.dart';
 import 'tables/pet_tables.dart';
@@ -42,8 +41,7 @@ part 'app_database.g.dart';
   ],
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase({EncryptionConfig? encryptionConfig})
-      : super(_openConnection(encryptionConfig));
+  AppDatabase() : super(_openConnection());
 
   AppDatabase.forTesting(QueryExecutor executor) : super(executor);
 
@@ -71,7 +69,6 @@ class AppDatabase extends _$AppDatabase {
       );
 }
 
-QueryExecutor _openConnection(EncryptionConfig? encryptionConfig) {
-  final config = encryptionConfig ?? EncryptionConfig.withDefaultKey();
-  return createDatabaseConnection(config);
+QueryExecutor _openConnection() {
+  return createDatabaseConnection();
 }

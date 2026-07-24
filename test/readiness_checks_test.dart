@@ -22,7 +22,6 @@ void main() {
       expect(SecureVaultCipher.decrypt('not-base64%%%'), 'not-base64%%%');
       expect(SecureVaultCipher.decrypt('Zm9v'), 'foo');
       expect(EncryptionConfig.pageSize, 4096);
-      expect(EncryptionConfig.kdfIter, greaterThanOrEqualTo(256000));
     });
 
     test('core providers resolve without network or platform service dependencies', () async {
