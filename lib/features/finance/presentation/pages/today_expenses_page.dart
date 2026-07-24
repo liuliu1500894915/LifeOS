@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/app_theme.dart';
 import '../providers/finance_providers.dart';
 import '../widgets/transaction_drawer.dart';
 
@@ -11,7 +12,12 @@ class TodayExpensesPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final transactions = ref.watch(todayTransactionsWithCategoryProvider);
     final expenses = transactions.where((t) => t.flowType == 'EXPENSE').toList();
-    final total = expenses.fold<double>(0, (sum, t) => sum + t.amount);
+
+    // P1-5:三层成本 —— 日常 SPOT / 摊销 / 真实日成本(= 日常 + 摊销)。
+    // 摊销把长期支出(年付订阅等)按覆盖区间平摊到今日,避免全额尖峰。
+    final spot = ref.watch(todaySpotExpenseProvider);
+    final amortized = ref.watch(todayAmortizedExpenseProvider);
+    final trueCost = ref.watch(todayTrueExpenseProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -21,7 +27,7 @@ class TodayExpensesPage extends ConsumerWidget {
       ),
       body: Column(
         children: [
-          _buildSummaryBar(total, expenses.length),
+          _buildSummaryBar(trueCost, spot, amortized, expenses.length),
           Expanded(
             child: expenses.isEmpty
                 ? const Center(child: Text('今日暂无消费记录', style: TextStyle(fontSize: 15, color: Color(0xFF9E9E9E))))
@@ -70,37 +76,68 @@ class TodayExpensesPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildSummaryBar(double total, int count) {
+  /// 三层成本汇总:真实日成本(headline) + 日常 SPOT / 摊销 两项拆解。
+  Widget _buildSummaryBar(double trueCost, double spot, double amortized, int count) {
     return Container(
       margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('今日消费', style: TextStyle(fontSize: 13, color: Color(0xFF757575))),
-              const SizedBox(height: 4),
-              Text('¥${total.toStringAsFixed(2)}',
-                  style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: Color(0xFFE53935))),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('今日真实日成本', style: TextStyle(fontSize: 13, color: Color(0xFF757575))),
+                  const SizedBox(height: 4),
+                  Text('¥${trueCost.toStringAsFixed(2)}',
+                      style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: ModuleColors.expense)),
+                ],
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text('$count 笔支出', style: const TextStyle(fontSize: 13, color: Color(0xFF757575))),
+              ),
             ],
           ),
-          const Spacer(),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text('$count 笔支出',
-                style: const TextStyle(fontSize: 13, color: Color(0xFF757575))),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 10),
+            child: Divider(height: 1, color: Color(0xFFEEEEEE)),
           ),
+          Row(
+            children: [
+              Expanded(child: _buildLayerStat('日常', spot, ModuleColors.finance)),
+              Container(width: 1, height: 28, color: const Color(0xFFEEEEEE)),
+              Expanded(child: _buildLayerStat('摊销', amortized, ModuleColors.warning)),
+            ],
+          ),
+          const SizedBox(height: 6),
+          const Text('日常 = 当日一次性支出 · 摊销 = 长期支出按区间平摊到今日',
+              style: TextStyle(fontSize: 11, color: Color(0xFF9E9E9E))),
         ],
       ),
+    );
+  }
+
+  Widget _buildLayerStat(String label, double amount, Color color) {
+    return Column(
+      children: [
+        Text(label, style: const TextStyle(fontSize: 12, color: Color(0xFF9E9E9E))),
+        const SizedBox(height: 2),
+        Text('¥${amount.toStringAsFixed(2)}',
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: color)),
+      ],
     );
   }
 }

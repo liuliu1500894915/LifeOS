@@ -24,6 +24,9 @@ class _MonthlySpendingPageState extends ConsumerState<MonthlySpendingPage> {
     final monthBudget = ref.watch(monthBudgetProvider);
     final dailyExpense = ref.watch(monthDailyExpenseProvider);
     final monthTxs = ref.watch(monthTransactionsWithCategoryProvider);
+    // P1-5:三层成本 —— 日常 SPOT / 摊销 / 真实月成本(= 日常 + 摊销)。
+    final monthSpot = ref.watch(monthSpotExpenseProvider);
+    final monthAmortized = ref.watch(monthAmortizedExpenseProvider);
     final budgetPerDay = monthBudget > 0 ? monthBudget / DateTime(_focusedDay.year, _focusedDay.month + 1, 0).day : 0.0;
 
     final selected = _selectedDay ?? DateTime.now();
@@ -46,7 +49,7 @@ class _MonthlySpendingPageState extends ConsumerState<MonthlySpendingPage> {
       ),
       body: Column(
         children: [
-          _buildMonthSummary(monthExpense, monthBudget),
+          _buildMonthSummary(monthExpense, monthSpot, monthAmortized, monthBudget),
           _buildLineChart(dailyExpense, budgetPerDay),
           _buildCalendar(dailyExpense),
           Expanded(
@@ -84,41 +87,73 @@ class _MonthlySpendingPageState extends ConsumerState<MonthlySpendingPage> {
     );
   }
 
-  Widget _buildMonthSummary(double monthExpense, double monthBudget) {
+  /// 三层成本汇总:真实月成本(headline) + 日常 SPOT / 摊销 拆解 + 预算使用率。
+  /// 真实月成本对预算(摊销份额本就应占预算);日常/摊销让用户看清「一次性」
+  /// 与「长期平摊」各占多少(P1-5)。
+  Widget _buildMonthSummary(double monthExpense, double monthSpot, double monthAmortized, double monthBudget) {
     final percent = monthBudget > 0 ? (monthExpense / monthBudget * 100).clamp(0, 150) : 0.0;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
             children: [
-              const Text('本月消费', style: TextStyle(fontSize: 13, color: Color(0xFF757575))),
-              const SizedBox(height: 4),
-              Text('¥${monthExpense.toStringAsFixed(2)}',
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Color(0xFFE53935))),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('本月真实月成本', style: TextStyle(fontSize: 13, color: Color(0xFF757575))),
+                  const SizedBox(height: 4),
+                  Text('¥${monthExpense.toStringAsFixed(2)}',
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: ModuleColors.expense)),
+                ],
+              ),
+              const Spacer(),
+              if (monthBudget > 0)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    const Text('预算使用', style: TextStyle(fontSize: 12, color: Color(0xFF9E9E9E))),
+                    const SizedBox(height: 4),
+                    Text('${percent.toStringAsFixed(1)}%',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: percent > 100 ? Colors.red : ModuleColors.finance,
+                        )),
+                  ],
+                ),
             ],
           ),
-          const Spacer(),
-          if (monthBudget > 0) ...[
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                const Text('预算使用', style: TextStyle(fontSize: 12, color: Color(0xFF9E9E9E))),
-                const SizedBox(height: 4),
-                Text('${percent.toStringAsFixed(1)}%',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: percent > 100 ? Colors.red : ModuleColors.finance,
-                    )),
-              ],
-            ),
-          ],
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 10),
+            child: Divider(height: 1, color: Color(0xFFEEEEEE)),
+          ),
+          Row(
+            children: [
+              Expanded(child: _buildLayerStat('日常', monthSpot, ModuleColors.finance)),
+              Container(width: 1, height: 28, color: const Color(0xFFEEEEEE)),
+              Expanded(child: _buildLayerStat('摊销', monthAmortized, ModuleColors.warning)),
+            ],
+          ),
+          const SizedBox(height: 6),
+          const Text('日常 = 当月一次性支出 · 摊销 = 长期支出按区间平摊到当月每日',
+              style: TextStyle(fontSize: 11, color: Color(0xFF9E9E9E))),
         ],
       ),
+    );
+  }
+
+  Widget _buildLayerStat(String label, double amount, Color color) {
+    return Column(
+      children: [
+        Text(label, style: const TextStyle(fontSize: 12, color: Color(0xFF9E9E9E))),
+        const SizedBox(height: 2),
+        Text('¥${amount.toStringAsFixed(2)}',
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: color)),
+      ],
     );
   }
 
