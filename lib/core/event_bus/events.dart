@@ -93,6 +93,25 @@ class SugaryDrinkRecordedEvent {
   final double cost;
 }
 
+// ── Health → Pet ──
+
+/// 运动（消耗）记录写入健康 `ExerciseLog`（运动唯一真相）后触发。
+/// 宠物订阅此事件涨精力（P5-1）：运动不再在宠物侧独立计消耗/写 SPORT，
+/// 统一经此事件驱动宠物状态。
+class ExerciseLoggedEvent {
+  const ExerciseLoggedEvent({
+    required this.exerciseName,
+    required this.durationMinutes,
+    required this.caloriesBurned,
+    required this.loggedAt,
+  });
+
+  final String exerciseName;
+  final int durationMinutes;
+  final double caloriesBurned;
+  final DateTime loggedAt;
+}
+
 // ── Relationship warmth decay → Daily ──
 
 class RelationshipCrisisEvent {

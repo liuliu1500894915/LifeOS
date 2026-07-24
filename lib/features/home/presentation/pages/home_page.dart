@@ -9,7 +9,6 @@ import '../../domain/pet_animation_state.dart';
 import '../providers/home_providers.dart';
 import '../providers/room_providers.dart';
 import '../widgets/drink_drawer.dart';
-import '../widgets/exercise_drawer.dart';
 import '../widgets/feed_drawer.dart';
 import '../widgets/pet_character.dart';
 import '../widgets/rest_drawer.dart';
@@ -175,7 +174,9 @@ class HomePage extends ConsumerWidget {
             icon: Icons.fitness_center,
             label: '运动',
             color: const Color(0xFF66BB6A),
-            onTap: () => _showSheet(context, const ExerciseDrawer()),
+            // P5-1：运动入口指向健康 ExercisePage（ExerciseLog 为唯一真相），
+            // 不再开宠物侧独立运动抽屉。
+            onTap: () => context.push(AppRoutes.exercise),
           ),
           _QuickActionButton(
             icon: Icons.bed,

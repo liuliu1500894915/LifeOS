@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/database/app_database.dart';
 import '../../../../core/database/system_bootstrap.dart';
+import '../../../../core/event_bus/bus.dart';
+import '../../../../core/event_bus/events.dart';
 import '../../data/repositories/exercise_repository_drift.dart';
 
 // ── Stream-backed notifiers ──
@@ -31,13 +33,22 @@ class ExerciseLogNotifier extends StreamNotifier<List<ExerciseLogData>> {
     DateTime? loggedAt,
   }) async {
     await ref.read(systemBootstrapProvider.future);
+    final at = loggedAt ?? DateTime.now();
     await ref.read(exerciseRepositoryProvider).addExerciseLog(
           exerciseName: exerciseName,
           durationMinutes: durationMinutes,
           intensity: intensity,
           caloriesBurned: caloriesBurned,
-          loggedAt: loggedAt,
+          loggedAt: at,
         );
+    // 运动「唯一真相」已写入 ExerciseLog。发跨模块事件通知宠物涨精力（P5-1）：
+    // 宠物不再自行记录 SPORT 消耗，仅订阅此事件更新状态。
+    globalEventBus.fire(ExerciseLoggedEvent(
+      exerciseName: exerciseName,
+      durationMinutes: durationMinutes,
+      caloriesBurned: caloriesBurned,
+      loggedAt: at,
+    ));
   }
 
   Future<void> deleteExerciseLog(String logId) async {
