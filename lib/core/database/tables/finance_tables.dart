@@ -24,6 +24,23 @@ class FinancialTransaction extends Table {
   TextColumn get remark => text().withLength(max: 150).nullable()();
   DateTimeColumn get loggedAt => dateTime()();
 
+  // P1-1: 摊销字段。expenseNature 区分「日常一次性(SPOT)」与「长期摊销
+  // (AMORTIZED)」,默认 SPOT(兼容存量交易,v4→v5 迁移补默认值)。
+  // AMORTIZED 交易由 amortize 区间定义分摊周期;sourceSubscriptionId 回链
+  // 自动入账的订阅(可空——手工摊销交易为 null)。余额仍按全额扣减,
+  // 摊销只影响分析口径(日/月成本),不改现金流。
+  TextColumn get expenseNature => text().withLength(max: 10).withDefault(
+        const Constant('SPOT'),
+      ).check(
+        expenseNature.equals('SPOT') | expenseNature.equals('AMORTIZED'),
+      )();
+  DateTimeColumn get amortizeStartDate => dateTime().nullable()();
+  DateTimeColumn get amortizeEndDate => dateTime().nullable()();
+  TextColumn get sourceSubscriptionId => text()
+      .withLength(min: 1, max: 36)
+      .nullable()
+      .references(SubscriptionServices, #subscriptionId)();
+
   @override
   Set<Column> get primaryKey => {transactionId};
 }

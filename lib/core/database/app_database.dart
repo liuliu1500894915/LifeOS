@@ -53,7 +53,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(QueryExecutor executor) : super(executor);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -101,6 +101,28 @@ class AppDatabase extends _$AppDatabase {
             );
             // finance 交易索引（fresh install 走 onCreate，旧库走这里补）。
             await _createFinanceIndexes(m);
+          },
+          from4To5: (m, schema) async {
+            // v4→v5: FinancialTransaction 加摊销四列（P1-1）。均 addColumn，不重建表、
+            // 不触碰既有列，旧库升级零数据风险。expenseNature 默认 'SPOT' 使存量交易
+            // 自动归为「日常一次性」，语义不变；其余三列可空，存量行落 NULL。
+            // 查询列 expenseNature 的索引留给 P1-5（届时才有按 nature 过滤的查询）。
+            await m.addColumn(
+              schema.financialTransaction,
+              schema.financialTransaction.expenseNature,
+            );
+            await m.addColumn(
+              schema.financialTransaction,
+              schema.financialTransaction.amortizeStartDate,
+            );
+            await m.addColumn(
+              schema.financialTransaction,
+              schema.financialTransaction.amortizeEndDate,
+            );
+            await m.addColumn(
+              schema.financialTransaction,
+              schema.financialTransaction.sourceSubscriptionId,
+            );
           },
         ),
         beforeOpen: (details) async {

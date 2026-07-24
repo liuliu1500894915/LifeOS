@@ -4909,562 +4909,6 @@ class PaymentAccountsCompanion extends UpdateCompanion<PaymentAccount> {
   }
 }
 
-class $FinancialTransactionTable extends FinancialTransaction
-    with TableInfo<$FinancialTransactionTable, FinancialTransactionData> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $FinancialTransactionTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _transactionIdMeta = const VerificationMeta(
-    'transactionId',
-  );
-  @override
-  late final GeneratedColumn<String> transactionId = GeneratedColumn<String>(
-    'transaction_id',
-    aliasedName,
-    false,
-    additionalChecks: GeneratedColumn.checkTextLength(
-      minTextLength: 1,
-      maxTextLength: 36,
-    ),
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  @override
-  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
-    'user_id',
-    aliasedName,
-    false,
-    additionalChecks: GeneratedColumn.checkTextLength(
-      minTextLength: 1,
-      maxTextLength: 36,
-    ),
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES user_accounts (user_id)',
-    ),
-  );
-  static const VerificationMeta _flowTypeMeta = const VerificationMeta(
-    'flowType',
-  );
-  @override
-  late final GeneratedColumn<String> flowType = GeneratedColumn<String>(
-    'flow_type',
-    aliasedName,
-    false,
-    check: () =>
-        flowType.equals('INCOME') |
-        flowType.equals('EXPENSE') |
-        flowType.equals('TRANSFER'),
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
-  @override
-  late final GeneratedColumn<double> amount = GeneratedColumn<double>(
-    'amount',
-    aliasedName,
-    false,
-    type: DriftSqlType.double,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _categoryIdMeta = const VerificationMeta(
-    'categoryId',
-  );
-  @override
-  late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
-    'category_id',
-    aliasedName,
-    false,
-    additionalChecks: GeneratedColumn.checkTextLength(
-      minTextLength: 1,
-      maxTextLength: 36,
-    ),
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES expense_categories (category_id)',
-    ),
-  );
-  static const VerificationMeta _accountIdMeta = const VerificationMeta(
-    'accountId',
-  );
-  @override
-  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
-    'account_id',
-    aliasedName,
-    false,
-    additionalChecks: GeneratedColumn.checkTextLength(
-      minTextLength: 1,
-      maxTextLength: 36,
-    ),
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES payment_accounts (account_id)',
-    ),
-  );
-  static const VerificationMeta _remarkMeta = const VerificationMeta('remark');
-  @override
-  late final GeneratedColumn<String> remark = GeneratedColumn<String>(
-    'remark',
-    aliasedName,
-    true,
-    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 150),
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _loggedAtMeta = const VerificationMeta(
-    'loggedAt',
-  );
-  @override
-  late final GeneratedColumn<DateTime> loggedAt = GeneratedColumn<DateTime>(
-    'logged_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: true,
-  );
-  @override
-  List<GeneratedColumn> get $columns => [
-    transactionId,
-    userId,
-    flowType,
-    amount,
-    categoryId,
-    accountId,
-    remark,
-    loggedAt,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'financial_transaction';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<FinancialTransactionData> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('transaction_id')) {
-      context.handle(
-        _transactionIdMeta,
-        transactionId.isAcceptableOrUnknown(
-          data['transaction_id']!,
-          _transactionIdMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_transactionIdMeta);
-    }
-    if (data.containsKey('user_id')) {
-      context.handle(
-        _userIdMeta,
-        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_userIdMeta);
-    }
-    if (data.containsKey('flow_type')) {
-      context.handle(
-        _flowTypeMeta,
-        flowType.isAcceptableOrUnknown(data['flow_type']!, _flowTypeMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_flowTypeMeta);
-    }
-    if (data.containsKey('amount')) {
-      context.handle(
-        _amountMeta,
-        amount.isAcceptableOrUnknown(data['amount']!, _amountMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_amountMeta);
-    }
-    if (data.containsKey('category_id')) {
-      context.handle(
-        _categoryIdMeta,
-        categoryId.isAcceptableOrUnknown(data['category_id']!, _categoryIdMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_categoryIdMeta);
-    }
-    if (data.containsKey('account_id')) {
-      context.handle(
-        _accountIdMeta,
-        accountId.isAcceptableOrUnknown(data['account_id']!, _accountIdMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_accountIdMeta);
-    }
-    if (data.containsKey('remark')) {
-      context.handle(
-        _remarkMeta,
-        remark.isAcceptableOrUnknown(data['remark']!, _remarkMeta),
-      );
-    }
-    if (data.containsKey('logged_at')) {
-      context.handle(
-        _loggedAtMeta,
-        loggedAt.isAcceptableOrUnknown(data['logged_at']!, _loggedAtMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_loggedAtMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {transactionId};
-  @override
-  FinancialTransactionData map(
-    Map<String, dynamic> data, {
-    String? tablePrefix,
-  }) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return FinancialTransactionData(
-      transactionId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}transaction_id'],
-      )!,
-      userId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}user_id'],
-      )!,
-      flowType: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}flow_type'],
-      )!,
-      amount: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}amount'],
-      )!,
-      categoryId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}category_id'],
-      )!,
-      accountId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}account_id'],
-      )!,
-      remark: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}remark'],
-      ),
-      loggedAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}logged_at'],
-      )!,
-    );
-  }
-
-  @override
-  $FinancialTransactionTable createAlias(String alias) {
-    return $FinancialTransactionTable(attachedDatabase, alias);
-  }
-}
-
-class FinancialTransactionData extends DataClass
-    implements Insertable<FinancialTransactionData> {
-  final String transactionId;
-  final String userId;
-  final String flowType;
-  final double amount;
-  final String categoryId;
-  final String accountId;
-  final String? remark;
-  final DateTime loggedAt;
-  const FinancialTransactionData({
-    required this.transactionId,
-    required this.userId,
-    required this.flowType,
-    required this.amount,
-    required this.categoryId,
-    required this.accountId,
-    this.remark,
-    required this.loggedAt,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['transaction_id'] = Variable<String>(transactionId);
-    map['user_id'] = Variable<String>(userId);
-    map['flow_type'] = Variable<String>(flowType);
-    map['amount'] = Variable<double>(amount);
-    map['category_id'] = Variable<String>(categoryId);
-    map['account_id'] = Variable<String>(accountId);
-    if (!nullToAbsent || remark != null) {
-      map['remark'] = Variable<String>(remark);
-    }
-    map['logged_at'] = Variable<DateTime>(loggedAt);
-    return map;
-  }
-
-  FinancialTransactionCompanion toCompanion(bool nullToAbsent) {
-    return FinancialTransactionCompanion(
-      transactionId: Value(transactionId),
-      userId: Value(userId),
-      flowType: Value(flowType),
-      amount: Value(amount),
-      categoryId: Value(categoryId),
-      accountId: Value(accountId),
-      remark: remark == null && nullToAbsent
-          ? const Value.absent()
-          : Value(remark),
-      loggedAt: Value(loggedAt),
-    );
-  }
-
-  factory FinancialTransactionData.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return FinancialTransactionData(
-      transactionId: serializer.fromJson<String>(json['transactionId']),
-      userId: serializer.fromJson<String>(json['userId']),
-      flowType: serializer.fromJson<String>(json['flowType']),
-      amount: serializer.fromJson<double>(json['amount']),
-      categoryId: serializer.fromJson<String>(json['categoryId']),
-      accountId: serializer.fromJson<String>(json['accountId']),
-      remark: serializer.fromJson<String?>(json['remark']),
-      loggedAt: serializer.fromJson<DateTime>(json['loggedAt']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'transactionId': serializer.toJson<String>(transactionId),
-      'userId': serializer.toJson<String>(userId),
-      'flowType': serializer.toJson<String>(flowType),
-      'amount': serializer.toJson<double>(amount),
-      'categoryId': serializer.toJson<String>(categoryId),
-      'accountId': serializer.toJson<String>(accountId),
-      'remark': serializer.toJson<String?>(remark),
-      'loggedAt': serializer.toJson<DateTime>(loggedAt),
-    };
-  }
-
-  FinancialTransactionData copyWith({
-    String? transactionId,
-    String? userId,
-    String? flowType,
-    double? amount,
-    String? categoryId,
-    String? accountId,
-    Value<String?> remark = const Value.absent(),
-    DateTime? loggedAt,
-  }) => FinancialTransactionData(
-    transactionId: transactionId ?? this.transactionId,
-    userId: userId ?? this.userId,
-    flowType: flowType ?? this.flowType,
-    amount: amount ?? this.amount,
-    categoryId: categoryId ?? this.categoryId,
-    accountId: accountId ?? this.accountId,
-    remark: remark.present ? remark.value : this.remark,
-    loggedAt: loggedAt ?? this.loggedAt,
-  );
-  FinancialTransactionData copyWithCompanion(
-    FinancialTransactionCompanion data,
-  ) {
-    return FinancialTransactionData(
-      transactionId: data.transactionId.present
-          ? data.transactionId.value
-          : this.transactionId,
-      userId: data.userId.present ? data.userId.value : this.userId,
-      flowType: data.flowType.present ? data.flowType.value : this.flowType,
-      amount: data.amount.present ? data.amount.value : this.amount,
-      categoryId: data.categoryId.present
-          ? data.categoryId.value
-          : this.categoryId,
-      accountId: data.accountId.present ? data.accountId.value : this.accountId,
-      remark: data.remark.present ? data.remark.value : this.remark,
-      loggedAt: data.loggedAt.present ? data.loggedAt.value : this.loggedAt,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('FinancialTransactionData(')
-          ..write('transactionId: $transactionId, ')
-          ..write('userId: $userId, ')
-          ..write('flowType: $flowType, ')
-          ..write('amount: $amount, ')
-          ..write('categoryId: $categoryId, ')
-          ..write('accountId: $accountId, ')
-          ..write('remark: $remark, ')
-          ..write('loggedAt: $loggedAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    transactionId,
-    userId,
-    flowType,
-    amount,
-    categoryId,
-    accountId,
-    remark,
-    loggedAt,
-  );
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is FinancialTransactionData &&
-          other.transactionId == this.transactionId &&
-          other.userId == this.userId &&
-          other.flowType == this.flowType &&
-          other.amount == this.amount &&
-          other.categoryId == this.categoryId &&
-          other.accountId == this.accountId &&
-          other.remark == this.remark &&
-          other.loggedAt == this.loggedAt);
-}
-
-class FinancialTransactionCompanion
-    extends UpdateCompanion<FinancialTransactionData> {
-  final Value<String> transactionId;
-  final Value<String> userId;
-  final Value<String> flowType;
-  final Value<double> amount;
-  final Value<String> categoryId;
-  final Value<String> accountId;
-  final Value<String?> remark;
-  final Value<DateTime> loggedAt;
-  final Value<int> rowid;
-  const FinancialTransactionCompanion({
-    this.transactionId = const Value.absent(),
-    this.userId = const Value.absent(),
-    this.flowType = const Value.absent(),
-    this.amount = const Value.absent(),
-    this.categoryId = const Value.absent(),
-    this.accountId = const Value.absent(),
-    this.remark = const Value.absent(),
-    this.loggedAt = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  FinancialTransactionCompanion.insert({
-    required String transactionId,
-    required String userId,
-    required String flowType,
-    required double amount,
-    required String categoryId,
-    required String accountId,
-    this.remark = const Value.absent(),
-    required DateTime loggedAt,
-    this.rowid = const Value.absent(),
-  }) : transactionId = Value(transactionId),
-       userId = Value(userId),
-       flowType = Value(flowType),
-       amount = Value(amount),
-       categoryId = Value(categoryId),
-       accountId = Value(accountId),
-       loggedAt = Value(loggedAt);
-  static Insertable<FinancialTransactionData> custom({
-    Expression<String>? transactionId,
-    Expression<String>? userId,
-    Expression<String>? flowType,
-    Expression<double>? amount,
-    Expression<String>? categoryId,
-    Expression<String>? accountId,
-    Expression<String>? remark,
-    Expression<DateTime>? loggedAt,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (transactionId != null) 'transaction_id': transactionId,
-      if (userId != null) 'user_id': userId,
-      if (flowType != null) 'flow_type': flowType,
-      if (amount != null) 'amount': amount,
-      if (categoryId != null) 'category_id': categoryId,
-      if (accountId != null) 'account_id': accountId,
-      if (remark != null) 'remark': remark,
-      if (loggedAt != null) 'logged_at': loggedAt,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  FinancialTransactionCompanion copyWith({
-    Value<String>? transactionId,
-    Value<String>? userId,
-    Value<String>? flowType,
-    Value<double>? amount,
-    Value<String>? categoryId,
-    Value<String>? accountId,
-    Value<String?>? remark,
-    Value<DateTime>? loggedAt,
-    Value<int>? rowid,
-  }) {
-    return FinancialTransactionCompanion(
-      transactionId: transactionId ?? this.transactionId,
-      userId: userId ?? this.userId,
-      flowType: flowType ?? this.flowType,
-      amount: amount ?? this.amount,
-      categoryId: categoryId ?? this.categoryId,
-      accountId: accountId ?? this.accountId,
-      remark: remark ?? this.remark,
-      loggedAt: loggedAt ?? this.loggedAt,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (transactionId.present) {
-      map['transaction_id'] = Variable<String>(transactionId.value);
-    }
-    if (userId.present) {
-      map['user_id'] = Variable<String>(userId.value);
-    }
-    if (flowType.present) {
-      map['flow_type'] = Variable<String>(flowType.value);
-    }
-    if (amount.present) {
-      map['amount'] = Variable<double>(amount.value);
-    }
-    if (categoryId.present) {
-      map['category_id'] = Variable<String>(categoryId.value);
-    }
-    if (accountId.present) {
-      map['account_id'] = Variable<String>(accountId.value);
-    }
-    if (remark.present) {
-      map['remark'] = Variable<String>(remark.value);
-    }
-    if (loggedAt.present) {
-      map['logged_at'] = Variable<DateTime>(loggedAt.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('FinancialTransactionCompanion(')
-          ..write('transactionId: $transactionId, ')
-          ..write('userId: $userId, ')
-          ..write('flowType: $flowType, ')
-          ..write('amount: $amount, ')
-          ..write('categoryId: $categoryId, ')
-          ..write('accountId: $accountId, ')
-          ..write('remark: $remark, ')
-          ..write('loggedAt: $loggedAt, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class $SubscriptionServicesTable extends SubscriptionServices
     with TableInfo<$SubscriptionServicesTable, SubscriptionService> {
   @override
@@ -6119,6 +5563,800 @@ class SubscriptionServicesCompanion
           ..write('alertEnabled: $alertEnabled, ')
           ..write('isActive: $isActive, ')
           ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $FinancialTransactionTable extends FinancialTransaction
+    with TableInfo<$FinancialTransactionTable, FinancialTransactionData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FinancialTransactionTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _transactionIdMeta = const VerificationMeta(
+    'transactionId',
+  );
+  @override
+  late final GeneratedColumn<String> transactionId = GeneratedColumn<String>(
+    'transaction_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES user_accounts (user_id)',
+    ),
+  );
+  static const VerificationMeta _flowTypeMeta = const VerificationMeta(
+    'flowType',
+  );
+  @override
+  late final GeneratedColumn<String> flowType = GeneratedColumn<String>(
+    'flow_type',
+    aliasedName,
+    false,
+    check: () =>
+        flowType.equals('INCOME') |
+        flowType.equals('EXPENSE') |
+        flowType.equals('TRANSFER'),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<double> amount = GeneratedColumn<double>(
+    'amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoryIdMeta = const VerificationMeta(
+    'categoryId',
+  );
+  @override
+  late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
+    'category_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES expense_categories (category_id)',
+    ),
+  );
+  static const VerificationMeta _accountIdMeta = const VerificationMeta(
+    'accountId',
+  );
+  @override
+  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
+    'account_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES payment_accounts (account_id)',
+    ),
+  );
+  static const VerificationMeta _remarkMeta = const VerificationMeta('remark');
+  @override
+  late final GeneratedColumn<String> remark = GeneratedColumn<String>(
+    'remark',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 150),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _loggedAtMeta = const VerificationMeta(
+    'loggedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> loggedAt = GeneratedColumn<DateTime>(
+    'logged_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _expenseNatureMeta = const VerificationMeta(
+    'expenseNature',
+  );
+  @override
+  late final GeneratedColumn<String> expenseNature = GeneratedColumn<String>(
+    'expense_nature',
+    aliasedName,
+    false,
+    check: () =>
+        expenseNature.equals('SPOT') | expenseNature.equals('AMORTIZED'),
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 10),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('SPOT'),
+  );
+  static const VerificationMeta _amortizeStartDateMeta = const VerificationMeta(
+    'amortizeStartDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> amortizeStartDate =
+      GeneratedColumn<DateTime>(
+        'amortize_start_date',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _amortizeEndDateMeta = const VerificationMeta(
+    'amortizeEndDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> amortizeEndDate =
+      GeneratedColumn<DateTime>(
+        'amortize_end_date',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _sourceSubscriptionIdMeta =
+      const VerificationMeta('sourceSubscriptionId');
+  @override
+  late final GeneratedColumn<String> sourceSubscriptionId =
+      GeneratedColumn<String>(
+        'source_subscription_id',
+        aliasedName,
+        true,
+        additionalChecks: GeneratedColumn.checkTextLength(
+          minTextLength: 1,
+          maxTextLength: 36,
+        ),
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES subscription_services (subscription_id)',
+        ),
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    transactionId,
+    userId,
+    flowType,
+    amount,
+    categoryId,
+    accountId,
+    remark,
+    loggedAt,
+    expenseNature,
+    amortizeStartDate,
+    amortizeEndDate,
+    sourceSubscriptionId,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'financial_transaction';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<FinancialTransactionData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('transaction_id')) {
+      context.handle(
+        _transactionIdMeta,
+        transactionId.isAcceptableOrUnknown(
+          data['transaction_id']!,
+          _transactionIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_transactionIdMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('flow_type')) {
+      context.handle(
+        _flowTypeMeta,
+        flowType.isAcceptableOrUnknown(data['flow_type']!, _flowTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_flowTypeMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(
+        _amountMeta,
+        amount.isAcceptableOrUnknown(data['amount']!, _amountMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    if (data.containsKey('category_id')) {
+      context.handle(
+        _categoryIdMeta,
+        categoryId.isAcceptableOrUnknown(data['category_id']!, _categoryIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryIdMeta);
+    }
+    if (data.containsKey('account_id')) {
+      context.handle(
+        _accountIdMeta,
+        accountId.isAcceptableOrUnknown(data['account_id']!, _accountIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_accountIdMeta);
+    }
+    if (data.containsKey('remark')) {
+      context.handle(
+        _remarkMeta,
+        remark.isAcceptableOrUnknown(data['remark']!, _remarkMeta),
+      );
+    }
+    if (data.containsKey('logged_at')) {
+      context.handle(
+        _loggedAtMeta,
+        loggedAt.isAcceptableOrUnknown(data['logged_at']!, _loggedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_loggedAtMeta);
+    }
+    if (data.containsKey('expense_nature')) {
+      context.handle(
+        _expenseNatureMeta,
+        expenseNature.isAcceptableOrUnknown(
+          data['expense_nature']!,
+          _expenseNatureMeta,
+        ),
+      );
+    }
+    if (data.containsKey('amortize_start_date')) {
+      context.handle(
+        _amortizeStartDateMeta,
+        amortizeStartDate.isAcceptableOrUnknown(
+          data['amortize_start_date']!,
+          _amortizeStartDateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('amortize_end_date')) {
+      context.handle(
+        _amortizeEndDateMeta,
+        amortizeEndDate.isAcceptableOrUnknown(
+          data['amortize_end_date']!,
+          _amortizeEndDateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('source_subscription_id')) {
+      context.handle(
+        _sourceSubscriptionIdMeta,
+        sourceSubscriptionId.isAcceptableOrUnknown(
+          data['source_subscription_id']!,
+          _sourceSubscriptionIdMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {transactionId};
+  @override
+  FinancialTransactionData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FinancialTransactionData(
+      transactionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}transaction_id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
+      flowType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}flow_type'],
+      )!,
+      amount: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}amount'],
+      )!,
+      categoryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category_id'],
+      )!,
+      accountId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}account_id'],
+      )!,
+      remark: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remark'],
+      ),
+      loggedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}logged_at'],
+      )!,
+      expenseNature: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}expense_nature'],
+      )!,
+      amortizeStartDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}amortize_start_date'],
+      ),
+      amortizeEndDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}amortize_end_date'],
+      ),
+      sourceSubscriptionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_subscription_id'],
+      ),
+    );
+  }
+
+  @override
+  $FinancialTransactionTable createAlias(String alias) {
+    return $FinancialTransactionTable(attachedDatabase, alias);
+  }
+}
+
+class FinancialTransactionData extends DataClass
+    implements Insertable<FinancialTransactionData> {
+  final String transactionId;
+  final String userId;
+  final String flowType;
+  final double amount;
+  final String categoryId;
+  final String accountId;
+  final String? remark;
+  final DateTime loggedAt;
+  final String expenseNature;
+  final DateTime? amortizeStartDate;
+  final DateTime? amortizeEndDate;
+  final String? sourceSubscriptionId;
+  const FinancialTransactionData({
+    required this.transactionId,
+    required this.userId,
+    required this.flowType,
+    required this.amount,
+    required this.categoryId,
+    required this.accountId,
+    this.remark,
+    required this.loggedAt,
+    required this.expenseNature,
+    this.amortizeStartDate,
+    this.amortizeEndDate,
+    this.sourceSubscriptionId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['transaction_id'] = Variable<String>(transactionId);
+    map['user_id'] = Variable<String>(userId);
+    map['flow_type'] = Variable<String>(flowType);
+    map['amount'] = Variable<double>(amount);
+    map['category_id'] = Variable<String>(categoryId);
+    map['account_id'] = Variable<String>(accountId);
+    if (!nullToAbsent || remark != null) {
+      map['remark'] = Variable<String>(remark);
+    }
+    map['logged_at'] = Variable<DateTime>(loggedAt);
+    map['expense_nature'] = Variable<String>(expenseNature);
+    if (!nullToAbsent || amortizeStartDate != null) {
+      map['amortize_start_date'] = Variable<DateTime>(amortizeStartDate);
+    }
+    if (!nullToAbsent || amortizeEndDate != null) {
+      map['amortize_end_date'] = Variable<DateTime>(amortizeEndDate);
+    }
+    if (!nullToAbsent || sourceSubscriptionId != null) {
+      map['source_subscription_id'] = Variable<String>(sourceSubscriptionId);
+    }
+    return map;
+  }
+
+  FinancialTransactionCompanion toCompanion(bool nullToAbsent) {
+    return FinancialTransactionCompanion(
+      transactionId: Value(transactionId),
+      userId: Value(userId),
+      flowType: Value(flowType),
+      amount: Value(amount),
+      categoryId: Value(categoryId),
+      accountId: Value(accountId),
+      remark: remark == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remark),
+      loggedAt: Value(loggedAt),
+      expenseNature: Value(expenseNature),
+      amortizeStartDate: amortizeStartDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(amortizeStartDate),
+      amortizeEndDate: amortizeEndDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(amortizeEndDate),
+      sourceSubscriptionId: sourceSubscriptionId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sourceSubscriptionId),
+    );
+  }
+
+  factory FinancialTransactionData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FinancialTransactionData(
+      transactionId: serializer.fromJson<String>(json['transactionId']),
+      userId: serializer.fromJson<String>(json['userId']),
+      flowType: serializer.fromJson<String>(json['flowType']),
+      amount: serializer.fromJson<double>(json['amount']),
+      categoryId: serializer.fromJson<String>(json['categoryId']),
+      accountId: serializer.fromJson<String>(json['accountId']),
+      remark: serializer.fromJson<String?>(json['remark']),
+      loggedAt: serializer.fromJson<DateTime>(json['loggedAt']),
+      expenseNature: serializer.fromJson<String>(json['expenseNature']),
+      amortizeStartDate: serializer.fromJson<DateTime?>(
+        json['amortizeStartDate'],
+      ),
+      amortizeEndDate: serializer.fromJson<DateTime?>(json['amortizeEndDate']),
+      sourceSubscriptionId: serializer.fromJson<String?>(
+        json['sourceSubscriptionId'],
+      ),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'transactionId': serializer.toJson<String>(transactionId),
+      'userId': serializer.toJson<String>(userId),
+      'flowType': serializer.toJson<String>(flowType),
+      'amount': serializer.toJson<double>(amount),
+      'categoryId': serializer.toJson<String>(categoryId),
+      'accountId': serializer.toJson<String>(accountId),
+      'remark': serializer.toJson<String?>(remark),
+      'loggedAt': serializer.toJson<DateTime>(loggedAt),
+      'expenseNature': serializer.toJson<String>(expenseNature),
+      'amortizeStartDate': serializer.toJson<DateTime?>(amortizeStartDate),
+      'amortizeEndDate': serializer.toJson<DateTime?>(amortizeEndDate),
+      'sourceSubscriptionId': serializer.toJson<String?>(sourceSubscriptionId),
+    };
+  }
+
+  FinancialTransactionData copyWith({
+    String? transactionId,
+    String? userId,
+    String? flowType,
+    double? amount,
+    String? categoryId,
+    String? accountId,
+    Value<String?> remark = const Value.absent(),
+    DateTime? loggedAt,
+    String? expenseNature,
+    Value<DateTime?> amortizeStartDate = const Value.absent(),
+    Value<DateTime?> amortizeEndDate = const Value.absent(),
+    Value<String?> sourceSubscriptionId = const Value.absent(),
+  }) => FinancialTransactionData(
+    transactionId: transactionId ?? this.transactionId,
+    userId: userId ?? this.userId,
+    flowType: flowType ?? this.flowType,
+    amount: amount ?? this.amount,
+    categoryId: categoryId ?? this.categoryId,
+    accountId: accountId ?? this.accountId,
+    remark: remark.present ? remark.value : this.remark,
+    loggedAt: loggedAt ?? this.loggedAt,
+    expenseNature: expenseNature ?? this.expenseNature,
+    amortizeStartDate: amortizeStartDate.present
+        ? amortizeStartDate.value
+        : this.amortizeStartDate,
+    amortizeEndDate: amortizeEndDate.present
+        ? amortizeEndDate.value
+        : this.amortizeEndDate,
+    sourceSubscriptionId: sourceSubscriptionId.present
+        ? sourceSubscriptionId.value
+        : this.sourceSubscriptionId,
+  );
+  FinancialTransactionData copyWithCompanion(
+    FinancialTransactionCompanion data,
+  ) {
+    return FinancialTransactionData(
+      transactionId: data.transactionId.present
+          ? data.transactionId.value
+          : this.transactionId,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      flowType: data.flowType.present ? data.flowType.value : this.flowType,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      categoryId: data.categoryId.present
+          ? data.categoryId.value
+          : this.categoryId,
+      accountId: data.accountId.present ? data.accountId.value : this.accountId,
+      remark: data.remark.present ? data.remark.value : this.remark,
+      loggedAt: data.loggedAt.present ? data.loggedAt.value : this.loggedAt,
+      expenseNature: data.expenseNature.present
+          ? data.expenseNature.value
+          : this.expenseNature,
+      amortizeStartDate: data.amortizeStartDate.present
+          ? data.amortizeStartDate.value
+          : this.amortizeStartDate,
+      amortizeEndDate: data.amortizeEndDate.present
+          ? data.amortizeEndDate.value
+          : this.amortizeEndDate,
+      sourceSubscriptionId: data.sourceSubscriptionId.present
+          ? data.sourceSubscriptionId.value
+          : this.sourceSubscriptionId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FinancialTransactionData(')
+          ..write('transactionId: $transactionId, ')
+          ..write('userId: $userId, ')
+          ..write('flowType: $flowType, ')
+          ..write('amount: $amount, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('accountId: $accountId, ')
+          ..write('remark: $remark, ')
+          ..write('loggedAt: $loggedAt, ')
+          ..write('expenseNature: $expenseNature, ')
+          ..write('amortizeStartDate: $amortizeStartDate, ')
+          ..write('amortizeEndDate: $amortizeEndDate, ')
+          ..write('sourceSubscriptionId: $sourceSubscriptionId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    transactionId,
+    userId,
+    flowType,
+    amount,
+    categoryId,
+    accountId,
+    remark,
+    loggedAt,
+    expenseNature,
+    amortizeStartDate,
+    amortizeEndDate,
+    sourceSubscriptionId,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FinancialTransactionData &&
+          other.transactionId == this.transactionId &&
+          other.userId == this.userId &&
+          other.flowType == this.flowType &&
+          other.amount == this.amount &&
+          other.categoryId == this.categoryId &&
+          other.accountId == this.accountId &&
+          other.remark == this.remark &&
+          other.loggedAt == this.loggedAt &&
+          other.expenseNature == this.expenseNature &&
+          other.amortizeStartDate == this.amortizeStartDate &&
+          other.amortizeEndDate == this.amortizeEndDate &&
+          other.sourceSubscriptionId == this.sourceSubscriptionId);
+}
+
+class FinancialTransactionCompanion
+    extends UpdateCompanion<FinancialTransactionData> {
+  final Value<String> transactionId;
+  final Value<String> userId;
+  final Value<String> flowType;
+  final Value<double> amount;
+  final Value<String> categoryId;
+  final Value<String> accountId;
+  final Value<String?> remark;
+  final Value<DateTime> loggedAt;
+  final Value<String> expenseNature;
+  final Value<DateTime?> amortizeStartDate;
+  final Value<DateTime?> amortizeEndDate;
+  final Value<String?> sourceSubscriptionId;
+  final Value<int> rowid;
+  const FinancialTransactionCompanion({
+    this.transactionId = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.flowType = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.categoryId = const Value.absent(),
+    this.accountId = const Value.absent(),
+    this.remark = const Value.absent(),
+    this.loggedAt = const Value.absent(),
+    this.expenseNature = const Value.absent(),
+    this.amortizeStartDate = const Value.absent(),
+    this.amortizeEndDate = const Value.absent(),
+    this.sourceSubscriptionId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  FinancialTransactionCompanion.insert({
+    required String transactionId,
+    required String userId,
+    required String flowType,
+    required double amount,
+    required String categoryId,
+    required String accountId,
+    this.remark = const Value.absent(),
+    required DateTime loggedAt,
+    this.expenseNature = const Value.absent(),
+    this.amortizeStartDate = const Value.absent(),
+    this.amortizeEndDate = const Value.absent(),
+    this.sourceSubscriptionId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : transactionId = Value(transactionId),
+       userId = Value(userId),
+       flowType = Value(flowType),
+       amount = Value(amount),
+       categoryId = Value(categoryId),
+       accountId = Value(accountId),
+       loggedAt = Value(loggedAt);
+  static Insertable<FinancialTransactionData> custom({
+    Expression<String>? transactionId,
+    Expression<String>? userId,
+    Expression<String>? flowType,
+    Expression<double>? amount,
+    Expression<String>? categoryId,
+    Expression<String>? accountId,
+    Expression<String>? remark,
+    Expression<DateTime>? loggedAt,
+    Expression<String>? expenseNature,
+    Expression<DateTime>? amortizeStartDate,
+    Expression<DateTime>? amortizeEndDate,
+    Expression<String>? sourceSubscriptionId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (transactionId != null) 'transaction_id': transactionId,
+      if (userId != null) 'user_id': userId,
+      if (flowType != null) 'flow_type': flowType,
+      if (amount != null) 'amount': amount,
+      if (categoryId != null) 'category_id': categoryId,
+      if (accountId != null) 'account_id': accountId,
+      if (remark != null) 'remark': remark,
+      if (loggedAt != null) 'logged_at': loggedAt,
+      if (expenseNature != null) 'expense_nature': expenseNature,
+      if (amortizeStartDate != null) 'amortize_start_date': amortizeStartDate,
+      if (amortizeEndDate != null) 'amortize_end_date': amortizeEndDate,
+      if (sourceSubscriptionId != null)
+        'source_subscription_id': sourceSubscriptionId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  FinancialTransactionCompanion copyWith({
+    Value<String>? transactionId,
+    Value<String>? userId,
+    Value<String>? flowType,
+    Value<double>? amount,
+    Value<String>? categoryId,
+    Value<String>? accountId,
+    Value<String?>? remark,
+    Value<DateTime>? loggedAt,
+    Value<String>? expenseNature,
+    Value<DateTime?>? amortizeStartDate,
+    Value<DateTime?>? amortizeEndDate,
+    Value<String?>? sourceSubscriptionId,
+    Value<int>? rowid,
+  }) {
+    return FinancialTransactionCompanion(
+      transactionId: transactionId ?? this.transactionId,
+      userId: userId ?? this.userId,
+      flowType: flowType ?? this.flowType,
+      amount: amount ?? this.amount,
+      categoryId: categoryId ?? this.categoryId,
+      accountId: accountId ?? this.accountId,
+      remark: remark ?? this.remark,
+      loggedAt: loggedAt ?? this.loggedAt,
+      expenseNature: expenseNature ?? this.expenseNature,
+      amortizeStartDate: amortizeStartDate ?? this.amortizeStartDate,
+      amortizeEndDate: amortizeEndDate ?? this.amortizeEndDate,
+      sourceSubscriptionId: sourceSubscriptionId ?? this.sourceSubscriptionId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (transactionId.present) {
+      map['transaction_id'] = Variable<String>(transactionId.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (flowType.present) {
+      map['flow_type'] = Variable<String>(flowType.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<double>(amount.value);
+    }
+    if (categoryId.present) {
+      map['category_id'] = Variable<String>(categoryId.value);
+    }
+    if (accountId.present) {
+      map['account_id'] = Variable<String>(accountId.value);
+    }
+    if (remark.present) {
+      map['remark'] = Variable<String>(remark.value);
+    }
+    if (loggedAt.present) {
+      map['logged_at'] = Variable<DateTime>(loggedAt.value);
+    }
+    if (expenseNature.present) {
+      map['expense_nature'] = Variable<String>(expenseNature.value);
+    }
+    if (amortizeStartDate.present) {
+      map['amortize_start_date'] = Variable<DateTime>(amortizeStartDate.value);
+    }
+    if (amortizeEndDate.present) {
+      map['amortize_end_date'] = Variable<DateTime>(amortizeEndDate.value);
+    }
+    if (sourceSubscriptionId.present) {
+      map['source_subscription_id'] = Variable<String>(
+        sourceSubscriptionId.value,
+      );
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FinancialTransactionCompanion(')
+          ..write('transactionId: $transactionId, ')
+          ..write('userId: $userId, ')
+          ..write('flowType: $flowType, ')
+          ..write('amount: $amount, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('accountId: $accountId, ')
+          ..write('remark: $remark, ')
+          ..write('loggedAt: $loggedAt, ')
+          ..write('expenseNature: $expenseNature, ')
+          ..write('amortizeStartDate: $amortizeStartDate, ')
+          ..write('amortizeEndDate: $amortizeEndDate, ')
+          ..write('sourceSubscriptionId: $sourceSubscriptionId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -17246,10 +17484,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PaymentAccountsTable paymentAccounts = $PaymentAccountsTable(
     this,
   );
-  late final $FinancialTransactionTable financialTransaction =
-      $FinancialTransactionTable(this);
   late final $SubscriptionServicesTable subscriptionServices =
       $SubscriptionServicesTable(this);
+  late final $FinancialTransactionTable financialTransaction =
+      $FinancialTransactionTable(this);
   late final $BudgetSettingsTable budgetSettings = $BudgetSettingsTable(this);
   late final $AssetValueSnapshotsTable assetValueSnapshots =
       $AssetValueSnapshotsTable(this);
@@ -17294,8 +17532,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     weightHistory,
     expenseCategories,
     paymentAccounts,
-    financialTransaction,
     subscriptionServices,
+    financialTransaction,
     budgetSettings,
     assetValueSnapshots,
     flagGoals,
@@ -17540,37 +17778,6 @@ final class $$UserAccountsTableReferences
   }
 
   static MultiTypedResultKey<
-    $FinancialTransactionTable,
-    List<FinancialTransactionData>
-  >
-  _financialTransactionRefsTable(_$AppDatabase db) =>
-      MultiTypedResultKey.fromTable(
-        db.financialTransaction,
-        aliasName: $_aliasNameGenerator(
-          db.userAccounts.userId,
-          db.financialTransaction.userId,
-        ),
-      );
-
-  $$FinancialTransactionTableProcessedTableManager
-  get financialTransactionRefs {
-    final manager =
-        $$FinancialTransactionTableTableManager(
-          $_db,
-          $_db.financialTransaction,
-        ).filter(
-          (f) => f.userId.userId.sqlEquals($_itemColumn<String>('user_id')!),
-        );
-
-    final cache = $_typedResult.readTableOrNull(
-      _financialTransactionRefsTable($_db),
-    );
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-
-  static MultiTypedResultKey<
     $SubscriptionServicesTable,
     List<SubscriptionService>
   >
@@ -17595,6 +17802,37 @@ final class $$UserAccountsTableReferences
 
     final cache = $_typedResult.readTableOrNull(
       _subscriptionServicesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $FinancialTransactionTable,
+    List<FinancialTransactionData>
+  >
+  _financialTransactionRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.financialTransaction,
+        aliasName: $_aliasNameGenerator(
+          db.userAccounts.userId,
+          db.financialTransaction.userId,
+        ),
+      );
+
+  $$FinancialTransactionTableProcessedTableManager
+  get financialTransactionRefs {
+    final manager =
+        $$FinancialTransactionTableTableManager(
+          $_db,
+          $_db.financialTransaction,
+        ).filter(
+          (f) => f.userId.userId.sqlEquals($_itemColumn<String>('user_id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _financialTransactionRefsTable($_db),
     );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
@@ -18331,31 +18569,6 @@ class $$UserAccountsTableFilterComposer
     return f(composer);
   }
 
-  Expression<bool> financialTransactionRefs(
-    Expression<bool> Function($$FinancialTransactionTableFilterComposer f) f,
-  ) {
-    final $$FinancialTransactionTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.userId,
-      referencedTable: $db.financialTransaction,
-      getReferencedColumn: (t) => t.userId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$FinancialTransactionTableFilterComposer(
-            $db: $db,
-            $table: $db.financialTransaction,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
   Expression<bool> subscriptionServicesRefs(
     Expression<bool> Function($$SubscriptionServicesTableFilterComposer f) f,
   ) {
@@ -18372,6 +18585,31 @@ class $$UserAccountsTableFilterComposer
           }) => $$SubscriptionServicesTableFilterComposer(
             $db: $db,
             $table: $db.subscriptionServices,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> financialTransactionRefs(
+    Expression<bool> Function($$FinancialTransactionTableFilterComposer f) f,
+  ) {
+    final $$FinancialTransactionTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.financialTransaction,
+      getReferencedColumn: (t) => t.userId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FinancialTransactionTableFilterComposer(
+            $db: $db,
+            $table: $db.financialTransaction,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -19161,32 +19399,6 @@ class $$UserAccountsTableAnnotationComposer
     return f(composer);
   }
 
-  Expression<T> financialTransactionRefs<T extends Object>(
-    Expression<T> Function($$FinancialTransactionTableAnnotationComposer a) f,
-  ) {
-    final $$FinancialTransactionTableAnnotationComposer composer =
-        $composerBuilder(
-          composer: this,
-          getCurrentColumn: (t) => t.userId,
-          referencedTable: $db.financialTransaction,
-          getReferencedColumn: (t) => t.userId,
-          builder:
-              (
-                joinBuilder, {
-                $addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer,
-              }) => $$FinancialTransactionTableAnnotationComposer(
-                $db: $db,
-                $table: $db.financialTransaction,
-                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-                joinBuilder: joinBuilder,
-                $removeJoinBuilderFromRootComposer:
-                    $removeJoinBuilderFromRootComposer,
-              ),
-        );
-    return f(composer);
-  }
-
   Expression<T> subscriptionServicesRefs<T extends Object>(
     Expression<T> Function($$SubscriptionServicesTableAnnotationComposer a) f,
   ) {
@@ -19204,6 +19416,32 @@ class $$UserAccountsTableAnnotationComposer
               }) => $$SubscriptionServicesTableAnnotationComposer(
                 $db: $db,
                 $table: $db.subscriptionServices,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> financialTransactionRefs<T extends Object>(
+    Expression<T> Function($$FinancialTransactionTableAnnotationComposer a) f,
+  ) {
+    final $$FinancialTransactionTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.userId,
+          referencedTable: $db.financialTransaction,
+          getReferencedColumn: (t) => t.userId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$FinancialTransactionTableAnnotationComposer(
+                $db: $db,
+                $table: $db.financialTransaction,
                 $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
                 joinBuilder: joinBuilder,
                 $removeJoinBuilderFromRootComposer:
@@ -19747,8 +19985,8 @@ class $$UserAccountsTableTableManager
             bool weightHistoryRefs,
             bool expenseCategoriesRefs,
             bool paymentAccountsRefs,
-            bool financialTransactionRefs,
             bool subscriptionServicesRefs,
+            bool financialTransactionRefs,
             bool budgetSettingsRefs,
             bool assetValueSnapshotsRefs,
             bool flagGoalsRefs,
@@ -19836,8 +20074,8 @@ class $$UserAccountsTableTableManager
                 weightHistoryRefs = false,
                 expenseCategoriesRefs = false,
                 paymentAccountsRefs = false,
-                financialTransactionRefs = false,
                 subscriptionServicesRefs = false,
+                financialTransactionRefs = false,
                 budgetSettingsRefs = false,
                 assetValueSnapshotsRefs = false,
                 flagGoalsRefs = false,
@@ -19870,8 +20108,8 @@ class $$UserAccountsTableTableManager
                     if (weightHistoryRefs) db.weightHistory,
                     if (expenseCategoriesRefs) db.expenseCategories,
                     if (paymentAccountsRefs) db.paymentAccounts,
-                    if (financialTransactionRefs) db.financialTransaction,
                     if (subscriptionServicesRefs) db.subscriptionServices,
+                    if (financialTransactionRefs) db.financialTransaction,
                     if (budgetSettingsRefs) db.budgetSettings,
                     if (assetValueSnapshotsRefs) db.assetValueSnapshots,
                     if (flagGoalsRefs) db.flagGoals,
@@ -20065,27 +20303,6 @@ class $$UserAccountsTableTableManager
                               ),
                           typedResults: items,
                         ),
-                      if (financialTransactionRefs)
-                        await $_getPrefetchedData<
-                          UserAccount,
-                          $UserAccountsTable,
-                          FinancialTransactionData
-                        >(
-                          currentTable: table,
-                          referencedTable: $$UserAccountsTableReferences
-                              ._financialTransactionRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$UserAccountsTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).financialTransactionRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.userId == item.userId,
-                              ),
-                          typedResults: items,
-                        ),
                       if (subscriptionServicesRefs)
                         await $_getPrefetchedData<
                           UserAccount,
@@ -20101,6 +20318,27 @@ class $$UserAccountsTableTableManager
                                 table,
                                 p0,
                               ).subscriptionServicesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.userId == item.userId,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (financialTransactionRefs)
+                        await $_getPrefetchedData<
+                          UserAccount,
+                          $UserAccountsTable,
+                          FinancialTransactionData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$UserAccountsTableReferences
+                              ._financialTransactionRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$UserAccountsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).financialTransactionRefs,
                           referencedItemsForCurrentItem:
                               (item, referencedItems) => referencedItems.where(
                                 (e) => e.userId == item.userId,
@@ -20556,8 +20794,8 @@ typedef $$UserAccountsTableProcessedTableManager =
         bool weightHistoryRefs,
         bool expenseCategoriesRefs,
         bool paymentAccountsRefs,
-        bool financialTransactionRefs,
         bool subscriptionServicesRefs,
+        bool financialTransactionRefs,
         bool budgetSettingsRefs,
         bool assetValueSnapshotsRefs,
         bool flagGoalsRefs,
@@ -23763,39 +24001,6 @@ final class $$PaymentAccountsTableReferences
   }
 
   static MultiTypedResultKey<
-    $FinancialTransactionTable,
-    List<FinancialTransactionData>
-  >
-  _financialTransactionRefsTable(_$AppDatabase db) =>
-      MultiTypedResultKey.fromTable(
-        db.financialTransaction,
-        aliasName: $_aliasNameGenerator(
-          db.paymentAccounts.accountId,
-          db.financialTransaction.accountId,
-        ),
-      );
-
-  $$FinancialTransactionTableProcessedTableManager
-  get financialTransactionRefs {
-    final manager =
-        $$FinancialTransactionTableTableManager(
-          $_db,
-          $_db.financialTransaction,
-        ).filter(
-          (f) => f.accountId.accountId.sqlEquals(
-            $_itemColumn<String>('account_id')!,
-          ),
-        );
-
-    final cache = $_typedResult.readTableOrNull(
-      _financialTransactionRefsTable($_db),
-    );
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-
-  static MultiTypedResultKey<
     $SubscriptionServicesTable,
     List<SubscriptionService>
   >
@@ -23822,6 +24027,39 @@ final class $$PaymentAccountsTableReferences
 
     final cache = $_typedResult.readTableOrNull(
       _subscriptionServicesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $FinancialTransactionTable,
+    List<FinancialTransactionData>
+  >
+  _financialTransactionRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.financialTransaction,
+        aliasName: $_aliasNameGenerator(
+          db.paymentAccounts.accountId,
+          db.financialTransaction.accountId,
+        ),
+      );
+
+  $$FinancialTransactionTableProcessedTableManager
+  get financialTransactionRefs {
+    final manager =
+        $$FinancialTransactionTableTableManager(
+          $_db,
+          $_db.financialTransaction,
+        ).filter(
+          (f) => f.accountId.accountId.sqlEquals(
+            $_itemColumn<String>('account_id')!,
+          ),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _financialTransactionRefsTable($_db),
     );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
@@ -23896,31 +24134,6 @@ class $$PaymentAccountsTableFilterComposer
     return composer;
   }
 
-  Expression<bool> financialTransactionRefs(
-    Expression<bool> Function($$FinancialTransactionTableFilterComposer f) f,
-  ) {
-    final $$FinancialTransactionTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.accountId,
-      referencedTable: $db.financialTransaction,
-      getReferencedColumn: (t) => t.accountId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$FinancialTransactionTableFilterComposer(
-            $db: $db,
-            $table: $db.financialTransaction,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
   Expression<bool> subscriptionServicesRefs(
     Expression<bool> Function($$SubscriptionServicesTableFilterComposer f) f,
   ) {
@@ -23937,6 +24150,31 @@ class $$PaymentAccountsTableFilterComposer
           }) => $$SubscriptionServicesTableFilterComposer(
             $db: $db,
             $table: $db.subscriptionServices,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> financialTransactionRefs(
+    Expression<bool> Function($$FinancialTransactionTableFilterComposer f) f,
+  ) {
+    final $$FinancialTransactionTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.financialTransaction,
+      getReferencedColumn: (t) => t.accountId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FinancialTransactionTableFilterComposer(
+            $db: $db,
+            $table: $db.financialTransaction,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -24074,32 +24312,6 @@ class $$PaymentAccountsTableAnnotationComposer
     return composer;
   }
 
-  Expression<T> financialTransactionRefs<T extends Object>(
-    Expression<T> Function($$FinancialTransactionTableAnnotationComposer a) f,
-  ) {
-    final $$FinancialTransactionTableAnnotationComposer composer =
-        $composerBuilder(
-          composer: this,
-          getCurrentColumn: (t) => t.accountId,
-          referencedTable: $db.financialTransaction,
-          getReferencedColumn: (t) => t.accountId,
-          builder:
-              (
-                joinBuilder, {
-                $addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer,
-              }) => $$FinancialTransactionTableAnnotationComposer(
-                $db: $db,
-                $table: $db.financialTransaction,
-                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-                joinBuilder: joinBuilder,
-                $removeJoinBuilderFromRootComposer:
-                    $removeJoinBuilderFromRootComposer,
-              ),
-        );
-    return f(composer);
-  }
-
   Expression<T> subscriptionServicesRefs<T extends Object>(
     Expression<T> Function($$SubscriptionServicesTableAnnotationComposer a) f,
   ) {
@@ -24125,6 +24337,32 @@ class $$PaymentAccountsTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> financialTransactionRefs<T extends Object>(
+    Expression<T> Function($$FinancialTransactionTableAnnotationComposer a) f,
+  ) {
+    final $$FinancialTransactionTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.accountId,
+          referencedTable: $db.financialTransaction,
+          getReferencedColumn: (t) => t.accountId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$FinancialTransactionTableAnnotationComposer(
+                $db: $db,
+                $table: $db.financialTransaction,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$PaymentAccountsTableTableManager
@@ -24142,8 +24380,8 @@ class $$PaymentAccountsTableTableManager
           PaymentAccount,
           PrefetchHooks Function({
             bool userId,
-            bool financialTransactionRefs,
             bool subscriptionServicesRefs,
+            bool financialTransactionRefs,
           })
         > {
   $$PaymentAccountsTableTableManager(
@@ -24214,14 +24452,14 @@ class $$PaymentAccountsTableTableManager
           prefetchHooksCallback:
               ({
                 userId = false,
-                financialTransactionRefs = false,
                 subscriptionServicesRefs = false,
+                financialTransactionRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
-                    if (financialTransactionRefs) db.financialTransaction,
                     if (subscriptionServicesRefs) db.subscriptionServices,
+                    if (financialTransactionRefs) db.financialTransaction,
                   ],
                   addJoins:
                       <
@@ -24259,27 +24497,6 @@ class $$PaymentAccountsTableTableManager
                       },
                   getPrefetchedDataCallback: (items) async {
                     return [
-                      if (financialTransactionRefs)
-                        await $_getPrefetchedData<
-                          PaymentAccount,
-                          $PaymentAccountsTable,
-                          FinancialTransactionData
-                        >(
-                          currentTable: table,
-                          referencedTable: $$PaymentAccountsTableReferences
-                              ._financialTransactionRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$PaymentAccountsTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).financialTransactionRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.accountId == item.accountId,
-                              ),
-                          typedResults: items,
-                        ),
                       if (subscriptionServicesRefs)
                         await $_getPrefetchedData<
                           PaymentAccount,
@@ -24295,6 +24512,27 @@ class $$PaymentAccountsTableTableManager
                                 table,
                                 p0,
                               ).subscriptionServicesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.accountId == item.accountId,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (financialTransactionRefs)
+                        await $_getPrefetchedData<
+                          PaymentAccount,
+                          $PaymentAccountsTable,
+                          FinancialTransactionData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$PaymentAccountsTableReferences
+                              ._financialTransactionRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$PaymentAccountsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).financialTransactionRefs,
                           referencedItemsForCurrentItem:
                               (item, referencedItems) => referencedItems.where(
                                 (e) => e.accountId == item.accountId,
@@ -24323,597 +24561,9 @@ typedef $$PaymentAccountsTableProcessedTableManager =
       PaymentAccount,
       PrefetchHooks Function({
         bool userId,
-        bool financialTransactionRefs,
         bool subscriptionServicesRefs,
+        bool financialTransactionRefs,
       })
-    >;
-typedef $$FinancialTransactionTableCreateCompanionBuilder =
-    FinancialTransactionCompanion Function({
-      required String transactionId,
-      required String userId,
-      required String flowType,
-      required double amount,
-      required String categoryId,
-      required String accountId,
-      Value<String?> remark,
-      required DateTime loggedAt,
-      Value<int> rowid,
-    });
-typedef $$FinancialTransactionTableUpdateCompanionBuilder =
-    FinancialTransactionCompanion Function({
-      Value<String> transactionId,
-      Value<String> userId,
-      Value<String> flowType,
-      Value<double> amount,
-      Value<String> categoryId,
-      Value<String> accountId,
-      Value<String?> remark,
-      Value<DateTime> loggedAt,
-      Value<int> rowid,
-    });
-
-final class $$FinancialTransactionTableReferences
-    extends
-        BaseReferences<
-          _$AppDatabase,
-          $FinancialTransactionTable,
-          FinancialTransactionData
-        > {
-  $$FinancialTransactionTableReferences(
-    super.$_db,
-    super.$_table,
-    super.$_typedResult,
-  );
-
-  static $UserAccountsTable _userIdTable(_$AppDatabase db) =>
-      db.userAccounts.createAlias(
-        $_aliasNameGenerator(
-          db.financialTransaction.userId,
-          db.userAccounts.userId,
-        ),
-      );
-
-  $$UserAccountsTableProcessedTableManager get userId {
-    final $_column = $_itemColumn<String>('user_id')!;
-
-    final manager = $$UserAccountsTableTableManager(
-      $_db,
-      $_db.userAccounts,
-    ).filter((f) => f.userId.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_userIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-
-  static $ExpenseCategoriesTable _categoryIdTable(_$AppDatabase db) =>
-      db.expenseCategories.createAlias(
-        $_aliasNameGenerator(
-          db.financialTransaction.categoryId,
-          db.expenseCategories.categoryId,
-        ),
-      );
-
-  $$ExpenseCategoriesTableProcessedTableManager get categoryId {
-    final $_column = $_itemColumn<String>('category_id')!;
-
-    final manager = $$ExpenseCategoriesTableTableManager(
-      $_db,
-      $_db.expenseCategories,
-    ).filter((f) => f.categoryId.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_categoryIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-
-  static $PaymentAccountsTable _accountIdTable(_$AppDatabase db) =>
-      db.paymentAccounts.createAlias(
-        $_aliasNameGenerator(
-          db.financialTransaction.accountId,
-          db.paymentAccounts.accountId,
-        ),
-      );
-
-  $$PaymentAccountsTableProcessedTableManager get accountId {
-    final $_column = $_itemColumn<String>('account_id')!;
-
-    final manager = $$PaymentAccountsTableTableManager(
-      $_db,
-      $_db.paymentAccounts,
-    ).filter((f) => f.accountId.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_accountIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-}
-
-class $$FinancialTransactionTableFilterComposer
-    extends Composer<_$AppDatabase, $FinancialTransactionTable> {
-  $$FinancialTransactionTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<String> get transactionId => $composableBuilder(
-    column: $table.transactionId,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get flowType => $composableBuilder(
-    column: $table.flowType,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<double> get amount => $composableBuilder(
-    column: $table.amount,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get remark => $composableBuilder(
-    column: $table.remark,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get loggedAt => $composableBuilder(
-    column: $table.loggedAt,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  $$UserAccountsTableFilterComposer get userId {
-    final $$UserAccountsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.userId,
-      referencedTable: $db.userAccounts,
-      getReferencedColumn: (t) => t.userId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UserAccountsTableFilterComposer(
-            $db: $db,
-            $table: $db.userAccounts,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$ExpenseCategoriesTableFilterComposer get categoryId {
-    final $$ExpenseCategoriesTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.categoryId,
-      referencedTable: $db.expenseCategories,
-      getReferencedColumn: (t) => t.categoryId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ExpenseCategoriesTableFilterComposer(
-            $db: $db,
-            $table: $db.expenseCategories,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$PaymentAccountsTableFilterComposer get accountId {
-    final $$PaymentAccountsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.accountId,
-      referencedTable: $db.paymentAccounts,
-      getReferencedColumn: (t) => t.accountId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$PaymentAccountsTableFilterComposer(
-            $db: $db,
-            $table: $db.paymentAccounts,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-}
-
-class $$FinancialTransactionTableOrderingComposer
-    extends Composer<_$AppDatabase, $FinancialTransactionTable> {
-  $$FinancialTransactionTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<String> get transactionId => $composableBuilder(
-    column: $table.transactionId,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get flowType => $composableBuilder(
-    column: $table.flowType,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<double> get amount => $composableBuilder(
-    column: $table.amount,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get remark => $composableBuilder(
-    column: $table.remark,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get loggedAt => $composableBuilder(
-    column: $table.loggedAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  $$UserAccountsTableOrderingComposer get userId {
-    final $$UserAccountsTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.userId,
-      referencedTable: $db.userAccounts,
-      getReferencedColumn: (t) => t.userId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UserAccountsTableOrderingComposer(
-            $db: $db,
-            $table: $db.userAccounts,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$ExpenseCategoriesTableOrderingComposer get categoryId {
-    final $$ExpenseCategoriesTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.categoryId,
-      referencedTable: $db.expenseCategories,
-      getReferencedColumn: (t) => t.categoryId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ExpenseCategoriesTableOrderingComposer(
-            $db: $db,
-            $table: $db.expenseCategories,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$PaymentAccountsTableOrderingComposer get accountId {
-    final $$PaymentAccountsTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.accountId,
-      referencedTable: $db.paymentAccounts,
-      getReferencedColumn: (t) => t.accountId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$PaymentAccountsTableOrderingComposer(
-            $db: $db,
-            $table: $db.paymentAccounts,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-}
-
-class $$FinancialTransactionTableAnnotationComposer
-    extends Composer<_$AppDatabase, $FinancialTransactionTable> {
-  $$FinancialTransactionTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<String> get transactionId => $composableBuilder(
-    column: $table.transactionId,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get flowType =>
-      $composableBuilder(column: $table.flowType, builder: (column) => column);
-
-  GeneratedColumn<double> get amount =>
-      $composableBuilder(column: $table.amount, builder: (column) => column);
-
-  GeneratedColumn<String> get remark =>
-      $composableBuilder(column: $table.remark, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get loggedAt =>
-      $composableBuilder(column: $table.loggedAt, builder: (column) => column);
-
-  $$UserAccountsTableAnnotationComposer get userId {
-    final $$UserAccountsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.userId,
-      referencedTable: $db.userAccounts,
-      getReferencedColumn: (t) => t.userId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UserAccountsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.userAccounts,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$ExpenseCategoriesTableAnnotationComposer get categoryId {
-    final $$ExpenseCategoriesTableAnnotationComposer composer =
-        $composerBuilder(
-          composer: this,
-          getCurrentColumn: (t) => t.categoryId,
-          referencedTable: $db.expenseCategories,
-          getReferencedColumn: (t) => t.categoryId,
-          builder:
-              (
-                joinBuilder, {
-                $addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer,
-              }) => $$ExpenseCategoriesTableAnnotationComposer(
-                $db: $db,
-                $table: $db.expenseCategories,
-                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-                joinBuilder: joinBuilder,
-                $removeJoinBuilderFromRootComposer:
-                    $removeJoinBuilderFromRootComposer,
-              ),
-        );
-    return composer;
-  }
-
-  $$PaymentAccountsTableAnnotationComposer get accountId {
-    final $$PaymentAccountsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.accountId,
-      referencedTable: $db.paymentAccounts,
-      getReferencedColumn: (t) => t.accountId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$PaymentAccountsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.paymentAccounts,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-}
-
-class $$FinancialTransactionTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $FinancialTransactionTable,
-          FinancialTransactionData,
-          $$FinancialTransactionTableFilterComposer,
-          $$FinancialTransactionTableOrderingComposer,
-          $$FinancialTransactionTableAnnotationComposer,
-          $$FinancialTransactionTableCreateCompanionBuilder,
-          $$FinancialTransactionTableUpdateCompanionBuilder,
-          (FinancialTransactionData, $$FinancialTransactionTableReferences),
-          FinancialTransactionData,
-          PrefetchHooks Function({bool userId, bool categoryId, bool accountId})
-        > {
-  $$FinancialTransactionTableTableManager(
-    _$AppDatabase db,
-    $FinancialTransactionTable table,
-  ) : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$FinancialTransactionTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$FinancialTransactionTableOrderingComposer(
-                $db: db,
-                $table: table,
-              ),
-          createComputedFieldComposer: () =>
-              $$FinancialTransactionTableAnnotationComposer(
-                $db: db,
-                $table: table,
-              ),
-          updateCompanionCallback:
-              ({
-                Value<String> transactionId = const Value.absent(),
-                Value<String> userId = const Value.absent(),
-                Value<String> flowType = const Value.absent(),
-                Value<double> amount = const Value.absent(),
-                Value<String> categoryId = const Value.absent(),
-                Value<String> accountId = const Value.absent(),
-                Value<String?> remark = const Value.absent(),
-                Value<DateTime> loggedAt = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => FinancialTransactionCompanion(
-                transactionId: transactionId,
-                userId: userId,
-                flowType: flowType,
-                amount: amount,
-                categoryId: categoryId,
-                accountId: accountId,
-                remark: remark,
-                loggedAt: loggedAt,
-                rowid: rowid,
-              ),
-          createCompanionCallback:
-              ({
-                required String transactionId,
-                required String userId,
-                required String flowType,
-                required double amount,
-                required String categoryId,
-                required String accountId,
-                Value<String?> remark = const Value.absent(),
-                required DateTime loggedAt,
-                Value<int> rowid = const Value.absent(),
-              }) => FinancialTransactionCompanion.insert(
-                transactionId: transactionId,
-                userId: userId,
-                flowType: flowType,
-                amount: amount,
-                categoryId: categoryId,
-                accountId: accountId,
-                remark: remark,
-                loggedAt: loggedAt,
-                rowid: rowid,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable(table),
-                  $$FinancialTransactionTableReferences(db, table, e),
-                ),
-              )
-              .toList(),
-          prefetchHooksCallback:
-              ({userId = false, categoryId = false, accountId = false}) {
-                return PrefetchHooks(
-                  db: db,
-                  explicitlyWatchedTables: [],
-                  addJoins:
-                      <
-                        T extends TableManagerState<
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic
-                        >
-                      >(state) {
-                        if (userId) {
-                          state =
-                              state.withJoin(
-                                    currentTable: table,
-                                    currentColumn: table.userId,
-                                    referencedTable:
-                                        $$FinancialTransactionTableReferences
-                                            ._userIdTable(db),
-                                    referencedColumn:
-                                        $$FinancialTransactionTableReferences
-                                            ._userIdTable(db)
-                                            .userId,
-                                  )
-                                  as T;
-                        }
-                        if (categoryId) {
-                          state =
-                              state.withJoin(
-                                    currentTable: table,
-                                    currentColumn: table.categoryId,
-                                    referencedTable:
-                                        $$FinancialTransactionTableReferences
-                                            ._categoryIdTable(db),
-                                    referencedColumn:
-                                        $$FinancialTransactionTableReferences
-                                            ._categoryIdTable(db)
-                                            .categoryId,
-                                  )
-                                  as T;
-                        }
-                        if (accountId) {
-                          state =
-                              state.withJoin(
-                                    currentTable: table,
-                                    currentColumn: table.accountId,
-                                    referencedTable:
-                                        $$FinancialTransactionTableReferences
-                                            ._accountIdTable(db),
-                                    referencedColumn:
-                                        $$FinancialTransactionTableReferences
-                                            ._accountIdTable(db)
-                                            .accountId,
-                                  )
-                                  as T;
-                        }
-
-                        return state;
-                      },
-                  getPrefetchedDataCallback: (items) async {
-                    return [];
-                  },
-                );
-              },
-        ),
-      );
-}
-
-typedef $$FinancialTransactionTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $FinancialTransactionTable,
-      FinancialTransactionData,
-      $$FinancialTransactionTableFilterComposer,
-      $$FinancialTransactionTableOrderingComposer,
-      $$FinancialTransactionTableAnnotationComposer,
-      $$FinancialTransactionTableCreateCompanionBuilder,
-      $$FinancialTransactionTableUpdateCompanionBuilder,
-      (FinancialTransactionData, $$FinancialTransactionTableReferences),
-      FinancialTransactionData,
-      PrefetchHooks Function({bool userId, bool categoryId, bool accountId})
     >;
 typedef $$SubscriptionServicesTableCreateCompanionBuilder =
     SubscriptionServicesCompanion Function({
@@ -24998,6 +24648,39 @@ final class $$SubscriptionServicesTableReferences
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $FinancialTransactionTable,
+    List<FinancialTransactionData>
+  >
+  _financialTransactionRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.financialTransaction,
+        aliasName: $_aliasNameGenerator(
+          db.subscriptionServices.subscriptionId,
+          db.financialTransaction.sourceSubscriptionId,
+        ),
+      );
+
+  $$FinancialTransactionTableProcessedTableManager
+  get financialTransactionRefs {
+    final manager =
+        $$FinancialTransactionTableTableManager(
+          $_db,
+          $_db.financialTransaction,
+        ).filter(
+          (f) => f.sourceSubscriptionId.subscriptionId.sqlEquals(
+            $_itemColumn<String>('subscription_id')!,
+          ),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _financialTransactionRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
     );
   }
 }
@@ -25095,6 +24778,31 @@ class $$SubscriptionServicesTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> financialTransactionRefs(
+    Expression<bool> Function($$FinancialTransactionTableFilterComposer f) f,
+  ) {
+    final $$FinancialTransactionTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.subscriptionId,
+      referencedTable: $db.financialTransaction,
+      getReferencedColumn: (t) => t.sourceSubscriptionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FinancialTransactionTableFilterComposer(
+            $db: $db,
+            $table: $db.financialTransaction,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 }
 
@@ -25282,6 +24990,32 @@ class $$SubscriptionServicesTableAnnotationComposer
     );
     return composer;
   }
+
+  Expression<T> financialTransactionRefs<T extends Object>(
+    Expression<T> Function($$FinancialTransactionTableAnnotationComposer a) f,
+  ) {
+    final $$FinancialTransactionTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.subscriptionId,
+          referencedTable: $db.financialTransaction,
+          getReferencedColumn: (t) => t.sourceSubscriptionId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$FinancialTransactionTableAnnotationComposer(
+                $db: $db,
+                $table: $db.financialTransaction,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$SubscriptionServicesTableTableManager
@@ -25297,7 +25031,11 @@ class $$SubscriptionServicesTableTableManager
           $$SubscriptionServicesTableUpdateCompanionBuilder,
           (SubscriptionService, $$SubscriptionServicesTableReferences),
           SubscriptionService,
-          PrefetchHooks Function({bool userId, bool accountId})
+          PrefetchHooks Function({
+            bool userId,
+            bool accountId,
+            bool financialTransactionRefs,
+          })
         > {
   $$SubscriptionServicesTableTableManager(
     _$AppDatabase db,
@@ -25378,64 +25116,95 @@ class $$SubscriptionServicesTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({userId = false, accountId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (userId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.userId,
-                                referencedTable:
-                                    $$SubscriptionServicesTableReferences
-                                        ._userIdTable(db),
-                                referencedColumn:
-                                    $$SubscriptionServicesTableReferences
-                                        ._userIdTable(db)
-                                        .userId,
-                              )
-                              as T;
-                    }
-                    if (accountId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.accountId,
-                                referencedTable:
-                                    $$SubscriptionServicesTableReferences
-                                        ._accountIdTable(db),
-                                referencedColumn:
-                                    $$SubscriptionServicesTableReferences
-                                        ._accountIdTable(db)
-                                        .accountId,
-                              )
-                              as T;
-                    }
+          prefetchHooksCallback:
+              ({
+                userId = false,
+                accountId = false,
+                financialTransactionRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (financialTransactionRefs) db.financialTransaction,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (userId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.userId,
+                                    referencedTable:
+                                        $$SubscriptionServicesTableReferences
+                                            ._userIdTable(db),
+                                    referencedColumn:
+                                        $$SubscriptionServicesTableReferences
+                                            ._userIdTable(db)
+                                            .userId,
+                                  )
+                                  as T;
+                        }
+                        if (accountId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.accountId,
+                                    referencedTable:
+                                        $$SubscriptionServicesTableReferences
+                                            ._accountIdTable(db),
+                                    referencedColumn:
+                                        $$SubscriptionServicesTableReferences
+                                            ._accountIdTable(db)
+                                            .accountId,
+                                  )
+                                  as T;
+                        }
 
-                    return state;
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (financialTransactionRefs)
+                        await $_getPrefetchedData<
+                          SubscriptionService,
+                          $SubscriptionServicesTable,
+                          FinancialTransactionData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$SubscriptionServicesTableReferences
+                              ._financialTransactionRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$SubscriptionServicesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).financialTransactionRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) =>
+                                    e.sourceSubscriptionId ==
+                                    item.subscriptionId,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
                   },
-              getPrefetchedDataCallback: (items) async {
-                return [];
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -25452,7 +25221,794 @@ typedef $$SubscriptionServicesTableProcessedTableManager =
       $$SubscriptionServicesTableUpdateCompanionBuilder,
       (SubscriptionService, $$SubscriptionServicesTableReferences),
       SubscriptionService,
-      PrefetchHooks Function({bool userId, bool accountId})
+      PrefetchHooks Function({
+        bool userId,
+        bool accountId,
+        bool financialTransactionRefs,
+      })
+    >;
+typedef $$FinancialTransactionTableCreateCompanionBuilder =
+    FinancialTransactionCompanion Function({
+      required String transactionId,
+      required String userId,
+      required String flowType,
+      required double amount,
+      required String categoryId,
+      required String accountId,
+      Value<String?> remark,
+      required DateTime loggedAt,
+      Value<String> expenseNature,
+      Value<DateTime?> amortizeStartDate,
+      Value<DateTime?> amortizeEndDate,
+      Value<String?> sourceSubscriptionId,
+      Value<int> rowid,
+    });
+typedef $$FinancialTransactionTableUpdateCompanionBuilder =
+    FinancialTransactionCompanion Function({
+      Value<String> transactionId,
+      Value<String> userId,
+      Value<String> flowType,
+      Value<double> amount,
+      Value<String> categoryId,
+      Value<String> accountId,
+      Value<String?> remark,
+      Value<DateTime> loggedAt,
+      Value<String> expenseNature,
+      Value<DateTime?> amortizeStartDate,
+      Value<DateTime?> amortizeEndDate,
+      Value<String?> sourceSubscriptionId,
+      Value<int> rowid,
+    });
+
+final class $$FinancialTransactionTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $FinancialTransactionTable,
+          FinancialTransactionData
+        > {
+  $$FinancialTransactionTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $UserAccountsTable _userIdTable(_$AppDatabase db) =>
+      db.userAccounts.createAlias(
+        $_aliasNameGenerator(
+          db.financialTransaction.userId,
+          db.userAccounts.userId,
+        ),
+      );
+
+  $$UserAccountsTableProcessedTableManager get userId {
+    final $_column = $_itemColumn<String>('user_id')!;
+
+    final manager = $$UserAccountsTableTableManager(
+      $_db,
+      $_db.userAccounts,
+    ).filter((f) => f.userId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_userIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ExpenseCategoriesTable _categoryIdTable(_$AppDatabase db) =>
+      db.expenseCategories.createAlias(
+        $_aliasNameGenerator(
+          db.financialTransaction.categoryId,
+          db.expenseCategories.categoryId,
+        ),
+      );
+
+  $$ExpenseCategoriesTableProcessedTableManager get categoryId {
+    final $_column = $_itemColumn<String>('category_id')!;
+
+    final manager = $$ExpenseCategoriesTableTableManager(
+      $_db,
+      $_db.expenseCategories,
+    ).filter((f) => f.categoryId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_categoryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $PaymentAccountsTable _accountIdTable(_$AppDatabase db) =>
+      db.paymentAccounts.createAlias(
+        $_aliasNameGenerator(
+          db.financialTransaction.accountId,
+          db.paymentAccounts.accountId,
+        ),
+      );
+
+  $$PaymentAccountsTableProcessedTableManager get accountId {
+    final $_column = $_itemColumn<String>('account_id')!;
+
+    final manager = $$PaymentAccountsTableTableManager(
+      $_db,
+      $_db.paymentAccounts,
+    ).filter((f) => f.accountId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_accountIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $SubscriptionServicesTable _sourceSubscriptionIdTable(
+    _$AppDatabase db,
+  ) => db.subscriptionServices.createAlias(
+    $_aliasNameGenerator(
+      db.financialTransaction.sourceSubscriptionId,
+      db.subscriptionServices.subscriptionId,
+    ),
+  );
+
+  $$SubscriptionServicesTableProcessedTableManager? get sourceSubscriptionId {
+    final $_column = $_itemColumn<String>('source_subscription_id');
+    if ($_column == null) return null;
+    final manager = $$SubscriptionServicesTableTableManager(
+      $_db,
+      $_db.subscriptionServices,
+    ).filter((f) => f.subscriptionId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(
+      _sourceSubscriptionIdTable($_db),
+    );
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$FinancialTransactionTableFilterComposer
+    extends Composer<_$AppDatabase, $FinancialTransactionTable> {
+  $$FinancialTransactionTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get transactionId => $composableBuilder(
+    column: $table.transactionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get flowType => $composableBuilder(
+    column: $table.flowType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get remark => $composableBuilder(
+    column: $table.remark,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get loggedAt => $composableBuilder(
+    column: $table.loggedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get expenseNature => $composableBuilder(
+    column: $table.expenseNature,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get amortizeStartDate => $composableBuilder(
+    column: $table.amortizeStartDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get amortizeEndDate => $composableBuilder(
+    column: $table.amortizeEndDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$UserAccountsTableFilterComposer get userId {
+    final $$UserAccountsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.userAccounts,
+      getReferencedColumn: (t) => t.userId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UserAccountsTableFilterComposer(
+            $db: $db,
+            $table: $db.userAccounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ExpenseCategoriesTableFilterComposer get categoryId {
+    final $$ExpenseCategoriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.categoryId,
+      referencedTable: $db.expenseCategories,
+      getReferencedColumn: (t) => t.categoryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ExpenseCategoriesTableFilterComposer(
+            $db: $db,
+            $table: $db.expenseCategories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$PaymentAccountsTableFilterComposer get accountId {
+    final $$PaymentAccountsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.paymentAccounts,
+      getReferencedColumn: (t) => t.accountId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PaymentAccountsTableFilterComposer(
+            $db: $db,
+            $table: $db.paymentAccounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$SubscriptionServicesTableFilterComposer get sourceSubscriptionId {
+    final $$SubscriptionServicesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.sourceSubscriptionId,
+      referencedTable: $db.subscriptionServices,
+      getReferencedColumn: (t) => t.subscriptionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SubscriptionServicesTableFilterComposer(
+            $db: $db,
+            $table: $db.subscriptionServices,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$FinancialTransactionTableOrderingComposer
+    extends Composer<_$AppDatabase, $FinancialTransactionTable> {
+  $$FinancialTransactionTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get transactionId => $composableBuilder(
+    column: $table.transactionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get flowType => $composableBuilder(
+    column: $table.flowType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get remark => $composableBuilder(
+    column: $table.remark,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get loggedAt => $composableBuilder(
+    column: $table.loggedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get expenseNature => $composableBuilder(
+    column: $table.expenseNature,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get amortizeStartDate => $composableBuilder(
+    column: $table.amortizeStartDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get amortizeEndDate => $composableBuilder(
+    column: $table.amortizeEndDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$UserAccountsTableOrderingComposer get userId {
+    final $$UserAccountsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.userAccounts,
+      getReferencedColumn: (t) => t.userId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UserAccountsTableOrderingComposer(
+            $db: $db,
+            $table: $db.userAccounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ExpenseCategoriesTableOrderingComposer get categoryId {
+    final $$ExpenseCategoriesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.categoryId,
+      referencedTable: $db.expenseCategories,
+      getReferencedColumn: (t) => t.categoryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ExpenseCategoriesTableOrderingComposer(
+            $db: $db,
+            $table: $db.expenseCategories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$PaymentAccountsTableOrderingComposer get accountId {
+    final $$PaymentAccountsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.paymentAccounts,
+      getReferencedColumn: (t) => t.accountId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PaymentAccountsTableOrderingComposer(
+            $db: $db,
+            $table: $db.paymentAccounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$SubscriptionServicesTableOrderingComposer get sourceSubscriptionId {
+    final $$SubscriptionServicesTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.sourceSubscriptionId,
+          referencedTable: $db.subscriptionServices,
+          getReferencedColumn: (t) => t.subscriptionId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$SubscriptionServicesTableOrderingComposer(
+                $db: $db,
+                $table: $db.subscriptionServices,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$FinancialTransactionTableAnnotationComposer
+    extends Composer<_$AppDatabase, $FinancialTransactionTable> {
+  $$FinancialTransactionTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get transactionId => $composableBuilder(
+    column: $table.transactionId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get flowType =>
+      $composableBuilder(column: $table.flowType, builder: (column) => column);
+
+  GeneratedColumn<double> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<String> get remark =>
+      $composableBuilder(column: $table.remark, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get loggedAt =>
+      $composableBuilder(column: $table.loggedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get expenseNature => $composableBuilder(
+    column: $table.expenseNature,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get amortizeStartDate => $composableBuilder(
+    column: $table.amortizeStartDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get amortizeEndDate => $composableBuilder(
+    column: $table.amortizeEndDate,
+    builder: (column) => column,
+  );
+
+  $$UserAccountsTableAnnotationComposer get userId {
+    final $$UserAccountsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.userAccounts,
+      getReferencedColumn: (t) => t.userId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UserAccountsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.userAccounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ExpenseCategoriesTableAnnotationComposer get categoryId {
+    final $$ExpenseCategoriesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.categoryId,
+          referencedTable: $db.expenseCategories,
+          getReferencedColumn: (t) => t.categoryId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ExpenseCategoriesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.expenseCategories,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$PaymentAccountsTableAnnotationComposer get accountId {
+    final $$PaymentAccountsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.paymentAccounts,
+      getReferencedColumn: (t) => t.accountId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PaymentAccountsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.paymentAccounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$SubscriptionServicesTableAnnotationComposer get sourceSubscriptionId {
+    final $$SubscriptionServicesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.sourceSubscriptionId,
+          referencedTable: $db.subscriptionServices,
+          getReferencedColumn: (t) => t.subscriptionId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$SubscriptionServicesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.subscriptionServices,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$FinancialTransactionTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $FinancialTransactionTable,
+          FinancialTransactionData,
+          $$FinancialTransactionTableFilterComposer,
+          $$FinancialTransactionTableOrderingComposer,
+          $$FinancialTransactionTableAnnotationComposer,
+          $$FinancialTransactionTableCreateCompanionBuilder,
+          $$FinancialTransactionTableUpdateCompanionBuilder,
+          (FinancialTransactionData, $$FinancialTransactionTableReferences),
+          FinancialTransactionData,
+          PrefetchHooks Function({
+            bool userId,
+            bool categoryId,
+            bool accountId,
+            bool sourceSubscriptionId,
+          })
+        > {
+  $$FinancialTransactionTableTableManager(
+    _$AppDatabase db,
+    $FinancialTransactionTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$FinancialTransactionTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$FinancialTransactionTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$FinancialTransactionTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> transactionId = const Value.absent(),
+                Value<String> userId = const Value.absent(),
+                Value<String> flowType = const Value.absent(),
+                Value<double> amount = const Value.absent(),
+                Value<String> categoryId = const Value.absent(),
+                Value<String> accountId = const Value.absent(),
+                Value<String?> remark = const Value.absent(),
+                Value<DateTime> loggedAt = const Value.absent(),
+                Value<String> expenseNature = const Value.absent(),
+                Value<DateTime?> amortizeStartDate = const Value.absent(),
+                Value<DateTime?> amortizeEndDate = const Value.absent(),
+                Value<String?> sourceSubscriptionId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => FinancialTransactionCompanion(
+                transactionId: transactionId,
+                userId: userId,
+                flowType: flowType,
+                amount: amount,
+                categoryId: categoryId,
+                accountId: accountId,
+                remark: remark,
+                loggedAt: loggedAt,
+                expenseNature: expenseNature,
+                amortizeStartDate: amortizeStartDate,
+                amortizeEndDate: amortizeEndDate,
+                sourceSubscriptionId: sourceSubscriptionId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String transactionId,
+                required String userId,
+                required String flowType,
+                required double amount,
+                required String categoryId,
+                required String accountId,
+                Value<String?> remark = const Value.absent(),
+                required DateTime loggedAt,
+                Value<String> expenseNature = const Value.absent(),
+                Value<DateTime?> amortizeStartDate = const Value.absent(),
+                Value<DateTime?> amortizeEndDate = const Value.absent(),
+                Value<String?> sourceSubscriptionId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => FinancialTransactionCompanion.insert(
+                transactionId: transactionId,
+                userId: userId,
+                flowType: flowType,
+                amount: amount,
+                categoryId: categoryId,
+                accountId: accountId,
+                remark: remark,
+                loggedAt: loggedAt,
+                expenseNature: expenseNature,
+                amortizeStartDate: amortizeStartDate,
+                amortizeEndDate: amortizeEndDate,
+                sourceSubscriptionId: sourceSubscriptionId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$FinancialTransactionTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                userId = false,
+                categoryId = false,
+                accountId = false,
+                sourceSubscriptionId = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (userId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.userId,
+                                    referencedTable:
+                                        $$FinancialTransactionTableReferences
+                                            ._userIdTable(db),
+                                    referencedColumn:
+                                        $$FinancialTransactionTableReferences
+                                            ._userIdTable(db)
+                                            .userId,
+                                  )
+                                  as T;
+                        }
+                        if (categoryId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.categoryId,
+                                    referencedTable:
+                                        $$FinancialTransactionTableReferences
+                                            ._categoryIdTable(db),
+                                    referencedColumn:
+                                        $$FinancialTransactionTableReferences
+                                            ._categoryIdTable(db)
+                                            .categoryId,
+                                  )
+                                  as T;
+                        }
+                        if (accountId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.accountId,
+                                    referencedTable:
+                                        $$FinancialTransactionTableReferences
+                                            ._accountIdTable(db),
+                                    referencedColumn:
+                                        $$FinancialTransactionTableReferences
+                                            ._accountIdTable(db)
+                                            .accountId,
+                                  )
+                                  as T;
+                        }
+                        if (sourceSubscriptionId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.sourceSubscriptionId,
+                                    referencedTable:
+                                        $$FinancialTransactionTableReferences
+                                            ._sourceSubscriptionIdTable(db),
+                                    referencedColumn:
+                                        $$FinancialTransactionTableReferences
+                                            ._sourceSubscriptionIdTable(db)
+                                            .subscriptionId,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$FinancialTransactionTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $FinancialTransactionTable,
+      FinancialTransactionData,
+      $$FinancialTransactionTableFilterComposer,
+      $$FinancialTransactionTableOrderingComposer,
+      $$FinancialTransactionTableAnnotationComposer,
+      $$FinancialTransactionTableCreateCompanionBuilder,
+      $$FinancialTransactionTableUpdateCompanionBuilder,
+      (FinancialTransactionData, $$FinancialTransactionTableReferences),
+      FinancialTransactionData,
+      PrefetchHooks Function({
+        bool userId,
+        bool categoryId,
+        bool accountId,
+        bool sourceSubscriptionId,
+      })
     >;
 typedef $$BudgetSettingsTableCreateCompanionBuilder =
     BudgetSettingsCompanion Function({
@@ -34594,10 +35150,10 @@ class $AppDatabaseManager {
       $$ExpenseCategoriesTableTableManager(_db, _db.expenseCategories);
   $$PaymentAccountsTableTableManager get paymentAccounts =>
       $$PaymentAccountsTableTableManager(_db, _db.paymentAccounts);
-  $$FinancialTransactionTableTableManager get financialTransaction =>
-      $$FinancialTransactionTableTableManager(_db, _db.financialTransaction);
   $$SubscriptionServicesTableTableManager get subscriptionServices =>
       $$SubscriptionServicesTableTableManager(_db, _db.subscriptionServices);
+  $$FinancialTransactionTableTableManager get financialTransaction =>
+      $$FinancialTransactionTableTableManager(_db, _db.financialTransaction);
   $$BudgetSettingsTableTableManager get budgetSettings =>
       $$BudgetSettingsTableTableManager(_db, _db.budgetSettings);
   $$AssetValueSnapshotsTableTableManager get assetValueSnapshots =>
