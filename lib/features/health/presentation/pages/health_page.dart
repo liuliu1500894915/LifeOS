@@ -4,14 +4,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/database/app_database.dart';
 import '../../domain/nutrition.dart';
 import '../providers/meal_providers.dart';
+import '../widgets/energy_ledger_card.dart';
 import '../widgets/food_picker_sheet.dart';
+import '../widgets/health_exercise_section.dart';
 import '../widgets/nutrition_progress_card.dart';
 
-/// 健康模块首页壳（P2-3）。
+/// 健康模块首页壳 ——「能量账本」统一视图（P2-3 起，P3-3 合并摄入+消耗）。
 ///
-/// 目前承载「饮食摄入」区；P3-2 将在其后追加「运动消耗」区（同 health 模块，
-/// 仅扩 exercise_* 文件 + 往本页加一段，互不冲突）。读取全部走 `.watch()` 流
-/// （[mealLogProvider] 派生），写库后列表自动刷新。
+/// 三段：① [EnergyLedgerCard]「吃 − 动 = 净」能量平衡 + 固定目标额度（消耗不加回）；
+/// ② [NutritionOverview] 营养环与三宏量条（P2-4）；③ 按餐次的饮食记录；
+/// ④ [HealthExerciseSection] 运动消耗记录与入口（顺带修复 `/home/exercise` 孤儿路由）。
+/// 读取全部走 `.watch()` 流（meal/exercise/goal 派生），写库后各段自动刷新。
 class HealthPage extends ConsumerWidget {
   const HealthPage({super.key});
 
@@ -37,6 +40,8 @@ class HealthPage extends ConsumerWidget {
             children: [
               const _Header(),
               const SizedBox(height: 12),
+              const EnergyLedgerCard(),
+              const SizedBox(height: 12),
               const NutritionOverview(),
               const SizedBox(height: 16),
               for (final type in MealType.values) ...[
@@ -48,6 +53,7 @@ class HealthPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
               ],
+              const HealthExerciseSection(),
             ],
           ),
         ),
