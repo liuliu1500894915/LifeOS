@@ -61,7 +61,7 @@ lib/
 
 ## 数据库规范
 
-- **迁移**：统一 Drift **versioned `stepByStep`**，禁止「`createAll` + 手写 `onUpgrade` 补表」混合模式。每次改 schema：`schemaVersion` +1、`drift_dev schema dump` 快照、补迁移测试、旧库升级不丢数据。`drift_schemas/` 已有 v1+v2 快照，迁移已改 stepByStep（P0-2 完成）。⚠️ **重新生成 `schema_versions.dart` / `test/generated_migrations/*` 后，需手动给这三个文件补 `tables/app_defaults.dart` 的 import** —— 生成代码引用 `AppDefaults.*` 列默认常量，但 drift schema dump 不会自动加 import，否则编译报 `Undefined name 'AppDefaults'`。
+- **迁移**：统一 Drift **versioned `stepByStep`**，禁止「`createAll` + 手写 `onUpgrade` 补表」混合模式。每次改 schema：`schemaVersion` +1、`drift_dev schema dump` 快照、补迁移测试、旧库升级不丢数据。`drift_schemas/` 已有 v1/v2/v3 快照（**v3 = 健康摄入/消耗五表，PR#1 已合**；迁移已改 stepByStep，P0-2 完成）。**下一个改 schema 的任务从 v4 起**（守门人按版本号串行合）。⚠️ **重新生成 `schema_versions.dart` / `test/generated_migrations/*` 后，需手动给这三个文件补 `tables/app_defaults.dart` 的 import** —— 生成代码引用 `AppDefaults.*` 列默认常量，但 drift schema dump 不会自动加 import，否则编译报 `Undefined name 'AppDefaults'`。
 - **外键**：跨表引用必须 `.references()`；`PRAGMA foreign_keys = ON` 放在 **`beforeOpen`**（不放 `setup`）。
 - **索引**：按列过滤/排序的查询列必须建索引；禁止「全表 `.get()` 后 Dart `.where` 过滤」。
 - **命名**：Table 类 `PascalCase` 单数（`MealLog`）；列 getter `camelCase`（Drift 自动映射 snake_case）；主键 `xxxId`。新表要注册进 `@DriftDatabase`、导出进 `tables/tables.dart`。
@@ -97,6 +97,12 @@ lib/
 | `createAll` + 手写 onUpgrade | versioned stepByStep |
 
 ## 多人协作
+
+**⚠️ 一个终端/agent = 一个 git worktree = 一个分支，绝不共用同一个工作目录。** 曾有三个 Claude Code 终端同时在主目录 `/Users/liu/Desktop/LifeOS` 跑不同任务，导致：① 共享文件（`app_database.g.dart`、`schema_versions.dart`、`tables.dart`）被相互覆盖（非 git 冲突，是"后写覆盖先写"）；② 多个 `build_runner` 争用同一个 `.dart_tool/build` 锁 → 卡死。开并行任务前先隔离：
+```bash
+git worktree add ../lifeos-<任务> -b feat/<任务> origin/main   # 各自目录、各自分支、各自 .dart_tool
+# 各终端 cd 进各自 worktree 目录再干活；同一目录绝不并发跑两个 build_runner
+```
 
 **分工按「竖切」（一人包干一条功能线的 data+domain+presentation），不按「层」切** —— 减少多人改同一批文件。并行结构：P0 地基先合进 main（门禁）→ 之后财务/摄入/消耗/每日 4 条线并行 → P5 联动收口。纯函数任务（TDEE、摊销算法）可提前抢跑。
 
