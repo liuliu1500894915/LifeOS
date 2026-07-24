@@ -4,6 +4,7 @@ import '../../../../core/database/app_database.dart';
 import '../../../../core/database/system_bootstrap.dart';
 import '../../data/repositories/finance_repository.dart';
 import '../../data/repositories/finance_repository_drift.dart';
+import '../../domain/amortization.dart';
 
 // 导出 join 读投影 DTO(TransactionWithCategory)供消费层引用。
 export '../../data/repositories/finance_repository.dart';
@@ -366,15 +367,91 @@ final monthTransactionsWithCategoryProvider =
       [];
 });
 
-final todayExpenseProvider = Provider<double>((ref) {
-  final txs = ref.watch(todayTransactionsProvider);
-  return txs.where((t) => t.flowType == 'EXPENSE').fold<double>(0, (s, t) => s + t.amount);
+// ── P1-5: 日/月支出拆「日常 SPOT」/「长期摊销」/「真实成本」三层 ──
+//
+// 长期摊销类支出(expenseNature == AMORTIZED,如年付订阅/保险)余额仍按全额
+// 扣(现金流不变),但在分析口径上按覆盖区间平摊到每一天,避免「一次性全额
+// 尖峰」扭曲日/月曲线。故:
+//   - 日常(SPOT)      = 当日/当月真实发生的一次性支出全额;
+//   - 摊销(AMORTIZED) = 由 domain/amortization.dart 按区间平摊到当日/当月的
+//                        份额(dailyAmortizedCost / amortizedCostInRange);
+//   - 真实成本         = 日常 + 摊销(三层自洽:日常+摊销=真实,验收 P1-5)。
+//
+// 摊销可由「上一计费周期 post 的交易」覆盖到本月(如年付订阅),故摊销源取
+// 全量交易流里所有 AMORTIZED 交易、再按目标日/区间筛覆盖,而非仅看当月新单。
+
+/// 全量 AMORTIZED 交易,适配为 domain 边界 [AmortizedTx](仅金额 + 起止)。
+///
+/// 取全量交易流而非当月子集 —— 摊销区间可跨多月(年付订阅),上月 post 的
+/// 交易同样分摊到本月每日。仅取 EXPENSE 且起止区间齐全者;缺区间的非法
+/// AMORTIZED 行不计(domain 守卫亦会跳过,见 amortization.dart)。
+final amortizedTransactionsProvider = Provider<List<AmortizedTx>>((ref) {
+  final txs = ref.watch(transactionProvider).valueOrNull ?? const <FinancialTransactionData>[];
+  return txs
+      .where((t) =>
+          t.flowType == 'EXPENSE' &&
+          t.expenseNature == 'AMORTIZED' &&
+          t.amortizeStartDate != null &&
+          t.amortizeEndDate != null)
+      .map((t) => AmortizedTx(
+            amount: t.amount,
+            start: t.amortizeStartDate!,
+            end: t.amortizeEndDate!,
+          ))
+      .toList(growable: false);
 });
 
-final monthExpenseProvider = Provider<double>((ref) {
-  final txs = ref.watch(monthTransactionsProvider);
-  return txs.where((t) => t.flowType == 'EXPENSE').fold<double>(0, (s, t) => s + t.amount);
+// ── 今日三层 ──
+
+/// 今日「日常」:当日发生的 SPOT 支出全额。
+final todaySpotExpenseProvider = Provider<double>((ref) {
+  final txs = ref.watch(todayTransactionsProvider);
+  return txs
+      .where((t) => t.flowType == 'EXPENSE' && t.expenseNature == 'SPOT')
+      .fold<double>(0, (s, t) => s + t.amount);
 });
+
+/// 今日「摊销」:所有覆盖今日的 AMORTIZED 交易,按「金额 ÷ 覆盖天数」求和。
+final todayAmortizedExpenseProvider = Provider<double>((ref) {
+  final amort = ref.watch(amortizedTransactionsProvider);
+  return dailyAmortizedCost(amort, _todayStart());
+});
+
+/// 今日「真实日成本」= 日常 SPOT + 当日摊销份额。
+final todayTrueExpenseProvider = Provider<double>(
+    (ref) => ref.watch(todaySpotExpenseProvider) + ref.watch(todayAmortizedExpenseProvider));
+
+// ── 本月三层 ──
+
+/// 本月「日常」:当月发生的 SPOT 支出全额。
+final monthSpotExpenseProvider = Provider<double>((ref) {
+  final txs = ref.watch(monthTransactionsProvider);
+  return txs
+      .where((t) => t.flowType == 'EXPENSE' && t.expenseNature == 'SPOT')
+      .fold<double>(0, (s, t) => s + t.amount);
+});
+
+/// 本月「摊销」:[月初, 月末] 每日摊销合计(含头含尾)。
+final monthAmortizedExpenseProvider = Provider<double>((ref) {
+  final amort = ref.watch(amortizedTransactionsProvider);
+  final start = _monthStart();
+  // 月末(含):DateTime(year, month+1, 0) = 当月最后一天。amortizedCostInRange
+  // 区间含头含尾,故 [月初, 月末] 覆盖当月每一天。
+  final end = DateTime(start.year, start.month + 1, 0);
+  return amortizedCostInRange(amort, start, end);
+});
+
+/// 本月「真实月成本」= 日常 SPOT + 当月摊销合计。
+final monthTrueExpenseProvider = Provider<double>(
+    (ref) => ref.watch(monthSpotExpenseProvider) + ref.watch(monthAmortizedExpenseProvider));
+
+// ── 向后兼容:headline「今日花费 / 本月花费」改用真实成本 ──
+//
+// 拆 SPOT/摊销后,headline 不再含 AMORTIZED 全额尖峰,而显示「真实日/月
+// 成本」(日常+摊销),与三层展示自洽(验收 P1-5:日常视图不含 AMORTIZED
+// 全额尖峰)。预算剩余也按真实成本计 —— 摊销份额本就该占预算。
+final todayExpenseProvider = Provider<double>((ref) => ref.watch(todayTrueExpenseProvider));
+final monthExpenseProvider = Provider<double>((ref) => ref.watch(monthTrueExpenseProvider));
 
 final netWorthProvider = Provider<double>((ref) {
   final asyncAccounts = ref.watch(accountProvider);
@@ -399,12 +476,28 @@ final monthBudgetProvider = Provider<double>((ref) {
   return budget?.budgetAmount ?? 0;
 });
 
+/// 本月每日「真实成本」(按日号聚合):SPOT 当日全额 + 当日摊销份额。
+///
+/// P1-5:旧实现按 loggedAt 把 AMORTIZED 全额堆到 post 当天 → 折线图/日历出现
+/// 一次性尖峰。现改为「真实每日成本」—— SPOT 计入当日,dailyAmortizedCost
+/// 把每笔 AMORTIZED 按覆盖区间平摊到当月每一天,曲线平滑、无尖峰(验收
+/// P1-5)。供月度折线图与日历热力图。
 final monthDailyExpenseProvider = Provider<Map<int, double>>((ref) {
   final txs = ref.watch(monthTransactionsProvider);
+  final amort = ref.watch(amortizedTransactionsProvider);
   final result = <int, double>{};
-  for (final tx in txs.where((t) => t.flowType == 'EXPENSE')) {
-    final day = tx.loggedAt.day;
-    result.update(day, (v) => v + tx.amount, ifAbsent: () => tx.amount);
+  // SPOT:按 loggedAt 计入当天(monthTransactionsProvider 已限定当月)。
+  for (final tx in txs.where((t) => t.flowType == 'EXPENSE' && t.expenseNature == 'SPOT')) {
+    result.update(tx.loggedAt.day, (v) => v + tx.amount, ifAbsent: () => tx.amount);
+  }
+  // 摊销:平摊到当月每一天(跨月 AMORTIZED 同样贡献到本月覆盖日)。
+  final now = DateTime.now();
+  final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
+  for (var d = 1; d <= daysInMonth; d++) {
+    final dayCost = dailyAmortizedCost(amort, DateTime(now.year, now.month, d));
+    if (dayCost > 0) {
+      result.update(d, (v) => v + dayCost, ifAbsent: () => dayCost);
+    }
   }
   return result;
 });
