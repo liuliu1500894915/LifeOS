@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../providers/daily_providers.dart';
+import '../providers/moment_providers.dart';
 
 class DailyPage extends ConsumerStatefulWidget {
   const DailyPage({super.key});
@@ -46,6 +47,8 @@ class _DailyPageState extends ConsumerState<DailyPage> {
               _buildTodayHabits(context, habits),
               const SizedBox(height: 12),
               _buildFlagOverview(context, flags),
+              const SizedBox(height: 12),
+              _buildMomentCard(context),
               const SizedBox(height: 12),
               _buildReviewCard(context),
               const SizedBox(height: 24),
@@ -406,6 +409,51 @@ class _DailyPageState extends ConsumerState<DailyPage> {
             ),
           ),
       ],
+    );
+  }
+
+  Widget _buildMomentCard(BuildContext context) {
+    final todayCount = ref.watch(todayMomentCountProvider);
+    return GestureDetector(
+      onTap: () => context.push(AppRoutes.momentTimeline),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              ModuleColors.daily.withAlpha(15),
+              ModuleColors.daily.withAlpha(35),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            const Text('📸', style: TextStyle(fontSize: 20)),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '生活瞬间',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    todayCount > 0 ? '今日已记录 $todayCount 个瞬间' : '随手拍一张、写一句，留住今天',
+                    style: const TextStyle(fontSize: 12, color: Color(0xFF757575)),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: Color(0xFFBDBDBD)),
+          ],
+        ),
+      ),
     );
   }
 

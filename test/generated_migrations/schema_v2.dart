@@ -3,8 +3,7 @@ import 'dart:typed_data' as i2;
 // GENERATED CODE, DO NOT EDIT BY HAND.
 // ignore_for_file: type=lint
 import 'package:drift/drift.dart';
-// 手动补充:生成代码引用了 AppDefaults.* 列默认常量,重新生成后需重新添加。
-import '../../lib/core/database/tables/app_defaults.dart';
+import '../../lib/core/database/tables/app_defaults.dart'; // 手补:生成代码引用 AppDefaults.*
 
 class UserAccounts extends Table with TableInfo {
   @override

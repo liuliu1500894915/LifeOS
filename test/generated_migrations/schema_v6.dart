@@ -790,13 +790,13 @@ class WeightHistory extends Table with TableInfo {
   ];
 }
 
-class FinancialTransaction extends Table with TableInfo {
+class ExpenseCategories extends Table with TableInfo {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  FinancialTransaction(this.attachedDatabase, [this._alias]);
-  late final GeneratedColumn<String> transactionId = GeneratedColumn<String>(
-    'transaction_id',
+  ExpenseCategories(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
+    'category_id',
     aliasedName,
     false,
     additionalChecks: GeneratedColumn.checkTextLength(
@@ -820,81 +820,77 @@ class FinancialTransaction extends Table with TableInfo {
       'REFERENCES user_accounts (user_id)',
     ),
   );
-  late final GeneratedColumn<String> flowType = GeneratedColumn<String>(
-    'flow_type',
-    aliasedName,
-    false,
-    check: () =>
-        flowType.equals('INCOME') |
-        flowType.equals('EXPENSE') |
-        flowType.equals('TRANSFER'),
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  late final GeneratedColumn<double> amount = GeneratedColumn<double>(
-    'amount',
-    aliasedName,
-    false,
-    type: DriftSqlType.double,
-    requiredDuringInsert: true,
-  );
-  late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
-    'category_id',
+  late final GeneratedColumn<String> categoryName = GeneratedColumn<String>(
+    'category_name',
     aliasedName,
     false,
     additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 50),
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
-    'account_id',
+  late final GeneratedColumn<String> categoryIcon = GeneratedColumn<String>(
+    'category_icon',
     aliasedName,
     false,
-    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 50),
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 10),
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  late final GeneratedColumn<String> remark = GeneratedColumn<String>(
-    'remark',
+  late final GeneratedColumn<bool> isIncome = GeneratedColumn<bool>(
+    'is_income',
     aliasedName,
-    true,
-    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 150),
-    type: DriftSqlType.string,
+    false,
+    type: DriftSqlType.bool,
     requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_income" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
   );
-  late final GeneratedColumn<DateTime> loggedAt = GeneratedColumn<DateTime>(
-    'logged_at',
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
     aliasedName,
     false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  late final GeneratedColumn<bool> isActive = GeneratedColumn<bool>(
+    'is_active',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_active" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
   );
   @override
   List<GeneratedColumn> get $columns => [
-    transactionId,
-    userId,
-    flowType,
-    amount,
     categoryId,
-    accountId,
-    remark,
-    loggedAt,
+    userId,
+    categoryName,
+    categoryIcon,
+    isIncome,
+    sortOrder,
+    isActive,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'financial_transaction';
+  static const String $name = 'expense_categories';
   @override
-  Set<GeneratedColumn> get $primaryKey => {transactionId};
+  Set<GeneratedColumn> get $primaryKey => {categoryId};
   @override
   Never map(Map<String, dynamic> data, {String? tablePrefix}) {
     throw UnsupportedError('TableInfo.map in schema verification code');
   }
 
   @override
-  FinancialTransaction createAlias(String alias) {
-    return FinancialTransaction(attachedDatabase, alias);
+  ExpenseCategories createAlias(String alias) {
+    return ExpenseCategories(attachedDatabase, alias);
   }
 }
 
@@ -1148,6 +1144,172 @@ class SubscriptionServices extends Table with TableInfo {
   @override
   SubscriptionServices createAlias(String alias) {
     return SubscriptionServices(attachedDatabase, alias);
+  }
+}
+
+class FinancialTransaction extends Table with TableInfo {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  FinancialTransaction(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<String> transactionId = GeneratedColumn<String>(
+    'transaction_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES user_accounts (user_id)',
+    ),
+  );
+  late final GeneratedColumn<String> flowType = GeneratedColumn<String>(
+    'flow_type',
+    aliasedName,
+    false,
+    check: () =>
+        flowType.equals('INCOME') |
+        flowType.equals('EXPENSE') |
+        flowType.equals('TRANSFER'),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<double> amount = GeneratedColumn<double>(
+    'amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
+    'category_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES expense_categories (category_id)',
+    ),
+  );
+  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
+    'account_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES payment_accounts (account_id)',
+    ),
+  );
+  late final GeneratedColumn<String> remark = GeneratedColumn<String>(
+    'remark',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 150),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  late final GeneratedColumn<DateTime> loggedAt = GeneratedColumn<DateTime>(
+    'logged_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<String> expenseNature = GeneratedColumn<String>(
+    'expense_nature',
+    aliasedName,
+    false,
+    check: () =>
+        expenseNature.equals('SPOT') | expenseNature.equals('AMORTIZED'),
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 10),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('SPOT'),
+  );
+  late final GeneratedColumn<DateTime> amortizeStartDate =
+      GeneratedColumn<DateTime>(
+        'amortize_start_date',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  late final GeneratedColumn<DateTime> amortizeEndDate =
+      GeneratedColumn<DateTime>(
+        'amortize_end_date',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  late final GeneratedColumn<String> sourceSubscriptionId =
+      GeneratedColumn<String>(
+        'source_subscription_id',
+        aliasedName,
+        true,
+        additionalChecks: GeneratedColumn.checkTextLength(
+          minTextLength: 1,
+          maxTextLength: 36,
+        ),
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES subscription_services (subscription_id)',
+        ),
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    transactionId,
+    userId,
+    flowType,
+    amount,
+    categoryId,
+    accountId,
+    remark,
+    loggedAt,
+    expenseNature,
+    amortizeStartDate,
+    amortizeEndDate,
+    sourceSubscriptionId,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'financial_transaction';
+  @override
+  Set<GeneratedColumn> get $primaryKey => {transactionId};
+  @override
+  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
+    throw UnsupportedError('TableInfo.map in schema verification code');
+  }
+
+  @override
+  FinancialTransaction createAlias(String alias) {
+    return FinancialTransaction(attachedDatabase, alias);
   }
 }
 
@@ -1998,6 +2160,155 @@ class DailyReviewLog extends Table with TableInfo {
   }
 }
 
+class LifeMoment extends Table with TableInfo {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  LifeMoment(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<String> momentId = GeneratedColumn<String>(
+    'moment_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES user_accounts (user_id)',
+    ),
+  );
+  late final GeneratedColumn<String> content = GeneratedColumn<String>(
+    'content',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 2000),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  late final GeneratedColumn<String> moodTag = GeneratedColumn<String>(
+    'mood_tag',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 20),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  late final GeneratedColumn<DateTime> loggedAt = GeneratedColumn<DateTime>(
+    'logged_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    momentId,
+    userId,
+    content,
+    moodTag,
+    loggedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'life_moment';
+  @override
+  Set<GeneratedColumn> get $primaryKey => {momentId};
+  @override
+  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
+    throw UnsupportedError('TableInfo.map in schema verification code');
+  }
+
+  @override
+  LifeMoment createAlias(String alias) {
+    return LifeMoment(attachedDatabase, alias);
+  }
+}
+
+class MomentPhoto extends Table with TableInfo {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  MomentPhoto(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<String> photoId = GeneratedColumn<String>(
+    'photo_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<String> momentId = GeneratedColumn<String>(
+    'moment_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES life_moment (moment_id) ON DELETE CASCADE',
+    ),
+  );
+  late final GeneratedColumn<String> photoPath = GeneratedColumn<String>(
+    'photo_path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    photoId,
+    momentId,
+    photoPath,
+    sortOrder,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'moment_photo';
+  @override
+  Set<GeneratedColumn> get $primaryKey => {photoId};
+  @override
+  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
+    throw UnsupportedError('TableInfo.map in schema verification code');
+  }
+
+  @override
+  MomentPhoto createAlias(String alias) {
+    return MomentPhoto(attachedDatabase, alias);
+  }
+}
+
 class SecureDocumentsVault extends Table with TableInfo {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -2799,8 +3110,593 @@ class BackgroundWorkerLog extends Table with TableInfo {
   ];
 }
 
-class DatabaseAtV1 extends GeneratedDatabase {
-  DatabaseAtV1(QueryExecutor e) : super(e);
+class FoodCategory extends Table with TableInfo {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  FoodCategory(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
+    'category_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES user_accounts (user_id)',
+    ),
+  );
+  late final GeneratedColumn<String> categoryName = GeneratedColumn<String>(
+    'category_name',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 30),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<String> categoryIcon = GeneratedColumn<String>(
+    'category_icon',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 10),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  late final GeneratedColumn<bool> isBuiltIn = GeneratedColumn<bool>(
+    'is_built_in',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_built_in" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  late final GeneratedColumn<bool> isActive = GeneratedColumn<bool>(
+    'is_active',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_active" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    categoryId,
+    userId,
+    categoryName,
+    categoryIcon,
+    sortOrder,
+    isBuiltIn,
+    isActive,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'food_category';
+  @override
+  Set<GeneratedColumn> get $primaryKey => {categoryId};
+  @override
+  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
+    throw UnsupportedError('TableInfo.map in schema verification code');
+  }
+
+  @override
+  FoodCategory createAlias(String alias) {
+    return FoodCategory(attachedDatabase, alias);
+  }
+}
+
+class FoodLibrary extends Table with TableInfo {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  FoodLibrary(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<String> foodId = GeneratedColumn<String>(
+    'food_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES user_accounts (user_id)',
+    ),
+  );
+  late final GeneratedColumn<String> foodName = GeneratedColumn<String>(
+    'food_name',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 100),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
+    'category_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES food_category (category_id)',
+    ),
+  );
+  late final GeneratedColumn<bool> isCustom = GeneratedColumn<bool>(
+    'is_custom',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_custom" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  late final GeneratedColumn<double> caloriesPer100g = GeneratedColumn<double>(
+    'calories_per100g',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<double> proteinPer100g = GeneratedColumn<double>(
+    'protein_per100g',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  late final GeneratedColumn<double> fatPer100g = GeneratedColumn<double>(
+    'fat_per100g',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  late final GeneratedColumn<double> carbsPer100g = GeneratedColumn<double>(
+    'carbs_per100g',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  late final GeneratedColumn<double> defaultServingGrams =
+      GeneratedColumn<double>(
+        'default_serving_grams',
+        aliasedName,
+        false,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(100.0),
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    foodId,
+    userId,
+    foodName,
+    categoryId,
+    isCustom,
+    caloriesPer100g,
+    proteinPer100g,
+    fatPer100g,
+    carbsPer100g,
+    defaultServingGrams,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'food_library';
+  @override
+  Set<GeneratedColumn> get $primaryKey => {foodId};
+  @override
+  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
+    throw UnsupportedError('TableInfo.map in schema verification code');
+  }
+
+  @override
+  FoodLibrary createAlias(String alias) {
+    return FoodLibrary(attachedDatabase, alias);
+  }
+}
+
+class MealLog extends Table with TableInfo {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  MealLog(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<String> logId = GeneratedColumn<String>(
+    'log_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES user_accounts (user_id)',
+    ),
+  );
+  late final GeneratedColumn<String> foodId = GeneratedColumn<String>(
+    'food_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES food_library (food_id)',
+    ),
+  );
+  late final GeneratedColumn<String> mealType = GeneratedColumn<String>(
+    'meal_type',
+    aliasedName,
+    false,
+    check: () =>
+        mealType.equals('BREAKFAST') |
+        mealType.equals('LUNCH') |
+        mealType.equals('DINNER') |
+        mealType.equals('SNACK'),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<double> grams = GeneratedColumn<double>(
+    'grams',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<double> snapCalories = GeneratedColumn<double>(
+    'snap_calories',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<double> snapProtein = GeneratedColumn<double>(
+    'snap_protein',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<double> snapFat = GeneratedColumn<double>(
+    'snap_fat',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<double> snapCarbs = GeneratedColumn<double>(
+    'snap_carbs',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<DateTime> loggedAt = GeneratedColumn<DateTime>(
+    'logged_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    logId,
+    userId,
+    foodId,
+    mealType,
+    grams,
+    snapCalories,
+    snapProtein,
+    snapFat,
+    snapCarbs,
+    loggedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'meal_log';
+  @override
+  Set<GeneratedColumn> get $primaryKey => {logId};
+  @override
+  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
+    throw UnsupportedError('TableInfo.map in schema verification code');
+  }
+
+  @override
+  MealLog createAlias(String alias) {
+    return MealLog(attachedDatabase, alias);
+  }
+}
+
+class NutritionGoal extends Table with TableInfo {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  NutritionGoal(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES user_accounts (user_id)',
+    ),
+  );
+  late final GeneratedColumn<String> activityLevel = GeneratedColumn<String>(
+    'activity_level',
+    aliasedName,
+    false,
+    check: () =>
+        activityLevel.equals('SEDENTARY') |
+        activityLevel.equals('LIGHT') |
+        activityLevel.equals('MODERATE') |
+        activityLevel.equals('ACTIVE') |
+        activityLevel.equals('VERY_ACTIVE'),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<String> goalType = GeneratedColumn<String>(
+    'goal_type',
+    aliasedName,
+    false,
+    check: () =>
+        goalType.equals('CUT') |
+        goalType.equals('MAINTAIN') |
+        goalType.equals('BULK'),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<double> calorieTarget = GeneratedColumn<double>(
+    'calorie_target',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<double> proteinTarget = GeneratedColumn<double>(
+    'protein_target',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<double> fatTarget = GeneratedColumn<double>(
+    'fat_target',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<double> carbTarget = GeneratedColumn<double>(
+    'carb_target',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<bool> isAutoCalculated = GeneratedColumn<bool>(
+    'is_auto_calculated',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_auto_calculated" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    userId,
+    activityLevel,
+    goalType,
+    calorieTarget,
+    proteinTarget,
+    fatTarget,
+    carbTarget,
+    isAutoCalculated,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'nutrition_goal';
+  @override
+  Set<GeneratedColumn> get $primaryKey => {userId};
+  @override
+  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
+    throw UnsupportedError('TableInfo.map in schema verification code');
+  }
+
+  @override
+  NutritionGoal createAlias(String alias) {
+    return NutritionGoal(attachedDatabase, alias);
+  }
+}
+
+class ExerciseLog extends Table with TableInfo {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  ExerciseLog(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<String> logId = GeneratedColumn<String>(
+    'log_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES user_accounts (user_id)',
+    ),
+  );
+  late final GeneratedColumn<String> exerciseName = GeneratedColumn<String>(
+    'exercise_name',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 50),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<int> durationMinutes = GeneratedColumn<int>(
+    'duration_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<String> intensity = GeneratedColumn<String>(
+    'intensity',
+    aliasedName,
+    true,
+    check: () =>
+        intensity.equals('LOW') |
+        intensity.equals('MEDIUM') |
+        intensity.equals('HIGH'),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  late final GeneratedColumn<double> caloriesBurned = GeneratedColumn<double>(
+    'calories_burned',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  late final GeneratedColumn<DateTime> loggedAt = GeneratedColumn<DateTime>(
+    'logged_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    logId,
+    userId,
+    exerciseName,
+    durationMinutes,
+    intensity,
+    caloriesBurned,
+    loggedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'exercise_log';
+  @override
+  Set<GeneratedColumn> get $primaryKey => {logId};
+  @override
+  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
+    throw UnsupportedError('TableInfo.map in schema verification code');
+  }
+
+  @override
+  ExerciseLog createAlias(String alias) {
+    return ExerciseLog(attachedDatabase, alias);
+  }
+}
+
+class DatabaseAtV6 extends GeneratedDatabase {
+  DatabaseAtV6(QueryExecutor e) : super(e);
   late final UserAccounts userAccounts = UserAccounts(this);
   late final PetStatusCore petStatusCore = PetStatusCore(this);
   late final PetActionQuickLog petActionQuickLog = PetActionQuickLog(this);
@@ -2809,11 +3705,12 @@ class DatabaseAtV1 extends GeneratedDatabase {
       RoomFurniturePlacement(this);
   late final UserProfile userProfile = UserProfile(this);
   late final WeightHistory weightHistory = WeightHistory(this);
-  late final FinancialTransaction financialTransaction = FinancialTransaction(
-    this,
-  );
+  late final ExpenseCategories expenseCategories = ExpenseCategories(this);
   late final PaymentAccounts paymentAccounts = PaymentAccounts(this);
   late final SubscriptionServices subscriptionServices = SubscriptionServices(
+    this,
+  );
+  late final FinancialTransaction financialTransaction = FinancialTransaction(
     this,
   );
   late final BudgetSettings budgetSettings = BudgetSettings(this);
@@ -2826,6 +3723,8 @@ class DatabaseAtV1 extends GeneratedDatabase {
   late final HabitCheckLog habitCheckLog = HabitCheckLog(this);
   late final FlagMilestones flagMilestones = FlagMilestones(this);
   late final DailyReviewLog dailyReviewLog = DailyReviewLog(this);
+  late final LifeMoment lifeMoment = LifeMoment(this);
+  late final MomentPhoto momentPhoto = MomentPhoto(this);
   late final SecureDocumentsVault secureDocumentsVault = SecureDocumentsVault(
     this,
   );
@@ -2841,6 +3740,11 @@ class DatabaseAtV1 extends GeneratedDatabase {
   late final BackgroundWorkerLog backgroundWorkerLog = BackgroundWorkerLog(
     this,
   );
+  late final FoodCategory foodCategory = FoodCategory(this);
+  late final FoodLibrary foodLibrary = FoodLibrary(this);
+  late final MealLog mealLog = MealLog(this);
+  late final NutritionGoal nutritionGoal = NutritionGoal(this);
+  late final ExerciseLog exerciseLog = ExerciseLog(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2853,9 +3757,10 @@ class DatabaseAtV1 extends GeneratedDatabase {
     roomFurniturePlacement,
     userProfile,
     weightHistory,
-    financialTransaction,
+    expenseCategories,
     paymentAccounts,
     subscriptionServices,
+    financialTransaction,
     budgetSettings,
     assetValueSnapshots,
     flagGoals,
@@ -2864,6 +3769,8 @@ class DatabaseAtV1 extends GeneratedDatabase {
     habitCheckLog,
     flagMilestones,
     dailyReviewLog,
+    lifeMoment,
+    momentPhoto,
     secureDocumentsVault,
     memorialDays,
     relationshipNetwork,
@@ -2871,7 +3778,12 @@ class DatabaseAtV1 extends GeneratedDatabase {
     analyticalInsights,
     dailyAggregationCache,
     backgroundWorkerLog,
+    foodCategory,
+    foodLibrary,
+    mealLog,
+    nutritionGoal,
+    exerciseLog,
   ];
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 6;
 }
