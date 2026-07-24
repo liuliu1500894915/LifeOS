@@ -38,6 +38,8 @@ class HomePage extends ConsumerWidget {
               const SizedBox(height: 12),
               _buildRoomActions(context),
               const SizedBox(height: 12),
+              _buildHealthEntry(context),
+              const SizedBox(height: 12),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: TodaySnapshot(),
@@ -227,6 +229,54 @@ class HomePage extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // 健康饮食入口（P2-3）。health 模块目前无独立 tab，从主页 life-hub 进入。
+  Widget _buildHealthEntry(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: GestureDetector(
+        onTap: () => context.push(AppRoutes.homeHealth),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                const Color(0xFFFF7043).withAlpha(20),
+                const Color(0xFFFF7043).withAlpha(45),
+              ],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF7043).withAlpha(30),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.restaurant_menu, color: Color(0xFFFF7043), size: 20),
+              ),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('健康饮食', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF424242))),
+                    Text('记录每餐摄入与营养', style: TextStyle(fontSize: 12, color: Color(0xFF9E9E9E))),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: Color(0xFFFF7043)),
+            ],
+          ),
+        ),
       ),
     );
   }

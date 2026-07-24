@@ -11,6 +11,7 @@ import '../../features/analytics/presentation/pages/report_page.dart';
 import '../../features/daily/presentation/pages/daily_page.dart';
 import '../../features/finance/presentation/pages/finance_page.dart';
 import '../../features/health/presentation/pages/exercise_page.dart';
+import '../../features/health/presentation/pages/health_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/home/presentation/pages/pet_panel_page.dart';
 import '../../features/home/presentation/pages/room_edit_page.dart';
@@ -69,6 +70,7 @@ class AppRoutes {
   static const drink = '/home/drink';
   static const exercise = '/home/exercise';
   static const rest = '/home/rest';
+  static const homeHealth = '/home/health';
 
   // Finance
   static const todayExpenses = '/finance/today-expenses';
@@ -187,6 +189,7 @@ GoRouter createAppRouter() {
             _buildRealRoute('pet-panel', () => const PetPanelPage()),
             _buildRealRoute('room-edit', () => const RoomEditPage()),
             _buildRealRoute('exercise', () => const ExercisePage()),
+            _buildRealRoute('health', () => const HealthPage()),
           ]),
           _buildBranch(AppRoutes.finance, [
             _buildRealRoute('today-expenses', () => const TodayExpensesPage()),
