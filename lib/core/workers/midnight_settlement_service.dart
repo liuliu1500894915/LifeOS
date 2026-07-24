@@ -15,7 +15,7 @@ class MidnightSettlementService {
   final AppDatabase db;
 
   Future<bool> hasRunForDate(DateTime targetDate) async {
-    final workerType = WorkerType.midnightRollover.name.toUpperCase();
+    final workerType = WorkerType.midnightRollover.dbValue;
     final normalized = _dateOnly(targetDate);
     final rows = await (db.select(db.backgroundWorkerLog)
           ..where((t) => t.workerType.equals(workerType) & t.targetDate.equals(normalized)))
@@ -29,7 +29,7 @@ class MidnightSettlementService {
           BackgroundWorkerLogCompanion.insert(
             workerId: 'midnight-${normalized.toIso8601String()}',
             userId: _systemUserId,
-            workerType: WorkerType.midnightRollover.name.toUpperCase(),
+            workerType: WorkerType.midnightRollover.dbValue,
             executedAt: DateTime.now(),
             targetDate: normalized,
             status: 'SUCCESS',
@@ -219,6 +219,15 @@ class MidnightSettlementService {
     final todos = await (db.select(db.todoExecutionList)
           ..where((t) => t.targetDate.equals(targetDate)))
         .get();
+    // P5-2：摄入/消耗改读健康新表——MealLog.snapCalories（摄入）/ ExerciseLog
+    // .caloriesBurned（消耗），均为记录时冻结快照（§1.2.4），不再从宠物
+    // FEED/SPORT 汇总。睡眠时长仍来自宠物 REST 记录（休息入口未迁，仍记宠物侧）。
+    final mealLogs = await (db.select(db.mealLog)
+          ..where((t) => t.loggedAt.isBiggerOrEqualValue(start) & t.loggedAt.isSmallerThanValue(end)))
+        .get();
+    final exerciseLogs = await (db.select(db.exerciseLog)
+          ..where((t) => t.loggedAt.isBiggerOrEqualValue(start) & t.loggedAt.isSmallerThanValue(end)))
+        .get();
     final petLogs = await (db.select(db.petActionQuickLog)
           ..where((t) => t.createdAt.isBiggerOrEqualValue(start) & t.createdAt.isSmallerThanValue(end)))
         .get();
@@ -228,8 +237,8 @@ class MidnightSettlementService {
 
     final totalExpense = transactions.where((t) => t.flowType == 'EXPENSE').fold<double>(0, (sum, t) => sum + t.amount);
     final totalIncome = transactions.where((t) => t.flowType == 'INCOME').fold<double>(0, (sum, t) => sum + t.amount);
-    final calorieIn = petLogs.where((t) => t.actionType == 'FEED').fold<double>(0, (sum, t) => sum + t.valueNumeric);
-    final calorieOut = petLogs.where((t) => t.actionType == 'SPORT').fold<double>(0, (sum, t) => sum + t.valueNumeric);
+    final calorieIn = mealLogs.fold<double>(0, (sum, m) => sum + m.snapCalories);
+    final calorieOut = exerciseLogs.fold<double>(0, (sum, e) => sum + e.caloriesBurned);
     final sleepHours = petLogs.where((t) => t.actionType == 'REST').fold<double>(0, (sum, t) => sum + t.valueNumeric);
 
     await db.into(db.dailyAggregationCache).insertOnConflictUpdate(

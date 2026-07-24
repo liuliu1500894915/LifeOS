@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/event_bus/bus.dart';
 import '../../../../core/event_bus/events.dart';
+import '../../../../features/health/presentation/providers/exercise_providers.dart';
 import '../../domain/vital_calculator.dart';
 
 // ── Enums ──
@@ -174,13 +175,16 @@ final todaySummaryProvider = Provider<TodaySummary>((ref) {
         break;
     }
   }
-  // P5-1：运动消耗改由健康 ExerciseLog 记录（唯一真相），宠物 mock 不再产出
-  // sportMinutes/caloriesOut。这两项汇总改读 ExerciseLog 属 P5-2，在此之前为 0。
+  // P5-2：运动消耗改读健康 ExerciseLog（运动唯一真相，P5-1 已迁入）。复用健康模块
+  // 的当日聚合 Provider——它们源自 ExerciseLog 的 .watch() 流，记录运动后首页自动
+  // 刷新，无需手动 invalidate。修掉 P5-1 留下的「运动/消耗显示 0」中间态。
+  final sportMinutes = ref.watch(todayExerciseMinutesProvider);
+  final caloriesOut = ref.watch(todayCaloriesBurnedProvider);
   return TodaySummary(
     waterMl: waterMl,
-    sportMinutes: 0,
+    sportMinutes: sportMinutes.toDouble(),
     caloriesIn: calIn,
-    caloriesOut: 0,
+    caloriesOut: caloriesOut,
     sleepHours: 7.5,
   );
 });
