@@ -70,12 +70,14 @@ void main() {
       expect((await db.select(db.exerciseLog).get()), isEmpty);
 
       // fresh install 走 onCreate 也建了索引（与升级路径一致）。
+      // 注:用 containsAll 而非精确等于 —— fresh install 也会建 finance 索引
+      // (idx_ftx_*,P0-5),它们同样匹配 idx_% 前缀;此处只校验健康两个索引存在。
       final idx = await db.customSelect(
         "SELECT name FROM sqlite_master WHERE type = 'index' "
         "AND name LIKE 'idx_%'",
       ).get();
       final names = idx.map((r) => r.read<String>('name')).toSet();
-      expect(names, {'idx_meal_user_date', 'idx_exercise_user_date'});
+      expect(names, containsAll({'idx_meal_user_date', 'idx_exercise_user_date'}));
 
       // fresh schema matches the generated definition.
       await db.validateDatabaseSchema();

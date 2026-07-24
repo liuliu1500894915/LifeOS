@@ -5,7 +5,6 @@ import 'package:table_calendar/table_calendar.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../providers/finance_providers.dart';
-import '../../data/category_seeds.dart';
 
 class MonthlySpendingPage extends ConsumerStatefulWidget {
   const MonthlySpendingPage({super.key});
@@ -24,7 +23,7 @@ class _MonthlySpendingPageState extends ConsumerState<MonthlySpendingPage> {
     final monthExpense = ref.watch(monthExpenseProvider);
     final monthBudget = ref.watch(monthBudgetProvider);
     final dailyExpense = ref.watch(monthDailyExpenseProvider);
-    final monthTxs = ref.watch(monthTransactionsProvider);
+    final monthTxs = ref.watch(monthTransactionsWithCategoryProvider);
     final budgetPerDay = monthBudget > 0 ? monthBudget / DateTime(_focusedDay.year, _focusedDay.month + 1, 0).day : 0.0;
 
     final selected = _selectedDay ?? DateTime.now();
@@ -59,9 +58,6 @@ class _MonthlySpendingPageState extends ConsumerState<MonthlySpendingPage> {
                     separatorBuilder: (_, __) => const SizedBox(height: 6),
                     itemBuilder: (context, index) {
                       final t = selectedDayTxs[index];
-                      final cat = categoryForId(t.categoryId);
-                      final accounts = ref.watch(accountProvider).valueOrNull ?? [];
-                      final accountName = accounts.where((a) => a.accountId == t.accountId).firstOrNull?.accountName ?? '';
                       return Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
@@ -70,13 +66,13 @@ class _MonthlySpendingPageState extends ConsumerState<MonthlySpendingPage> {
                         ),
                         child: Row(
                           children: [
-                            Text(cat.icon, style: const TextStyle(fontSize: 20)),
+                            Text(t.categoryIcon, style: const TextStyle(fontSize: 20)),
                             const SizedBox(width: 10),
-                            Expanded(child: Text(cat.name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500))),
+                            Expanded(child: Text(t.categoryName, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500))),
                             Text('-¥${t.amount.toStringAsFixed(2)}',
                                 style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFFE53935))),
                             const SizedBox(width: 8),
-                            Text(accountName, style: const TextStyle(fontSize: 12, color: Color(0xFF9E9E9E))),
+                            Text(t.accountName, style: const TextStyle(fontSize: 12, color: Color(0xFF9E9E9E))),
                           ],
                         ),
                       );

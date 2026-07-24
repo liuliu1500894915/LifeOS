@@ -92,9 +92,35 @@ class FinanceRepositoryDrift implements FinanceRepository {
 
   @override
   Future<void> deleteAccount(String accountId) async {
+    // P0-5:删账户前校验关联交易/订阅 —— 有引用则抛 EntityInUseException,
+    // 既给 UI 友好提示,也避免 FK RESTRICT 抛底层错。
+    final blocking = await _blockingReasonForAccount(accountId);
+    if (blocking != null) {
+      throw EntityInUseException(blocking);
+    }
     await (_db.delete(_db.paymentAccounts)
           ..where((t) => t.accountId.equals(accountId)))
         .go();
+  }
+
+  /// 返回阻止删除该账户的原因(关联交易/订阅数),无引用则返回 null。
+  /// 用 COUNT 聚合而非"先全表 get 再 Dart 过滤"(执行计划铁律)。
+  Future<String?> _blockingReasonForAccount(String accountId) async {
+    final txCount = (await _db.customSelect(
+      'SELECT COUNT(*) AS c FROM financial_transaction WHERE account_id = ?',
+      variables: [Variable.withString(accountId)],
+    ).getSingle()).read<int>('c');
+    if (txCount > 0) {
+      return '该账户有 $txCount 笔关联交易，请先删除或迁移这些交易后再删账户';
+    }
+    final subCount = (await _db.customSelect(
+      'SELECT COUNT(*) AS c FROM subscription_services WHERE account_id = ?',
+      variables: [Variable.withString(accountId)],
+    ).getSingle()).read<int>('c');
+    if (subCount > 0) {
+      return '该账户关联了 $subCount 个订阅，请先处理后再删账户';
+    }
+    return null;
   }
 
   // ── 交易 ──
@@ -104,6 +130,37 @@ class FinanceRepositoryDrift implements FinanceRepository {
       (_db.select(_db.financialTransaction)
             ..orderBy([(t) => OrderingTerm.desc(t.loggedAt)]))
           .watch();
+
+  @override
+  Stream<List<TransactionWithCategory>> watchTransactionsWithCategory() {
+    // P0-5:交易列表分类名/账户名来自 DB join(expense_categories +
+    // payment_accounts),而非硬编码 categoryForId。innerJoin 安全 —— 加 FK 后
+    // 交易必然有有效分类/账户(RESTRICT 拦截删除),不会漏行。
+    final tx = _db.financialTransaction;
+    final cat = _db.expenseCategories;
+    final acc = _db.paymentAccounts;
+    final query = _db.select(tx).join([
+          innerJoin(cat, cat.categoryId.equalsExp(tx.categoryId)),
+          innerJoin(acc, acc.accountId.equalsExp(tx.accountId)),
+        ])
+          ..orderBy([OrderingTerm.desc(tx.loggedAt)]);
+    return query
+        .map(
+          (row) => TransactionWithCategory(
+            transactionId: row.read(tx.transactionId)!,
+            flowType: row.read(tx.flowType)!,
+            amount: row.read(tx.amount)!,
+            categoryId: row.read(tx.categoryId)!,
+            categoryName: row.read(cat.categoryName)!,
+            categoryIcon: row.read(cat.categoryIcon)!,
+            accountId: row.read(tx.accountId)!,
+            accountName: row.read(acc.accountName)!,
+            remark: row.read(tx.remark),
+            loggedAt: row.read(tx.loggedAt)!,
+          ),
+        )
+        .watch();
+  }
 
   @override
   Future<List<FinancialTransactionData>> getTransactions() =>
@@ -387,6 +444,15 @@ class FinanceRepositoryDrift implements FinanceRepository {
 
   @override
   Future<void> deleteCategory(String categoryId) async {
+    // P0-5:删分类前校验关联交易 —— 有引用则抛 EntityInUseException,
+    // 与 FK RESTRICT 一致(被引用的分类不可删)。
+    final txCount = (await _db.customSelect(
+      'SELECT COUNT(*) AS c FROM financial_transaction WHERE category_id = ?',
+      variables: [Variable.withString(categoryId)],
+    ).getSingle()).read<int>('c');
+    if (txCount > 0) {
+      throw EntityInUseException('该分类有 $txCount 笔关联交易，请先删除或迁移这些交易后再删分类');
+    }
     await (_db.delete(_db.expenseCategories)
           ..where((t) => t.categoryId.equals(categoryId)))
         .go();
