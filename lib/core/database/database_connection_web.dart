@@ -1,13 +1,15 @@
 import 'package:drift/drift.dart';
-import 'package:drift/web.dart';
+import 'package:drift/wasm.dart';
 
 import '../crypto/encryption_config.dart';
 
 QueryExecutor createDatabaseConnection(EncryptionConfig config) {
-  return WebDatabase.withStorage(
-    DriftWebStorage.indexedDb('life_os_web_db'),
-    setup: (db) {
-      db.run('PRAGMA foreign_keys = ON');
-    },
-  );
+  return LazyDatabase(() async {
+    final result = await WasmDatabase.open(
+      databaseImplementation: WebImplementation.inWebWorker,
+      sqlite3Uri: Uri.parse('sqlite3.wasm'),
+      driftWorkerUri: Uri.parse('drift_worker.js'),
+    );
+    return result.resolvedExecutor;
+  });
 }
