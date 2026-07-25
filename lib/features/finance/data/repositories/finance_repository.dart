@@ -80,6 +80,20 @@ abstract interface class FinanceRepository {
   });
   Future<void> deleteTransaction(String transactionId);
 
+  /// 编辑已有交易：改金额/分类/账户/备注/日期/摊销。余额做对账 —— 先按旧值回滚
+  /// 旧账户、再按新值应用到新账户（换账户也正确）。flowType 沿用原交易。
+  Future<void> updateTransaction({
+    required String transactionId,
+    required double amount,
+    required String categoryId,
+    required String accountId,
+    String? remark,
+    DateTime? loggedAt,
+    String expenseNature = 'SPOT',
+    DateTime? amortizeStart,
+    DateTime? amortizeEnd,
+  });
+
   // ── 资产 ──
   Stream<List<AssetInventoryData>> watchAssets();
   Future<List<AssetInventoryData>> getAssets();

@@ -259,6 +259,71 @@ class FinanceRepositoryDrift implements FinanceRepository {
     });
   }
 
+  @override
+  Future<void> updateTransaction({
+    required String transactionId,
+    required double amount,
+    required String categoryId,
+    required String accountId,
+    String? remark,
+    DateTime? loggedAt,
+    String expenseNature = 'SPOT',
+    DateTime? amortizeStart,
+    DateTime? amortizeEnd,
+  }) async {
+    if (expenseNature == 'AMORTIZED') {
+      if (amortizeStart == null || amortizeEnd == null) {
+        throw ArgumentError('AMORTIZED 交易必须填写覆盖起止日期');
+      }
+      if (_dateOnly(amortizeEnd).isBefore(_dateOnly(amortizeStart))) {
+        throw ArgumentError('AMORTIZED 交易覆盖结束日期不能早于开始日期');
+      }
+    }
+    final old = await (_db.select(_db.financialTransaction)
+          ..where((t) => t.transactionId.equals(transactionId)))
+        .getSingleOrNull();
+    if (old == null) return;
+
+    final flowType = old.flowType; // 编辑不改流向，沿用原交易
+    // 回滚旧值对旧账户的影响（与 delete 同口径）。
+    final rollback = flowType == 'EXPENSE' ? old.amount : -old.amount;
+    // 应用新值对新账户的影响（与 add 同口径）。
+    final applyDelta = flowType == 'EXPENSE' ? -amount : amount;
+    final dt = loggedAt ?? old.loggedAt;
+
+    await _db.transaction(() async {
+      await (_db.update(_db.financialTransaction)
+            ..where((t) => t.transactionId.equals(transactionId)))
+          .write(
+        FinancialTransactionCompanion(
+          amount: Value(amount),
+          categoryId: Value(categoryId),
+          accountId: Value(accountId),
+          remark: Value(remark),
+          loggedAt: Value(dt),
+          expenseNature: Value(expenseNature),
+          // 切回 SPOT 时必须把区间清空（Value(null)，非 absent）。
+          amortizeStartDate:
+              Value(amortizeStart == null ? null : _dateOnly(amortizeStart)),
+          amortizeEndDate:
+              Value(amortizeEnd == null ? null : _dateOnly(amortizeEnd)),
+        ),
+      );
+      // 先回滚旧账户，再应用到新账户；换账户也正确。两条 customUpdate 声明受影响表
+      // 以触发 watchAccounts 流重发。
+      await _db.customUpdate(
+        'UPDATE payment_accounts SET balance = balance + ? WHERE account_id = ?',
+        variables: [Variable.withReal(rollback), Variable.withString(old.accountId)],
+        updates: {_db.paymentAccounts},
+      );
+      await _db.customUpdate(
+        'UPDATE payment_accounts SET balance = balance + ? WHERE account_id = ?',
+        variables: [Variable.withReal(applyDelta), Variable.withString(accountId)],
+        updates: {_db.paymentAccounts},
+      );
+    });
+  }
+
   // ── 资产 ──
 
   @override

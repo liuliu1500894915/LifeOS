@@ -18,6 +18,7 @@ import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/home/presentation/pages/pet_panel_page.dart';
 import '../../features/home/presentation/pages/room_edit_page.dart';
 import '../../features/profile/presentation/pages/add_document_page.dart';
+import '../../features/profile/presentation/pages/profile_edit_page.dart';
 import '../../features/profile/presentation/pages/add_interaction_page.dart';
 import '../../features/profile/presentation/pages/add_memorial_page.dart';
 import '../../features/profile/presentation/pages/documents_page.dart';
@@ -239,7 +240,7 @@ GoRouter createAppRouter() {
             _buildRealRoute('moment-timeline', () => const MomentTimelinePage()),
           ]),
           _buildBranch(AppRoutes.profile, [
-            _buildRoute('edit', '编辑档案'),
+            _buildRealRoute('edit', () => const ProfileEditPage()),
             GoRoute(
               path: 'documents',
               pageBuilder: (context, state) => CustomTransitionPage(

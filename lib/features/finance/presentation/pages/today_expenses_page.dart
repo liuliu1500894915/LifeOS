@@ -180,7 +180,10 @@ class _TransactionCard extends ConsumerWidget {
         }
         return confirmed ?? false;
       },
-      child: Container(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => _openEdit(context, ref),
+        child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -236,7 +239,26 @@ class _TransactionCard extends ConsumerWidget {
             ),
           ],
         ),
-      ),
+      )),
     );
+  }
+
+  /// 点击交易 → 用完整交易行（含摊销字段）预填抽屉进入编辑。
+  void _openEdit(BuildContext context, WidgetRef ref) {
+    final list = ref.read(transactionProvider).valueOrNull ?? const [];
+    for (final f in list) {
+      if (f.transactionId == tx.transactionId) {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.white,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          builder: (_) => TransactionDrawer(editing: f),
+        );
+        return;
+      }
+    }
   }
 }

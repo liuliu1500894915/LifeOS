@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/database/app_database.dart';
 import '../../../../core/widgets/number_keyboard.dart';
 import '../providers/finance_providers.dart';
 import 'category_grid.dart';
 
 class TransactionDrawer extends ConsumerStatefulWidget {
-  const TransactionDrawer({super.key});
+  /// 传入 [editing] 则进入「编辑」模式：预填该交易、保存时走 updateTransaction。
+  const TransactionDrawer({super.key, this.editing});
+
+  final FinancialTransactionData? editing;
 
   @override
   ConsumerState<TransactionDrawer> createState() => _TransactionDrawerState();
@@ -19,6 +23,26 @@ class _TransactionDrawerState extends ConsumerState<TransactionDrawer> {
   String? _selectedAccountId;
   final _remarkController = TextEditingController();
   DateTime _date = DateTime.now();
+
+  bool get _isEditing => widget.editing != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final e = widget.editing;
+    if (e != null) {
+      _amount = e.amount == e.amount.roundToDouble()
+          ? e.amount.toStringAsFixed(0)
+          : e.amount.toString();
+      _categoryId = e.categoryId;
+      _selectedAccountId = e.accountId;
+      _remarkController.text = e.remark ?? '';
+      _date = e.loggedAt;
+      _isLongTerm = e.expenseNature == 'AMORTIZED';
+      _amortizeStart = e.amortizeStartDate;
+      _amortizeEnd = e.amortizeEndDate;
+    }
+  }
   // P1-2:一次性摊销开关。日常(SPOT,默认)= 当日记一笔全额支出;
   // 长期(AMORTIZED)= 把全额平摊到覆盖区间每一天(见 domain/amortization.dart)。
   // 两种模式余额都按全额扣,长期仅多带覆盖起止日期。
@@ -106,17 +130,34 @@ class _TransactionDrawerState extends ConsumerState<TransactionDrawer> {
     }
 
     try {
-      await ref.read(transactionProvider.notifier).addTransaction(
-            flowType: 'EXPENSE',
-            amount: amount,
-            categoryId: _categoryId!,
-            accountId: _selectedAccountId!,
-            remark: _remarkController.text.isEmpty ? null : _remarkController.text,
-            loggedAt: _date,
-            expenseNature: expenseNature,
-            amortizeStart: amortizeStart,
-            amortizeEnd: amortizeEnd,
-          );
+      final notifier = ref.read(transactionProvider.notifier);
+      final remark =
+          _remarkController.text.isEmpty ? null : _remarkController.text;
+      if (_isEditing) {
+        await notifier.updateTransaction(
+          transactionId: widget.editing!.transactionId,
+          amount: amount,
+          categoryId: _categoryId!,
+          accountId: _selectedAccountId!,
+          remark: remark,
+          loggedAt: _date,
+          expenseNature: expenseNature,
+          amortizeStart: amortizeStart,
+          amortizeEnd: amortizeEnd,
+        );
+      } else {
+        await notifier.addTransaction(
+          flowType: 'EXPENSE',
+          amount: amount,
+          categoryId: _categoryId!,
+          accountId: _selectedAccountId!,
+          remark: remark,
+          loggedAt: _date,
+          expenseNature: expenseNature,
+          amortizeStart: amortizeStart,
+          amortizeEnd: amortizeEnd,
+        );
+      }
 
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
