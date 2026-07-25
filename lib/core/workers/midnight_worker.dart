@@ -53,7 +53,7 @@ Future<bool> _executeHealthCheck() async {
 }
 
 final _defaultConstraints = Constraints(
-  networkType: NetworkType.not_required,
+  networkType: NetworkType.notRequired,
   requiresBatteryNotLow: false,
   requiresCharging: false,
   requiresDeviceIdle: false,
@@ -73,7 +73,7 @@ Future<void> registerBackgroundWorkers() async {
     WorkerTaskNames.midnightSettlement,
     frequency: const Duration(hours: 24),
     constraints: _defaultConstraints,
-    existingWorkPolicy: ExistingWorkPolicy.keep,
+    existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
     backoffPolicy: BackoffPolicy.linear,
     backoffPolicyDelay: const Duration(minutes: 10),
   );
@@ -83,7 +83,7 @@ Future<void> registerBackgroundWorkers() async {
     WorkerTaskNames.periodicHealthCheck,
     frequency: const Duration(hours: 6),
     constraints: _defaultConstraints,
-    existingWorkPolicy: ExistingWorkPolicy.keep,
+    existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
   );
 }
 
