@@ -110,6 +110,31 @@ class TransactionNotifier extends StreamNotifier<List<FinancialTransactionData>>
     await ref.read(financeBootstrapProvider.future);
     await ref.read(financeRepositoryProvider).deleteTransaction(transactionId);
   }
+
+  Future<void> updateTransaction({
+    required String transactionId,
+    required double amount,
+    required String categoryId,
+    required String accountId,
+    String? remark,
+    DateTime? loggedAt,
+    String expenseNature = 'SPOT',
+    DateTime? amortizeStart,
+    DateTime? amortizeEnd,
+  }) async {
+    await ref.read(financeBootstrapProvider.future);
+    await ref.read(financeRepositoryProvider).updateTransaction(
+          transactionId: transactionId,
+          amount: amount,
+          categoryId: categoryId,
+          accountId: accountId,
+          remark: remark,
+          loggedAt: loggedAt,
+          expenseNature: expenseNature,
+          amortizeStart: amortizeStart,
+          amortizeEnd: amortizeEnd,
+        );
+  }
 }
 
 class AssetNotifier extends StreamNotifier<List<AssetInventoryData>> {
