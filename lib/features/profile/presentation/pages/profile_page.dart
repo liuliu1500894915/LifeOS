@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/cream_glass.dart';
 import '../../../../core/widgets/status_capsule.dart';
 import '../providers/profile_providers.dart';
 
@@ -19,25 +20,33 @@ class ProfilePage extends ConsumerWidget {
     final nearestMemorialDays = memorials.isEmpty ? 0 : memorials.map((m) => m.date.difference(DateTime.now()).inDays).reduce((a, b) => a < b ? a : b);
     final avgWarmth = relationships.isEmpty ? 0 : relationships.fold<int>(0, (s, r) => s + r.warmthScore) ~/ relationships.length;
 
+    // 奶油玻璃：L1 光晕铺底。
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(context),
-              const SizedBox(height: 16),
-              _buildProfileCard(context),
-              const SizedBox(height: 16),
-              _buildSecureMatrix(context, nearestDocDays, nearestMemorialDays),
-              const SizedBox(height: 12),
-              _buildRelationshipEntry(context, relationships.length, avgWarmth),
-              const SizedBox(height: 24),
-            ],
+      backgroundColor: CreamGlass.ground,
+      body: Stack(
+        children: [
+          const Positioned.fill(child: AuroraBackground()),
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(context),
+                  const SizedBox(height: 16),
+                  _buildProfileCard(context),
+                  const SizedBox(height: 16),
+                  _buildSecureMatrix(
+                      context, nearestDocDays, nearestMemorialDays),
+                  const SizedBox(height: 12),
+                  _buildRelationshipEntry(
+                      context, relationships.length, avgWarmth),
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -70,7 +79,7 @@ class ProfilePage extends ConsumerWidget {
       onTap: () => context.push(AppRoutes.profileEdit),
       child: Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+        decoration: BoxDecoration(color: CreamGlass.surface, borderRadius: BorderRadius.circular(20), boxShadow: CreamGlass.cardShadow),
         child: Row(
           children: [
             Container(
@@ -143,7 +152,7 @@ class ProfilePage extends ConsumerWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+        decoration: BoxDecoration(color: CreamGlass.surface, borderRadius: BorderRadius.circular(20), boxShadow: CreamGlass.cardShadow),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -163,7 +172,7 @@ class ProfilePage extends ConsumerWidget {
       onTap: () => context.push(AppRoutes.relationships),
       child: Container(
         padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+        decoration: BoxDecoration(color: CreamGlass.surface, borderRadius: BorderRadius.circular(20), boxShadow: CreamGlass.cardShadow),
         child: Row(
           children: [
             Container(

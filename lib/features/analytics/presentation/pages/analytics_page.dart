@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/cream_glass.dart';
 import '../providers/analytics_providers.dart';
 
 class AnalyticsPage extends ConsumerStatefulWidget {
@@ -23,9 +24,13 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
     final daily = ref.watch(dailyAnalyticsProvider);
     final insight = ref.watch(insightCardProvider);
 
+    // 奶油玻璃：L1 光晕铺底。
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      body: SafeArea(
+      backgroundColor: CreamGlass.ground,
+      body: Stack(
+        children: [
+          const Positioned.fill(child: AuroraBackground()),
+          SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -50,7 +55,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                  decoration: BoxDecoration(color: CreamGlass.surface, borderRadius: BorderRadius.circular(20), boxShadow: CreamGlass.cardShadow),
                   child: Row(
                     children: const [
                       Icon(Icons.description_outlined, color: ModuleColors.analytics),
@@ -65,6 +70,8 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
             ],
           ),
         ),
+          ),
+        ],
       ),
     );
   }
@@ -187,7 +194,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+        decoration: BoxDecoration(color: CreamGlass.surface, borderRadius: BorderRadius.circular(20), boxShadow: CreamGlass.cardShadow),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -228,7 +235,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+        decoration: BoxDecoration(color: CreamGlass.surface, borderRadius: BorderRadius.circular(20), boxShadow: CreamGlass.cardShadow),
         child: Row(
           children: [
             Expanded(child: _buildProgressItem('Todo 清空率', '${(daily.completionRate * 100).toStringAsFixed(1)}%', daily.completionRate, ModuleColors.daily)),
