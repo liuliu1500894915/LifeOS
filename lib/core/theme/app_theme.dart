@@ -175,9 +175,11 @@ class AppTheme {
           borderRadius: BorderRadius.circular(16),
         ),
       ),
+      // 不在此处写死 shape —— 全局设 CircleBorder() 会把 FAB.extended（本该是
+      // 胶囊形）也强制成圆形，导致「记录饮食」这类带文字的 FAB 文字溢出被裁切。
+      // 留空则各形态用各自的默认形状（普通 FAB 圆形、extended 胶囊形）。
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         elevation: 2,
-        shape: CircleBorder(),
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,

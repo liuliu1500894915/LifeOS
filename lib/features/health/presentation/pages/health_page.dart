@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/database/app_database.dart';
+import '../../../../core/theme/cream_glass.dart';
 import '../../domain/nutrition.dart';
 import '../providers/meal_providers.dart';
 import '../widgets/energy_ledger_card.dart';
@@ -23,40 +24,50 @@ class HealthPage extends ConsumerWidget {
     final byType = ref.watch(mealLogsByTypeProvider);
     final nutritionByType = ref.watch(nutritionByTypeProvider);
 
+    // 奶油玻璃：L1 光晕铺底，内容浮于其上。
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: CreamGlass.ground,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => showFoodPicker(context, ref),
-        backgroundColor: const Color(0xFFFF7043),
+        backgroundColor: CreamGlass.peach,
         foregroundColor: Colors.white,
+        elevation: 6,
         icon: const Icon(Icons.add),
-        label: const Text('记录饮食'),
+        label: const Text('记录饮食',
+            style: TextStyle(fontWeight: FontWeight.w700)),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const _Header(),
-              const SizedBox(height: 12),
-              const EnergyLedgerCard(),
-              const SizedBox(height: 12),
-              const NutritionOverview(),
-              const SizedBox(height: 16),
-              for (final type in MealType.values) ...[
-                _MealSection(
-                  type: type,
-                  logs: byType[type]!,
-                  sectionNutrition: nutritionByType[type]!,
-                  onAdd: () => showFoodPicker(context, ref, initialMeal: type),
-                ),
-                const SizedBox(height: 12),
-              ],
-              const HealthExerciseSection(),
-            ],
+      body: Stack(
+        children: [
+          const Positioned.fill(child: AuroraBackground()),
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const _Header(),
+                  const SizedBox(height: 12),
+                  const EnergyLedgerCard(),
+                  const SizedBox(height: 12),
+                  const NutritionOverview(),
+                  const SizedBox(height: 18),
+                  for (final type in MealType.values) ...[
+                    _MealSection(
+                      type: type,
+                      logs: byType[type]!,
+                      sectionNutrition: nutritionByType[type]!,
+                      onAdd: () =>
+                          showFoodPicker(context, ref, initialMeal: type),
+                    ),
+                    const SizedBox(height: 10),
+                  ],
+                  const SizedBox(height: 8),
+                  const HealthExerciseSection(),
+                ],
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -92,34 +103,45 @@ class _MealSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
+    // L2 内容层：餐次分组用奶油实体卡。
+    return CreamCard(
+      padding: EdgeInsets.zero,
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: const EdgeInsets.fromLTRB(14, 11, 12, 11),
             child: Row(
               children: [
-                Text(type.label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                Text(type.label,
+                    style: const TextStyle(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w700,
+                        color: CreamGlass.ink)),
                 const SizedBox(width: 8),
                 Text(
                   '${sectionNutrition.calories.toStringAsFixed(0)} kcal',
-                  style: const TextStyle(fontSize: 13, color: Color(0xFFFF7043), fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    color: CreamGlass.peach,
+                    fontWeight: FontWeight.w700,
+                    fontFeatures: [FontFeature.tabularFigures()],
+                  ),
                 ),
                 const Spacer(),
                 GestureDetector(
                   onTap: onAdd,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFF7043).withAlpha(20),
-                      borderRadius: BorderRadius.circular(12),
+                      color: CreamGlass.peach.withAlpha(26),
+                      borderRadius: BorderRadius.circular(999),
                     ),
-                    child: const Text('+ 记录', style: TextStyle(fontSize: 12, color: Color(0xFFFF7043), fontWeight: FontWeight.w500)),
+                    child: const Text('＋ 记录',
+                        style: TextStyle(
+                            fontSize: 11.5,
+                            color: CreamGlass.peach,
+                            fontWeight: FontWeight.w700)),
                   ),
                 ),
               ],
@@ -127,12 +149,13 @@ class _MealSection extends ConsumerWidget {
           ),
           if (logs.isEmpty)
             const Padding(
-              padding: EdgeInsets.only(bottom: 12),
-              child: Text('暂无记录', style: TextStyle(fontSize: 12, color: Color(0xFFBDBDBD))),
+              padding: EdgeInsets.only(bottom: 13),
+              child: Text('暂无记录',
+                  style: TextStyle(fontSize: 11.5, color: CreamGlass.inkSoft)),
             )
           else
             ...[
-              const Divider(height: 1, color: Color(0xFFF0F0F0)),
+              const Divider(height: 1, color: Color(0xFFEFF4EF)),
               for (final log in logs) _MealLogTile(log: log),
             ],
         ],

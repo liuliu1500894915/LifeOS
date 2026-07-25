@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -28,6 +29,7 @@ import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/profile/presentation/pages/relationships_page.dart';
 import '../../features/profile/presentation/widgets/biometric_gate.dart';
 import '../theme/app_theme.dart';
+import '../theme/cream_glass.dart';
 import '../../features/finance/presentation/pages/accounts_page.dart';
 import '../../features/finance/presentation/pages/monthly_spending_page.dart';
 import '../../features/finance/presentation/pages/today_expenses_page.dart';
@@ -137,10 +139,20 @@ class _AppShell extends StatelessWidget {
 
     return Scaffold(
       body: child,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: idx,
-        onTap: (i) => context.go(AppRoutes._tabRoots[i]),
-        items: const [
+      // 导航栏刻意用**不透明**奶油白而非毛玻璃：玻璃需要 `extendBody: true`
+      // 才有内容可透，而那会让全 App 9 个页面的 FloatingActionButton 位置错乱
+      // （沉到栏下或抬得过高压住内容）。视觉收益不抵布局代价，故只取新色板。
+      bottomNavigationBar: DecoratedBox(
+        decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: Color(0xFFE3EAE5))),
+        ),
+        child: BottomNavigationBar(
+            backgroundColor: CreamGlass.surface,
+            elevation: 0,
+            type: BottomNavigationBarType.fixed,
+            currentIndex: idx,
+            onTap: (i) => context.go(AppRoutes._tabRoots[i]),
+            items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.pets),
             activeIcon: Icon(Icons.pets, color: ModuleColors.home),
@@ -167,6 +179,7 @@ class _AppShell extends StatelessWidget {
             label: '我的',
           ),
         ],
+      ),
       ),
     );
   }

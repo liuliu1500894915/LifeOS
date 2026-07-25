@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/cream_glass.dart';
 import '../../../../core/widgets/status_capsule.dart';
 import '../../domain/pet_animation_state.dart';
 import '../providers/home_providers.dart';
@@ -25,9 +26,13 @@ class HomePage extends ConsumerWidget {
     final screenHeight = MediaQuery.of(context).size.height;
     final roomHeight = (screenHeight * 0.38).clamp(240.0, 360.0);
 
+    // 奶油玻璃：L1 光晕铺底（房间本身已是 L3 主角，故此页光晕作为衬托）。
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      body: SafeArea(
+      backgroundColor: CreamGlass.ground,
+      body: Stack(
+        children: [
+          const Positioned.fill(child: AuroraBackground()),
+          SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.only(bottom: 16),
           child: Column(
@@ -49,6 +54,8 @@ class HomePage extends ConsumerWidget {
             ],
           ),
         ),
+          ),
+        ],
       ),
     );
   }
