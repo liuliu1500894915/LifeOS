@@ -11,6 +11,7 @@ import '../../features/analytics/presentation/pages/report_page.dart';
 import '../../features/daily/presentation/pages/daily_page.dart';
 import '../../features/daily/presentation/pages/moment_timeline_page.dart';
 import '../../features/daily/presentation/pages/review_editor_page.dart';
+import '../../features/finance/presentation/pages/finance_analysis_page.dart';
 import '../../features/finance/presentation/pages/finance_page.dart';
 import '../../features/health/presentation/pages/exercise_page.dart';
 import '../../features/health/presentation/pages/health_page.dart';
@@ -48,7 +49,7 @@ class PlaceholderPage extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(title: Text(title)),
         body: Center(
-          child: Text('$title', style: const TextStyle(fontSize: 18)),
+          child: Text(title, style: const TextStyle(fontSize: 18)),
         ),
       );
 }
@@ -78,6 +79,7 @@ class AppRoutes {
   // Finance
   static const todayExpenses = '/finance/today-expenses';
   static const monthlySpending = '/finance/monthly-spending';
+  static const financeAnalysis = '/finance/analysis';
   static const accounts = '/finance/accounts';
   static const assets = '/finance/assets';
   static const subscriptions = '/finance/subscriptions';
@@ -198,6 +200,7 @@ GoRouter createAppRouter() {
           _buildBranch(AppRoutes.finance, [
             _buildRealRoute('today-expenses', () => const TodayExpensesPage()),
             _buildRealRoute('monthly-spending', () => const MonthlySpendingPage()),
+            _buildRealRoute('analysis', () => const FinanceAnalysisPage()),
             _buildRealRoute('accounts', () => const AccountsPage()),
             _buildRealRoute('assets', () => const AssetListPage()),
             _buildRealRoute('subscriptions', () => const SubscriptionPage()),

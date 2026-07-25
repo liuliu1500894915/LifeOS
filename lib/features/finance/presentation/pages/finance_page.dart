@@ -101,7 +101,7 @@ class FinancePage extends ConsumerWidget {
         ),
         const Spacer(),
         IconButton(
-          onPressed: () => context.push(AppRoutes.financeDeep),
+          onPressed: () => context.push(AppRoutes.financeAnalysis),
           icon: const Icon(Icons.bar_chart, size: 20),
         ),
       ],

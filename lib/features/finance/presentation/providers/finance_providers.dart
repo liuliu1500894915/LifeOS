@@ -5,6 +5,7 @@ import '../../../../core/database/system_bootstrap.dart';
 import '../../data/repositories/finance_repository.dart';
 import '../../data/repositories/finance_repository_drift.dart';
 import '../../domain/amortization.dart';
+import '../../domain/analysis.dart';
 
 // 导出 join 读投影 DTO(TransactionWithCategory)供消费层引用。
 export '../../data/repositories/finance_repository.dart';
@@ -525,6 +526,59 @@ final monthDailyExpenseProvider = Provider<Map<int, double>>((ref) {
     }
   }
   return result;
+});
+
+// ── P-FA: 财务分析派生 provider（分类占比 / 近 30 天真实日成本趋势）──
+//
+// 计算逻辑放 domain/analysis.dart 纯函数（带单测）；本层仅做 Drift 行 → domain
+// 边界 DTO(ExpenseEntry/CategoryInfo)适配 + 取数,无 db./Companion/裸查询。
+// 读取复用现有流式派生 provider(transactionProvider / monthTransactionsProvider
+// / categoryProvider / amortizedTransactionsProvider),写库后流自动重发。
+
+/// 把 Drift `FinancialTransactionData` 适配为 domain 边界 [ExpenseEntry]。
+///
+/// 仅搬运聚合所需字段;flowType/expenseNature 用于过滤「日常 SPOT 支出」
+/// (与 monthSpotExpenseProvider 同口径)。
+List<ExpenseEntry> _toExpenseEntries(List<FinancialTransactionData> txs) {
+  return txs
+      .map((t) => ExpenseEntry(
+            categoryId: t.categoryId,
+            amount: t.amount,
+            flowType: t.flowType,
+            expenseNature: t.expenseNature,
+            loggedAt: t.loggedAt,
+          ))
+      .toList(growable: false);
+}
+
+/// 本月「日常 SPOT 支出」按分类聚合,输出降序切片(饼图 + 图例用)。
+///
+/// join `categoryProvider` 取分类名/图标(单一真相:来自 DB,非硬编码)。各切片
+/// amount 之和 == monthSpotExpenseProvider(同口径 EXPENSE+SPOT,验收 P-FA 自洽)。
+/// pct ∈ [0,1],总切片 pct 之和 == 1;无 SPOT 支出时返回空列表(UI 显示占位)。
+final monthCategoryBreakdownProvider = Provider<List<CategoryBreakdownSlice>>((ref) {
+  final txs = ref.watch(monthTransactionsProvider);
+  final cats = ref.watch(categoryProvider).valueOrNull ?? const <ExpenseCategory>[];
+  final catMap = {
+    for (final c in cats) c.categoryId: CategoryInfo(categoryId: c.categoryId, name: c.categoryName, icon: c.categoryIcon),
+  };
+  return categoryBreakdown(txs: _toExpenseEntries(txs), categories: catMap);
+});
+
+/// 近 30 天每天「真实日成本」序列(旧 → 新,折线图左 → 右)。
+///
+/// 每日 = 当日 SPOT 支出全额 + dailyAmortizedCost 平摊份额。摊销复用
+/// amortizedTransactionsProvider(取全量 AMORTIZED,跨月覆盖)+ dailyAmortizedCost
+/// 口径,曲线平滑、无全额尖峰(验收 P-FA)。SPOT 源取全量交易流再按日筛窗口。
+final last30DaysDailyCostProvider = Provider<List<DailyCostPoint>>((ref) {
+  final txs = ref.watch(transactionProvider).valueOrNull ?? const <FinancialTransactionData>[];
+  final amort = ref.watch(amortizedTransactionsProvider);
+  return dailyTrueCostSeries(
+    txs: _toExpenseEntries(txs),
+    amortized: amort,
+    today: _todayStart(),
+    days: 30,
+  );
 });
 
 // ── Backward-compatible providers for existing consumers ──
