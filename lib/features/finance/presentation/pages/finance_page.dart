@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/cream_glass.dart';
 import '../providers/finance_providers.dart';
 import '../widgets/transaction_drawer.dart';
 
@@ -23,52 +24,57 @@ class FinancePage extends ConsumerWidget {
 
     final budgetPercent = monthBudget > 0 ? ((monthBudget - monthExpense) / monthBudget * 100).clamp(0.0, 100.0) : 0.0;
 
+    // 奶油玻璃：L1 光晕背景铺底，内容浮在其上。
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(context),
-              const SizedBox(height: 16),
-              _buildNetWorthCard(context, netWorth, totalLiability),
-              const SizedBox(height: 12),
-              _buildSpendingRow(context, todayExpense, todayTxCount, monthExpense, budgetPercent),
-              _buildQuickRecordButton(context),
-              const SizedBox(height: 16),
-              _buildSectionLabel('账户管理'),
-              const SizedBox(height: 8),
-              _buildEntryCard(
-                context,
-                icon: Icons.account_balance_wallet,
-                title: '钱包账户',
-                subtitle: '管理微信、支付宝、银行卡等钱包',
-                onTap: () => context.push(AppRoutes.accounts),
+      backgroundColor: CreamGlass.ground,
+      body: Stack(
+        children: [
+          const Positioned.fill(child: AuroraBackground()),
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(context),
+                  const SizedBox(height: 14),
+                  _buildNetWorthCard(context, netWorth, totalLiability),
+                  const SizedBox(height: 12),
+                  _buildSpendingRow(context, todayExpense, todayTxCount, monthExpense, budgetPercent),
+                  const SizedBox(height: 12),
+                  _buildQuickRecordButton(context),
+                  const SizedBox(height: 20),
+                  const SectionLabel('账户管理'),
+                  _buildEntryCard(
+                    context,
+                    icon: Icons.account_balance_wallet,
+                    title: '钱包账户',
+                    subtitle: '微信 · 支付宝 · 银行卡',
+                    onTap: () => context.push(AppRoutes.accounts),
+                  ),
+                  const SizedBox(height: 20),
+                  const SectionLabel('资产与固定账单'),
+                  _buildEntryCard(
+                    context,
+                    icon: Icons.chair_outlined,
+                    title: '固定资产库',
+                    subtitle: '${assets.length} 件 · 估值 ¥${assets.fold<double>(0, (s, a) => s + a.purchasePrice).toStringAsFixed(0)}',
+                    onTap: () => context.push(AppRoutes.assets),
+                  ),
+                  const SizedBox(height: 10),
+                  _buildEntryCard(
+                    context,
+                    icon: Icons.autorenew,
+                    title: '自动化订阅管理',
+                    subtitle: '${subs.length} 项 · 月均 ¥${subs.fold<double>(0, (s, sub) => s + sub.amount).toStringAsFixed(0)}',
+                    onTap: () => context.push(AppRoutes.subscriptions),
+                  ),
+                  const SizedBox(height: 28),
+                ],
               ),
-              const SizedBox(height: 16),
-              _buildSectionLabel('资产与固定账单管理'),
-              const SizedBox(height: 8),
-              _buildEntryCard(
-                context,
-                icon: Icons.chair_outlined,
-                title: '固定资产库',
-                subtitle: '${assets.length}件设备 | 估值: ¥${assets.fold<double>(0, (s, a) => s + a.purchasePrice).toStringAsFixed(0)}',
-                onTap: () => context.push(AppRoutes.assets),
-              ),
-              const SizedBox(height: 8),
-              _buildEntryCard(
-                context,
-                icon: Icons.autorenew,
-                title: '自动化订阅管理',
-                subtitle: '${subs.length}项服务 | 月均: ¥${subs.fold<double>(0, (s, sub) => s + sub.amount).toStringAsFixed(0)}',
-                onTap: () => context.push(AppRoutes.subscriptions),
-              ),
-              const SizedBox(height: 24),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -76,20 +82,21 @@ class FinancePage extends ConsumerWidget {
   Widget _buildHeader(BuildContext context) {
     return Row(
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: ModuleColors.success.withAlpha(25),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: const Row(
+        // L1 氛围层：状态 chip 用毛玻璃，透出背景光晕。
+        const GlassPanel(
+          radius: 999,
+          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.lock_outline, size: 12, color: ModuleColors.success),
+              Icon(Icons.lock_outline, size: 11, color: CreamGlass.brand),
               SizedBox(width: 4),
               Text(
-                '同步状态:已加密',
-                style: TextStyle(fontSize: 11, color: ModuleColors.success),
+                '已加密',
+                style: TextStyle(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w600,
+                    color: CreamGlass.brand),
               ),
             ],
           ),
@@ -97,69 +104,71 @@ class FinancePage extends ConsumerWidget {
         const Spacer(),
         const Text(
           '财务中心',
-          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+          style: TextStyle(
+              fontSize: 16.5,
+              fontWeight: FontWeight.w700,
+              color: CreamGlass.ink),
         ),
         const Spacer(),
-        IconButton(
-          onPressed: () => context.push(AppRoutes.financeAnalysis),
-          icon: const Icon(Icons.bar_chart, size: 20),
+        GlassPanel(
+          radius: 999,
+          padding: EdgeInsets.zero,
+          child: IconButton(
+            onPressed: () => context.push(AppRoutes.financeAnalysis),
+            icon: const Icon(Icons.bar_chart, size: 18, color: CreamGlass.brand),
+            constraints: const BoxConstraints.tightFor(width: 34, height: 34),
+            padding: EdgeInsets.zero,
+          ),
         ),
       ],
     );
   }
 
+  /// L3 主角层：核心数字用完整软陶（本屏视觉重量最大的元素）。
   Widget _buildNetWorthCard(BuildContext context, double netWorth, double totalLiability) {
-    return GestureDetector(
+    return ClaySurface(
       onTap: () => context.push(AppRoutes.accounts),
-      child: Container(
+      padding: const EdgeInsets.all(18),
+      child: SizedBox(
         width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [ModuleColors.finance, Color(0xFF1B8C5E)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(20),
-        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
               '当前总净资产',
-              style: TextStyle(fontSize: 13, color: Colors.white70),
+              style: TextStyle(
+                fontSize: 11,
+                letterSpacing: 1.3,
+                color: Colors.white70,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 5),
             Text(
               '¥${netWorth.toStringAsFixed(2)}',
               style: const TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.w700,
+                fontSize: 33,
+                fontWeight: FontWeight.w800,
                 color: Colors.white,
-                height: 1.2,
+                height: 1.05,
+                letterSpacing: -0.8,
+                fontFeatures: [FontFeature.tabularFigures()],
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Row(
               children: [
-                _buildMiniStat('总负债', '¥${totalLiability.toStringAsFixed(0)}', Colors.white70),
-                const SizedBox(width: 16),
-                const Icon(Icons.chevron_right, color: Colors.white54, size: 16),
+                Text(
+                  '总负债 ¥${totalLiability.toStringAsFixed(0)}',
+                  style: const TextStyle(fontSize: 11.5, color: Colors.white70),
+                ),
+                const SizedBox(width: 6),
+                const Icon(Icons.chevron_right, color: Colors.white54, size: 15),
               ],
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildMiniStat(String label, String value, Color color) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text('$label ', style: const TextStyle(fontSize: 12, color: Colors.white70)),
-        Text(value, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: color)),
-      ],
     );
   }
 
@@ -171,8 +180,9 @@ class FinancePage extends ConsumerWidget {
             icon: Icons.receipt_long,
             title: '今日花费',
             amount: '¥${todayExpense.toStringAsFixed(2)}',
-            detail: '$todayCount笔支出',
-            color: ModuleColors.expense,
+            detail: '$todayCount 笔支出',
+            // 奶油玻璃色板：支出用蜜桃，替代旧的正红。
+            color: CreamGlass.peach,
             onTap: () => context.push(AppRoutes.todayExpenses),
           ),
         ),
@@ -182,8 +192,9 @@ class FinancePage extends ConsumerWidget {
             icon: Icons.calendar_month,
             title: '本月花费',
             amount: '¥${monthExpense.toStringAsFixed(0)}',
-            detail: budgetPercent > 0 ? '预算剩余: ${budgetPercent.toStringAsFixed(1)}%' : '未设预算',
-            color: ModuleColors.daily,
+            detail: budgetPercent > 0 ? '预算剩余 ${budgetPercent.toStringAsFixed(1)}%' : '未设预算',
+            // 本月为中性统计值，用主绿而非旧的亮蓝。
+            color: CreamGlass.brand,
             onTap: () => context.push(AppRoutes.monthlySpending),
           ),
         ),
@@ -191,6 +202,7 @@ class FinancePage extends ConsumerWidget {
     );
   }
 
+  /// L2 内容层：数据卡用不透明奶油实体（要被阅读，不用玻璃）。
   Widget _buildSummaryCard({
     required IconData icon,
     required String title,
@@ -199,39 +211,44 @@ class FinancePage extends ConsumerWidget {
     required Color color,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
+    return CreamCard(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, size: 16, color: color),
-                const SizedBox(width: 6),
-                Text(title, style: const TextStyle(fontSize: 13, color: Color(0xFF757575))),
-              ],
+      padding: const EdgeInsets.all(13),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 14, color: color),
+              const SizedBox(width: 5),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 11,
+                  letterSpacing: 0.9,
+                  fontWeight: FontWeight.w600,
+                  color: CreamGlass.inkMid,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            amount,
+            style: TextStyle(
+              fontSize: 21,
+              fontWeight: FontWeight.w800,
+              color: color,
+              letterSpacing: -0.5,
+              fontFeatures: const [FontFeature.tabularFigures()],
             ),
-            const SizedBox(height: 8),
-            Text(
-              amount,
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: color),
-            ),
-            const SizedBox(height: 4),
-            Text(detail, style: const TextStyle(fontSize: 12, color: Color(0xFF9E9E9E))),
-          ],
-        ),
+          ),
+          const SizedBox(height: 3),
+          Text(detail,
+              style: const TextStyle(fontSize: 11, color: CreamGlass.inkSoft)),
+        ],
       ),
     );
-  }
-
-  Widget _buildSectionLabel(String text) {
-    return Text(text, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF616161)));
   }
 
   Widget _buildEntryCard(
@@ -242,39 +259,43 @@ class FinancePage extends ConsumerWidget {
     required VoidCallback onTap,
     Widget? trailing,
   }) {
-    return GestureDetector(
+    // L2 内容层：入口列表同为奶油实体卡。
+    return CreamCard(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, size: 22, color: const Color(0xFF616161)),
+      padding: const EdgeInsets.all(13),
+      child: Row(
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: CreamGlass.brand.withAlpha(24),
+              borderRadius: BorderRadius.circular(13),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
-                  const SizedBox(height: 2),
-                  Text(subtitle, style: const TextStyle(fontSize: 13, color: Color(0xFF9E9E9E))),
-                ],
-              ),
+            child: Icon(icon, size: 20, color: CreamGlass.brand),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style: const TextStyle(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w600,
+                        color: CreamGlass.ink)),
+                const SizedBox(height: 2),
+                Text(subtitle,
+                    style: const TextStyle(
+                        fontSize: 11.5, color: CreamGlass.inkSoft)),
+              ],
             ),
-            if (trailing != null) trailing else const Icon(Icons.chevron_right, color: Color(0xFFBDBDBD)),
-          ],
-        ),
+          ),
+          if (trailing != null)
+            trailing
+          else
+            const Icon(Icons.chevron_right, color: Color(0xFFC3D0C8), size: 20),
+        ],
       ),
     );
   }
@@ -290,19 +311,18 @@ class FinancePage extends ConsumerWidget {
         ),
         builder: (_) => const TransactionDrawer(),
       ),
-      child: Container(
-        width: double.infinity,
+      // L3 主角层：主行动按钮用蜜桃软陶，与净资产卡形成绿/橙双主角。
+      child: ClaySurface(
+        from: CreamGlass.peachLight,
+        to: CreamGlass.peach,
+        radius: 19,
         padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          color: ModuleColors.finance,
-          borderRadius: BorderRadius.circular(14),
-        ),
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.add, color: Colors.white, size: 18),
             SizedBox(width: 6),
-            Text('记一笔', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white)),
+            Text('记一笔', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.white)),
           ],
         ),
       ),

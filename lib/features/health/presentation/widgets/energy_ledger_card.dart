@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/cream_glass.dart';
 import '../../domain/energy_ledger.dart';
 import '../../domain/nutrition_goal.dart';
 import '../providers/goal_providers.dart';
 import 'nutrition_goal_setup_sheet.dart';
 
-const _intakeColor = Color(0xFFFF7043); // 吃（与健康饮食主题一致）
-const _burnedColor = Color(0xFF66BB6A); // 动（与运动主题一致）
-const _netColor = Color(0xFF42A5F5); // 净
-const _overColor = Color(0xFFEF5350);
-const _trackColor = Color(0xFFE0E0E0);
+// 奶油玻璃色板：摄入=蜜桃、消耗=主绿、净值=墨绿文字。
+const _intakeColor = CreamGlass.peach; // 吃
+const _burnedColor = CreamGlass.brand; // 动
+const _netColor = CreamGlass.ink; // 净
+const _overColor = Color(0xFFE0603F);
+const _trackColor = Color(0xFFE3EAE5);
 
 /// 能量账本卡片（P3-3）：「吃 − 动 = 净」的能量平衡，对比**固定**目标。
 ///
@@ -23,14 +25,9 @@ class EnergyLedgerCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ledger = ref.watch(energyLedgerProvider);
-    return Container(
-      width: double.infinity,
+    // L2 内容层：奶油实体卡（数据要阅读，不用玻璃）。
+    return CreamCard(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
