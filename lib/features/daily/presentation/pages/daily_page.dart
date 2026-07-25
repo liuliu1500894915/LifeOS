@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/cream_glass.dart';
 import '../providers/daily_providers.dart';
 import '../providers/moment_providers.dart';
 
@@ -30,9 +31,13 @@ class _DailyPageState extends ConsumerState<DailyPage> {
     final habits = ref.watch(todayHabitsProvider);
     final flags = ref.watch(flagListProvider);
 
+    // 奶油玻璃：L1 光晕铺底。
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      body: SafeArea(
+      backgroundColor: CreamGlass.ground,
+      body: Stack(
+        children: [
+          const Positioned.fill(child: AuroraBackground()),
+          SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
@@ -55,6 +60,8 @@ class _DailyPageState extends ConsumerState<DailyPage> {
             ],
           ),
         ),
+          ),
+        ],
       ),
     );
   }
@@ -95,9 +102,9 @@ class _DailyPageState extends ConsumerState<DailyPage> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.grey.shade200),
+            color: CreamGlass.surface,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: CreamGlass.cardShadow,
           ),
           child: Row(
             children: [
@@ -125,8 +132,9 @@ class _DailyPageState extends ConsumerState<DailyPage> {
             margin: const EdgeInsets.only(bottom: 4),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
+              color: CreamGlass.surface,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: CreamGlass.cardShadow,
             ),
             child: Row(
               children: [
@@ -232,8 +240,9 @@ class _DailyPageState extends ConsumerState<DailyPage> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
+          color: CreamGlass.surface,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: CreamGlass.cardShadow,
           border: Border.all(color: color.withAlpha(50)),
         ),
         child: Column(
@@ -271,8 +280,9 @@ class _DailyPageState extends ConsumerState<DailyPage> {
             child: Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
+                color: CreamGlass.surface,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: CreamGlass.cardShadow,
               ),
               child: Row(
                 children: [
@@ -359,8 +369,9 @@ class _DailyPageState extends ConsumerState<DailyPage> {
               child: Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
+                  color: CreamGlass.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: CreamGlass.cardShadow,
                 ),
                 child: Row(
                   children: [
