@@ -320,14 +320,26 @@ class FinanceAnalysisPage extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  // 按周稀疏标注（每 7 天一个日期）。
+                  // 按周稀疏标注 + 末尾（今天）必标。
+                  //
+                  // interval 用 1 逐点回调、由下面的逻辑决定实际标哪几天：若直接用
+                  // interval: 7，末尾的周标记（第 28 天）会和轴末端的今天（第 29 天）
+                  // 挨在一起，两个日期糊成一团（如「7/2425」）。
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      interval: 7,
+                      interval: 1,
                       getTitlesWidget: (v, meta) {
                         final i = v.toInt();
-                        if (i < 0 || i >= dailyCost.length) return const SizedBox.shrink();
+                        if (i < 0 || i >= dailyCost.length) {
+                          return const SizedBox.shrink();
+                        }
+                        final last = dailyCost.length - 1;
+                        final isLast = i == last;
+                        // 末尾 4 天内的周标记让位给「今天」，避免标签重叠。
+                        if (!isLast && (i % 7 != 0 || last - i < 4)) {
+                          return const SizedBox.shrink();
+                        }
                         final d = dailyCost[i].date;
                         return SideTitleWidget(
                           meta: meta,
