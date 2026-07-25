@@ -10,7 +10,6 @@ import 'package:life_os/features/analytics/presentation/providers/analytics_prov
 import 'package:life_os/features/daily/presentation/providers/daily_providers.dart';
 import 'package:life_os/features/finance/presentation/providers/finance_providers.dart';
 import 'package:life_os/features/home/presentation/providers/home_providers.dart';
-import 'package:life_os/features/home/presentation/providers/room_providers.dart';
 import 'package:life_os/features/home/presentation/widgets/drink_drawer.dart';
 import 'package:life_os/features/profile/presentation/providers/profile_providers.dart';
 
@@ -196,26 +195,7 @@ void main() {
       expect(insight.coefficient, lessThan(0));
     });
 
-    test('room projections stay ordered after move, clamp, and bring-to-front updates', () {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-
-      final notifier = container.read(roomFurnitureNotifierProvider.notifier);
-      notifier.move('f1', const Offset(10, -20));
-      notifier.setScale('f1', 5);
-      notifier.bringToFront('f1');
-
-      final raw = container.read(roomFurnitureNotifierProvider);
-      final moved = raw.firstWhere((item) => item.placementId == 'f1');
-      expect(moved.posX, 230);
-      expect(moved.posY, 160);
-      expect(moved.scale, 1.8);
-
-      final projected = container.read(roomFurnitureProvider);
-      final zIndexes = projected.map((item) => item.zIndex).toList();
-      final sorted = [...zIndexes]..sort();
-      expect(zIndexes, orderedEquals(sorted));
-      expect(projected.last.placementId, 'f1');
-    });
+    // 房间摆件的移动/缩放/置顶已从 mock StateNotifier 改为落库的
+    // RoomRepository，对应测试见 test/home/room_repository_test.dart。
   });
 }

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -12,6 +14,7 @@ import '../widgets/drink_drawer.dart';
 import '../widgets/feed_drawer.dart';
 import '../widgets/pet_character.dart';
 import '../widgets/rest_drawer.dart';
+import '../widgets/room_scene.dart';
 import '../widgets/today_snapshot.dart';
 
 class HomePage extends ConsumerWidget {
@@ -84,70 +87,69 @@ class HomePage extends ConsumerWidget {
 
   Widget _buildPetRoom(BuildContext context, WidgetRef ref, double roomHeight) {
     final petStatus = ref.watch(petStatusProvider);
-    final furniture = ref.watch(roomFurnitureProvider);
+    // 固定资产投影：财务页勾选「在虚拟房间中展示」的资产会出现在房间里。
+    final assets =
+        ref.watch(roomAssetsProvider).valueOrNull ?? const <RoomAssetItem>[];
+    final hour = DateTime.now().hour;
+    final isNight = hour >= 19 || hour < 6;
+    final moodTint = petStatus.overallStatusLevel == 'CRITICAL'
+        ? ModuleColors.statusCritical
+        : null;
+
     return Container(
       height: roomHeight,
       margin: const EdgeInsets.symmetric(horizontal: 16),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Stack(
-        children: [
-          if (petStatus.overallStatusLevel == 'EXCELLENT')
-            Positioned.fill(
-              child: IgnorePointer(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [ModuleColors.statusExcellent.withAlpha(12), Colors.transparent],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          if (petStatus.overallStatusLevel == 'CRITICAL')
-            Positioned.fill(
-              child: IgnorePointer(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [ModuleColors.statusCritical.withAlpha(12), Colors.transparent],
-                      begin: Alignment.bottomCenter,
-                      end: Alignment.topCenter,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          for (final item in furniture)
-            Positioned(
-              left: item.posX,
-              top: item.posY,
-              child: Transform.scale(
-                scale: item.scale,
-                child: Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: item.color.withAlpha(20),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(item.icon, size: 24, color: item.color),
-                ),
-              ),
-            ),
-          Center(child: PetCharacter(
-            animationState: PetAnimationMapper.fromVitals(petStatus.vitals),
-            hydrationLevel: petStatus.hydrationPoints,
-            energyLevel: petStatus.energyPoints,
-            moodLevel: petStatus.moodPoints,
-            bodyShapeLevel: petStatus.bodyShapePoints,
-          )),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(28),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
         ],
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final w = constraints.maxWidth;
+          final h = constraints.maxHeight;
+          final petSize = math.min(h * 0.52, 165.0);
+          return Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Positioned.fill(
+                child: RoomScene(isNight: isNight, moodTint: moodTint),
+              ),
+              // 资产摆件（可拖动，位置持久化）
+              for (final item in assets)
+                _RoomAssetPiece(
+                  key: ValueKey(item.assetId),
+                  item: item,
+                  roomWidth: w,
+                  roomHeight: h,
+                ),
+              // 宠物：站在地毯中央
+              Positioned(
+                left: 0,
+                right: 0,
+                top: h * 0.86 - petSize * 0.90,
+                child: Center(
+                  child: PetCharacter(
+                    width: petSize,
+                    height: petSize,
+                    animationState:
+                        PetAnimationMapper.fromVitals(petStatus.vitals),
+                    hydrationLevel: petStatus.hydrationPoints,
+                    energyLevel: petStatus.energyPoints,
+                    moodLevel: petStatus.moodPoints,
+                    bodyShapeLevel: petStatus.bodyShapePoints,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -340,6 +342,105 @@ class _TextButton extends StatelessWidget {
             Icon(icon, size: 16, color: ModuleColors.home),
             const SizedBox(width: 6),
             Text(label, style: const TextStyle(fontSize: 13, color: Color(0xFF616161))),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 房间里的一件资产摆件：可拖动摆放，松手后位置写入 DB。
+///
+/// 位置用归一化坐标（0~1）存储，房间尺寸变化时摆件相对位置不变。
+class _RoomAssetPiece extends ConsumerStatefulWidget {
+  const _RoomAssetPiece({
+    super.key,
+    required this.item,
+    required this.roomWidth,
+    required this.roomHeight,
+  });
+
+  final RoomAssetItem item;
+  final double roomWidth;
+  final double roomHeight;
+
+  @override
+  ConsumerState<_RoomAssetPiece> createState() => _RoomAssetPieceState();
+}
+
+class _RoomAssetPieceState extends ConsumerState<_RoomAssetPiece> {
+  /// 拖拽过程中的临时像素偏移；松手写库后清零（届时流已带来新位置）。
+  Offset _drag = Offset.zero;
+  bool _dragging = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final item = widget.item;
+    final visual = assetVisual(item.iconId);
+    final size = 46.0 * item.scale;
+    final left = item.posX * widget.roomWidth + _drag.dx;
+    final top = item.posY * widget.roomHeight + _drag.dy;
+
+    return Positioned(
+      left: left,
+      top: top,
+      child: GestureDetector(
+        onPanStart: (_) {
+          setState(() => _dragging = true);
+          ref.read(roomRepositoryProvider).bringToFront(item.assetId);
+        },
+        onPanUpdate: (d) => setState(() => _drag += d.delta),
+        onPanEnd: (_) {
+          // left/top 已含拖拽偏移；换算回归一化坐标写库。
+          ref.read(roomRepositoryProvider).moveAsset(
+                item.assetId,
+                left / widget.roomWidth,
+                top / widget.roomHeight,
+              );
+          setState(() {
+            _drag = Offset.zero;
+            _dragging = false;
+          });
+        },
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedScale(
+              scale: _dragging ? 1.12 : 1.0,
+              duration: const Duration(milliseconds: 150),
+              child: Container(
+                width: size,
+                height: size,
+                decoration: BoxDecoration(
+                  color: Colors.white.withAlpha(220),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: visual.color.withAlpha(90)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withAlpha(_dragging ? 60 : 30),
+                      blurRadius: _dragging ? 10 : 5,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Text(visual.emoji,
+                      style: TextStyle(fontSize: size * 0.52)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 2),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+              decoration: BoxDecoration(
+                color: Colors.black.withAlpha(70),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                item.assetName,
+                style: const TextStyle(fontSize: 9, color: Colors.white),
+              ),
+            ),
           ],
         ),
       ),
