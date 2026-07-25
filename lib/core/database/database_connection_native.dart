@@ -4,6 +4,8 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:sqlcipher_flutter_libs/sqlcipher_flutter_libs.dart';
+import 'package:sqlite3/open.dart';
 
 import '../crypto/encryption_config.dart';
 import '../crypto/key_store.dart';
@@ -13,14 +15,27 @@ import '../crypto/key_store.dart';
 /// The encryption key is read from platform secure storage inside the lazy
 /// opener (the underlying [LazyDatabase] already runs asynchronously), so the
 /// synchronous [AppDatabase] constructor is unaffected.
+///
+/// 我们只依赖 `sqlcipher_flutter_libs`（不再依赖 `sqlite3_flutter_libs`，否则两者
+/// 打包同一 native 类会 dex 冲突）。sqlcipher 提供的是 `libsqlcipher.so`，而
+/// `sqlite3` 包默认加载 `libsqlite3.so` → 必须用 [open.overrideFor] 改成
+/// [openCipherOnAndroid]，否则运行时报 `libsqlite3.so not found`、所有 DB 操作失败。
 QueryExecutor createDatabaseConnection() {
   return LazyDatabase(() async {
     final dbFolder = await getApplicationDocumentsDirectory();
     final file = p.join(dbFolder.path, 'life_os.db');
     final keyHex = await DbKeyStore().getOrCreateRawKeyHex();
 
+    // 主 isolate：老版本 Android 上 sqlcipher 无法在后台 isolate 首次 dlopen 的
+    // 官方 workaround，须在主 isolate 先预热。
+    await applyWorkaroundToOpenSqlCipherOnOldAndroidVersions();
+
     return NativeDatabase.createInBackground(
       File(file),
+      // 后台 isolate 真正打开 DB → 在该 isolate 内把 sqlite3 指向 libsqlcipher.so。
+      isolateSetup: () async {
+        open.overrideFor(OperatingSystem.android, openCipherOnAndroid);
+      },
       setup: (rawDb) => applySqlCipherSetup(rawDb, keyHex),
     );
   });

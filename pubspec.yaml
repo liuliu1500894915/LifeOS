@@ -21,7 +21,8 @@ dependencies:
 
   # Database
   drift: ^2.25.1
-  sqlite3_flutter_libs: ^0.5.30
+  # 仅用加密版 sqlcipher_flutter_libs；不能再依赖 sqlite3_flutter_libs
+  # （两者打包同一 Sqlite3FlutterLibsPlugin 类 → dex 合并 duplicate class 冲突）。
   sqlcipher_flutter_libs: ^0.6.5
   path_provider: ^2.1.5
   path: ^1.9.1
@@ -30,7 +31,7 @@ dependencies:
   event_bus: ^2.0.1
 
   # Background Tasks
-  workmanager: ^0.5.2
+  workmanager: ^0.9.0+3
 
   # Animation
   rive: ^0.13.20

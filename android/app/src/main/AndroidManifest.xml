@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- P4-1 生活瞬间：拍照 -->
+    <uses-permission android:name="android.permission.CAMERA"/>
     <application
         android:label="life_os"
         android:name="${applicationName}"

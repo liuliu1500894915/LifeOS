@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>用于拍照记录你的生活瞬间</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>用于从相册选择照片记录生活瞬间</string>
 </dict>
 </plist>
